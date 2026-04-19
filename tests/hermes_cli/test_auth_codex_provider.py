@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from hermes_cli.auth import (
+from myai_cli.auth import (
     AuthError,
     DEFAULT_CODEX_BASE_URL,
     PROVIDER_REGISTRY,
@@ -96,7 +96,7 @@ def test_resolve_codex_runtime_credentials_refreshes_expiring_token(tmp_path, mo
         called["count"] += 1
         return {"access_token": "access-new", "refresh_token": "refresh-new"}
 
-    monkeypatch.setattr("hermes_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
+    monkeypatch.setattr("myai_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
 
     resolved = resolve_codex_runtime_credentials()
 
@@ -115,7 +115,7 @@ def test_resolve_codex_runtime_credentials_force_refresh(tmp_path, monkeypatch):
         called["count"] += 1
         return {"access_token": "access-forced", "refresh_token": "refresh-new"}
 
-    monkeypatch.setattr("hermes_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
+    monkeypatch.setattr("myai_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
 
     resolved = resolve_codex_runtime_credentials(force_refresh=True, refresh_if_expiring=False)
 
@@ -241,7 +241,7 @@ def test_write_codex_cli_tokens_handles_missing_dir(tmp_path, monkeypatch):
 
 def test_refresh_codex_auth_tokens_writes_back_to_cli(tmp_path, monkeypatch):
     """After refreshing, _refresh_codex_auth_tokens writes back to ~/.codex/auth.json."""
-    from hermes_cli.auth import _refresh_codex_auth_tokens
+    from myai_cli.auth import _refresh_codex_auth_tokens
 
     hermes_home = tmp_path / "hermes"
     codex_home = tmp_path / "codex-cli"
@@ -257,7 +257,7 @@ def test_refresh_codex_auth_tokens_writes_back_to_cli(tmp_path, monkeypatch):
     }))
 
     # Mock the pure refresh to return new tokens
-    monkeypatch.setattr("hermes_cli.auth.refresh_codex_oauth_pure", lambda *a, **kw: {
+    monkeypatch.setattr("myai_cli.auth.refresh_codex_oauth_pure", lambda *a, **kw: {
         "access_token": "refreshed-at",
         "refresh_token": "refreshed-rt",
         "last_refresh": "2026-04-12T01:00:00Z",

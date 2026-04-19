@@ -266,9 +266,9 @@ class HindsightMemoryProvider(MemoryProvider):
         import sys
         from pathlib import Path
 
-        from hermes_cli.config import save_config
+        from myai_cli.config import save_config
 
-        from hermes_cli.memory_setup import _curses_select
+        from myai_cli.memory_setup import _curses_select
 
         print("\n  Configuring Hindsight memory:\n")
 

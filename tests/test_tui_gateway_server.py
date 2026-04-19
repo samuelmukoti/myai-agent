@@ -130,7 +130,7 @@ def test_enable_gateway_prompts_sets_gateway_env(monkeypatch):
 
 
 def test_setup_status_reports_provider_config(monkeypatch):
-    monkeypatch.setattr("hermes_cli.main._has_any_provider_configured", lambda: False)
+    monkeypatch.setattr("myai_cli.main._has_any_provider_configured", lambda: False)
 
     resp = server.handle_request({"id": "1", "method": "setup.status", "params": {}})
 
@@ -214,10 +214,10 @@ def test_config_set_model_global_persists(monkeypatch):
         return result
 
     server._sessions["sid"] = _session(agent=_Agent())
-    monkeypatch.setattr("hermes_cli.model_switch.switch_model", _switch_model)
+    monkeypatch.setattr("myai_cli.model_switch.switch_model", _switch_model)
     monkeypatch.setattr(server, "_restart_slash_worker", lambda session: None)
     monkeypatch.setattr(server, "_emit", lambda *args, **kwargs: None)
-    monkeypatch.setattr("hermes_cli.config.save_config", lambda cfg: saved.update(cfg))
+    monkeypatch.setattr("myai_cli.config.save_config", lambda cfg: saved.update(cfg))
 
     resp = server.handle_request(
         {"id": "1", "method": "config.set", "params": {"session_id": "sid", "key": "model", "value": "anthropic/claude-sonnet-4.6 --global"}}
@@ -400,7 +400,7 @@ def test_command_dispatch_exec_nonzero_surfaces_error(monkeypatch):
 
 
 def test_plugins_list_surfaces_loader_error(monkeypatch):
-    with patch("hermes_cli.plugins.get_plugin_manager", side_effect=Exception("boom")):
+    with patch("myai_cli.plugins.get_plugin_manager", side_effect=Exception("boom")):
         resp = server.handle_request({"id": "1", "method": "plugins.list", "params": {}})
 
     assert "error" in resp
@@ -408,7 +408,7 @@ def test_plugins_list_surfaces_loader_error(monkeypatch):
 
 
 def test_complete_slash_surfaces_completer_error(monkeypatch):
-    with patch("hermes_cli.commands.SlashCommandCompleter", side_effect=Exception("no completer")):
+    with patch("myai_cli.commands.SlashCommandCompleter", side_effect=Exception("no completer")):
         resp = server.handle_request({"id": "1", "method": "complete.slash", "params": {"text": "/mo"}})
 
     assert "error" in resp

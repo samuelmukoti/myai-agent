@@ -111,7 +111,7 @@ export default function App() {
         <div className="mx-auto flex h-12 max-w-[1400px] items-stretch">
           <div className="flex items-center border-r border-border px-3 sm:px-5 shrink-0">
             <span className="font-collapse text-lg sm:text-xl font-bold tracking-wider uppercase blend-lighter">
-              H<span className="hidden sm:inline">ermes </span>A<span className="hidden sm:inline">gent</span>
+              M<span className="hidden sm:inline">yAIOne </span>A<span className="hidden sm:inline">gent</span>
             </span>
           </div>
 

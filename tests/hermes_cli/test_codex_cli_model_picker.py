@@ -72,7 +72,7 @@ def codex_cli_only_env(tmp_path, monkeypatch):
 
 def test_codex_cli_tokens_detected_by_model_picker(codex_cli_only_env):
     """openai-codex should appear when tokens only exist in ~/.codex/auth.json."""
-    from hermes_cli.model_switch import list_authenticated_providers
+    from myai_cli.model_switch import list_authenticated_providers
 
     providers = list_authenticated_providers(
         current_provider="openai-codex",
@@ -91,7 +91,7 @@ def test_codex_cli_tokens_detected_by_model_picker(codex_cli_only_env):
 def test_codex_cli_tokens_migrated_after_detection(codex_cli_only_env):
     """After the /model picker detects Codex CLI tokens, they should be
     migrated into the Hermes auth store for subsequent fast lookups."""
-    from hermes_cli.model_switch import list_authenticated_providers
+    from myai_cli.model_switch import list_authenticated_providers
 
     # First call triggers migration
     list_authenticated_providers(current_provider="openai-codex")
@@ -142,7 +142,7 @@ def hermes_auth_only_env(tmp_path, monkeypatch):
 
 def test_normal_path_still_works(hermes_auth_only_env):
     """openai-codex appears when tokens are already in Hermes auth store."""
-    from hermes_cli.model_switch import list_authenticated_providers
+    from myai_cli.model_switch import list_authenticated_providers
 
     providers = list_authenticated_providers(
         current_provider="openai-codex",
@@ -194,7 +194,7 @@ def claude_code_only_env(tmp_path, monkeypatch):
 
 def test_claude_code_file_detected_by_model_picker(claude_code_only_env):
     """anthropic should appear when credentials only exist in ~/.claude/.credentials.json."""
-    from hermes_cli.model_switch import list_authenticated_providers
+    from myai_cli.model_switch import list_authenticated_providers
 
     providers = list_authenticated_providers(
         current_provider="anthropic",
@@ -229,7 +229,7 @@ def test_no_codex_when_no_credentials(tmp_path, monkeypatch):
     ]:
         monkeypatch.delenv(var, raising=False)
 
-    from hermes_cli.model_switch import list_authenticated_providers
+    from myai_cli.model_switch import list_authenticated_providers
 
     providers = list_authenticated_providers(
         current_provider="openrouter",

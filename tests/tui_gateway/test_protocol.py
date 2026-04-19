@@ -21,8 +21,8 @@ def _restore_stdout():
 def server():
     with patch.dict("sys.modules", {
         "hermes_constants": MagicMock(get_hermes_home=MagicMock(return_value="/tmp/hermes_test")),
-        "hermes_cli.env_loader": MagicMock(),
-        "hermes_cli.banner": MagicMock(),
+        "myai_cli.env_loader": MagicMock(),
+        "myai_cli.banner": MagicMock(),
         "hermes_state": MagicMock(),
     }):
         import importlib

@@ -1612,7 +1612,7 @@ class BasePlatformAdapter(ABC):
             # session lifecycle and its cleanup races with the running task
             # (see PR #4926).
             cmd = event.get_command()
-            from hermes_cli.commands import should_bypass_active_session
+            from myai_cli.commands import should_bypass_active_session
 
             if should_bypass_active_session(cmd):
                 logger.debug(

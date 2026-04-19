@@ -515,7 +515,7 @@ class TestComponentPrefixes:
 
     def test_cli_prefix(self):
         prefixes = hermes_logging.COMPONENT_PREFIXES["cli"]
-        assert "hermes_cli" in prefixes
+        assert "myai_cli" in prefixes
         assert "cli" in prefixes
 
     def test_cron_prefix(self):
@@ -662,7 +662,7 @@ class TestAddRotatingHandler:
 
         old_umask = os.umask(0o022)
         try:
-            with patch("hermes_cli.config.is_managed", return_value=True):
+            with patch("myai_cli.config.is_managed", return_value=True):
                 hermes_logging._add_rotating_handler(
                     logger, log_path,
                     level=logging.INFO, max_bytes=1024, backup_count=1,
@@ -686,7 +686,7 @@ class TestAddRotatingHandler:
 
         old_umask = os.umask(0o022)
         try:
-            with patch("hermes_cli.config.is_managed", return_value=True):
+            with patch("myai_cli.config.is_managed", return_value=True):
                 hermes_logging._add_rotating_handler(
                     logger, log_path,
                     level=logging.INFO, max_bytes=1, backup_count=1,

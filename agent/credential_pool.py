@@ -14,8 +14,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from hermes_constants import OPENROUTER_BASE_URL
-import hermes_cli.auth as auth_mod
-from hermes_cli.auth import (
+import myai_cli.auth as auth_mod
+from myai_cli.auth import (
     CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS,
     DEFAULT_AGENT_KEY_MIN_TTL_SECONDS,
     PROVIDER_REGISTRY,
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 def _load_config_safe() -> Optional[dict]:
     """Load config.yaml, returning None on any error."""
     try:
-        from hermes_cli.config import load_config
+        from myai_cli.config import load_config
 
         return load_config()
     except Exception:
@@ -290,7 +290,7 @@ def _iter_custom_providers(config: Optional[dict] = None):
     if not isinstance(custom_providers, list):
         # Fall back to the v12+ providers dict via the compatibility layer
         try:
-            from hermes_cli.config import get_compatible_custom_providers
+            from myai_cli.config import get_compatible_custom_providers
 
             custom_providers = get_compatible_custom_providers(config)
         except Exception:
@@ -1091,7 +1091,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # Without this gate, auxiliary client fallback chains silently read
         # ~/.claude/.credentials.json without user consent.  See PR #4210.
         try:
-            from hermes_cli.auth import is_provider_explicitly_configured
+            from myai_cli.auth import is_provider_explicitly_configured
             if not is_provider_explicitly_configured("anthropic"):
                 return changed, active_sources
         except ImportError:
@@ -1106,7 +1106,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
             if creds and creds.get("accessToken"):
                 # Check if user explicitly removed this source
                 try:
-                    from hermes_cli.auth import is_source_suppressed
+                    from myai_cli.auth import is_source_suppressed
                     if is_source_suppressed(provider, source_name):
                         continue
                 except ImportError:
@@ -1165,7 +1165,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # env vars (COPILOT_GITHUB_TOKEN / GH_TOKEN).  They don't live in
         # the auth store or credential pool, so we resolve them here.
         try:
-            from hermes_cli.copilot_auth import resolve_copilot_token
+            from myai_cli.copilot_auth import resolve_copilot_token
             token, source = resolve_copilot_token()
             if token:
                 source_name = "gh_cli" if "gh" in source.lower() else f"env:{source}"
@@ -1193,7 +1193,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # Use refresh_if_expiring=False to avoid network calls during
         # pool loading / provider discovery.
         try:
-            from hermes_cli.auth import resolve_qwen_runtime_credentials
+            from myai_cli.auth import resolve_qwen_runtime_credentials
             creds = resolve_qwen_runtime_credentials(refresh_if_expiring=False)
             token = creds.get("api_key", "")
             if token:
@@ -1222,7 +1222,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # gate the removal is instantly undone on the next load_pool() call.
         codex_suppressed = False
         try:
-            from hermes_cli.auth import is_source_suppressed
+            from myai_cli.auth import is_source_suppressed
             codex_suppressed = is_source_suppressed(provider, "device_code")
         except ImportError:
             pass
@@ -1237,7 +1237,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # that only exist in the Codex CLI shared file.
         if not (isinstance(tokens, dict) and tokens.get("access_token")):
             try:
-                from hermes_cli.auth import _import_codex_cli_tokens, _save_codex_tokens
+                from myai_cli.auth import _import_codex_cli_tokens, _save_codex_tokens
                 cli_tokens = _import_codex_cli_tokens()
                 if cli_tokens:
                     logger.info("Importing Codex CLI tokens into Hermes auth store.")

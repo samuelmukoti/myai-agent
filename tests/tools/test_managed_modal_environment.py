@@ -33,25 +33,25 @@ def _restore_tool_and_agent_modules():
     original_modules = {
         name: module
         for name, module in sys.modules.items()
-        if name in ("tools", "agent", "hermes_cli")
+        if name in ("tools", "agent", "myai_cli")
         or name.startswith("tools.")
         or name.startswith("agent.")
-        or name.startswith("hermes_cli.")
+        or name.startswith("myai_cli.")
     }
     try:
         yield
     finally:
-        _reset_modules(("tools", "agent", "hermes_cli"))
+        _reset_modules(("tools", "agent", "myai_cli"))
         sys.modules.update(original_modules)
 
 
 def _install_fake_tools_package(*, credential_mounts=None):
-    _reset_modules(("tools", "agent", "hermes_cli"))
+    _reset_modules(("tools", "agent", "myai_cli"))
 
-    hermes_cli = types.ModuleType("hermes_cli")
-    hermes_cli.__path__ = []  # type: ignore[attr-defined]
-    sys.modules["hermes_cli"] = hermes_cli
-    sys.modules["hermes_cli.config"] = types.SimpleNamespace(
+    myai_cli = types.ModuleType("myai_cli")
+    myai_cli.__path__ = []  # type: ignore[attr-defined]
+    sys.modules["myai_cli"] = myai_cli
+    sys.modules["myai_cli.config"] = types.SimpleNamespace(
         get_hermes_home=lambda: Path(tempfile.gettempdir()) / "hermes-home",
     )
 

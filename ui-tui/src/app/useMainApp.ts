@@ -286,10 +286,10 @@ export function useMainApp(gw: GatewayClient) {
   useConfigSync({ gw, setBellOnComplete, setVoiceEnabled, sid: ui.sid })
 
   // ── Terminal tab title ─────────────────────────────────────────────
-  // Show model name + status so users can identify the Hermes tab.
+  // Show model name + status so users can identify the MyAIOne tab.
   const shortModel = ui.info?.model?.replace(/^.*\//, '') ?? ''
   const titleStatus = ui.busy ? '⏳' : '✓'
-  const terminalTitle = shortModel ? `${titleStatus} ${shortModel} — Hermes` : 'Hermes'
+  const terminalTitle = shortModel ? `${titleStatus} ${shortModel} — MyAIOne` : 'MyAIOne'
   useTerminalTitle(terminalTitle)
 
   useEffect(() => {

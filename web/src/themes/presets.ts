@@ -10,8 +10,8 @@ import type { DashboardTheme } from "./types";
 
 export const defaultTheme: DashboardTheme = {
   name: "default",
-  label: "Hermes Teal",
-  description: "Classic dark teal — the canonical Hermes look",
+  label: "MyAIOne Teal",
+  description: "Classic dark teal — the canonical MyAIOne look",
   colors: {
     background: "#041C1C",
     foreground: "#ffe6cb",

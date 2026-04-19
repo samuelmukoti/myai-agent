@@ -45,12 +45,12 @@ export const zh: Translations = {
   },
 
   app: {
-    brand: "Hermes Agent",
+    brand: "MyAIOne Agent",
     brandShort: "HA",
     webUi: "管理面板",
     footer: {
-      name: "Hermes Agent",
-      org: "Nous Research",
+      name: "MyAIOne Agent",
+      org: "MyAIOne",
     },
     nav: {
       status: "状态",

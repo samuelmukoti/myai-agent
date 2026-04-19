@@ -65,11 +65,11 @@ hermes doctor       # Diagnose any issues
 
 ## CLI vs Messaging Quick Reference
 
-Hermes has two entry points: start the terminal UI with `hermes`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
+MyAIOne Agent has two entry points: start the terminal UI with `myai`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
 
 | Action | CLI | Messaging platforms |
 |---------|-----|---------------------|
-| Start chatting | `hermes` | Run `hermes gateway setup` + `hermes gateway start`, then send the bot a message |
+| Start chatting | `myai` | Run `myai gateway setup` + `myai gateway start`, then send the bot a message |
 | Start fresh conversation | `/new` or `/reset` | `/new` or `/reset` |
 | Change model | `/model [provider:model]` | `/model [provider:model]` |
 | Set a personality | `/personality [name]` | `/personality [name]` |
@@ -109,9 +109,9 @@ All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes
 
 ## Migrating from OpenClaw
 
-If you're coming from OpenClaw, Hermes can automatically import your settings, memories, skills, and API keys.
+If you're coming from OpenClaw, MyAIOne Agent can automatically import your settings, memories, skills, and API keys.
 
-**During first-time setup:** The setup wizard (`hermes setup`) automatically detects `~/.openclaw` and offers to migrate before configuration begins.
+**During first-time setup:** The setup wizard (`myai setup`) automatically detects `~/.openclaw` and offers to migrate before configuration begins.
 
 **Anytime after install:**
 
@@ -138,15 +138,15 @@ See `hermes claw migrate --help` for all options, or use the `openclaw-migration
 
 ## Contributing
 
-We welcome contributions! See the [Contributing Guide](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) for development setup, code style, and PR process.
+We welcome contributions! See the [Contributing Guide](https://docs.myai1.ai/developer-guide/contributing) for development setup, code style, and PR process.
 
 Quick start for contributors — clone and go with `setup-hermes.sh`:
 
 ```bash
-git clone https://github.com/NousResearch/hermes-agent.git
-cd hermes-agent
-./setup-hermes.sh     # installs uv, creates venv, installs .[all], symlinks ~/.local/bin/hermes
-./hermes              # auto-detects the venv, no need to `source` first
+git clone https://github.com/melivo/myaione-agent.git
+cd myaione-agent
+./setup-hermes.sh     # installs uv, creates venv, installs .[all], symlinks ~/.local/bin/myai
+./hermes              # auto-detects the venv (compat wrapper; calls myai)
 ```
 
 Manual path (equivalent to the above):
@@ -169,11 +169,11 @@ python -m pytest tests/ -q
 
 ## Community
 
-- 💬 [Discord](https://discord.gg/NousResearch)
+- 🌐 [myai1.ai](https://myai1.ai) — MyAIOne Rig home
 - 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 💡 [Discussions](https://github.com/NousResearch/hermes-agent/discussions)
-- 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) — Community WeChat bridge: Run Hermes Agent and OpenClaw on the same WeChat account.
+- 🐛 [Issues](https://github.com/melivo/myaione-agent/issues)
+- 💡 [Discussions](https://github.com/melivo/myaione-agent/discussions)
+- ⬆ Upstream: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) — the agent core this is forked from.
 
 ---
 
@@ -181,4 +181,4 @@ python -m pytest tests/ -q
 
 MIT — see [LICENSE](LICENSE).
 
-Built by [Nous Research](https://nousresearch.com).
+Part of the **MyAIOne Rig**. Agent core forked from [Hermes Agent](https://github.com/NousResearch/hermes-agent) by [Nous Research](https://nousresearch.com).

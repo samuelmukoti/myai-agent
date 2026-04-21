@@ -10,13 +10,13 @@ zero migration needed.
 
 Usage::
 
-    hermes profile create coder          # fresh profile + bundled skills
-    hermes profile create coder --clone  # also copy config, .env, SOUL.md
-    hermes profile create coder --clone-all  # full copy of source profile
+    myai profile create coder          # fresh profile + bundled skills
+    myai profile create coder --clone  # also copy config, .env, SOUL.md
+    myai profile create coder --clone-all  # full copy of source profile
     coder chat                           # use via wrapper alias
-    hermes -p coder chat                 # or via flag
-    hermes profile use coder             # set as sticky default
-    hermes profile delete coder          # remove profile + alias + service
+    myai -p coder chat                 # or via flag
+    myai profile use coder             # set as sticky default
+    myai profile delete coder          # remove profile + alias + service
 """
 
 import json
@@ -207,7 +207,7 @@ def check_alias_collision(name: str) -> Optional[str]:
             if existing_path == str(wrapper_dir / name):
                 try:
                     content = (wrapper_dir / name).read_text()
-                    if "hermes -p" in content:
+                    if "myai -p" in content:
                         return None  # it's our wrapper, safe to overwrite
                 except Exception:
                     pass
@@ -238,7 +238,7 @@ def create_wrapper_script(name: str) -> Optional[Path]:
 
     wrapper_path = wrapper_dir / name
     try:
-        wrapper_path.write_text(f'#!/bin/sh\nexec hermes -p {name} "$@"\n')
+        wrapper_path.write_text(f'#!/bin/sh\nexec myai -p {name} "$@"\n')
         wrapper_path.chmod(wrapper_path.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
         return wrapper_path
     except OSError as e:
@@ -253,7 +253,7 @@ def remove_wrapper_script(name: str) -> bool:
         try:
             # Verify it's our wrapper before removing
             content = wrapper_path.read_text()
-            if "hermes -p" in content:
+            if "myai -p" in content:
                 wrapper_path.unlink()
                 return True
         except Exception:
@@ -509,7 +509,7 @@ def delete_profile(name: str, yes: bool = False) -> Path:
     if name == "default":
         raise ValueError(
             "Cannot delete the default profile (~/.hermes).\n"
-            "To remove everything, use: hermes uninstall"
+            "To remove everything, use: myai uninstall"
         )
 
     profile_dir = get_profile_dir(name)
@@ -698,7 +698,7 @@ def set_active_profile(name: str) -> None:
     if name != "default" and not profile_exists(name):
         raise FileNotFoundError(
             f"Profile '{name}' does not exist. "
-            f"Create it with: hermes profile create {name}"
+            f"Create it with: myai profile create {name}"
         )
 
     path = _get_active_profile_path()
@@ -894,7 +894,7 @@ def import_profile(archive_path: str, name: Optional[str] = None) -> Path:
     if not inferred_name:
         raise ValueError(
             "Cannot determine profile name from archive. "
-            "Specify it explicitly: hermes profile import <archive> --name <name>"
+            "Specify it explicitly: myai profile import <archive> --name <name>"
         )
 
     # Archives exported from the default profile have "default/" as top-level
@@ -903,7 +903,7 @@ def import_profile(archive_path: str, name: Optional[str] = None) -> Path:
     if inferred_name == "default":
         raise ValueError(
             "Cannot import as 'default' — that is the built-in root profile (~/.hermes). "
-            "Specify a different name: hermes profile import <archive> --name <name>"
+            "Specify a different name: myai profile import <archive> --name <name>"
         )
 
     validate_profile_name(inferred_name)
@@ -983,9 +983,9 @@ def rename_profile(old_name: str, new_name: str) -> Path:
 # ---------------------------------------------------------------------------
 
 def generate_bash_completion() -> str:
-    """Generate a bash completion script for hermes profile names."""
+    """Generate a bash completion script for myai profile names."""
     return '''# Hermes Agent profile completion
-# Add to ~/.bashrc: eval "$(hermes completion bash)"
+# Add to ~/.bashrc: eval "$(myai completion bash)"
 
 _hermes_profiles() {
     local profiles_dir="$HOME/.hermes/profiles"
@@ -1033,10 +1033,10 @@ complete -F _hermes_completion hermes
 
 
 def generate_zsh_completion() -> str:
-    """Generate a zsh completion script for hermes profile names."""
+    """Generate a zsh completion script for myai profile names."""
     return '''#compdef hermes
 # Hermes Agent profile completion
-# Add to ~/.zshrc: eval "$(hermes completion zsh)"
+# Add to ~/.zshrc: eval "$(myai completion zsh)"
 
 _hermes() {
     local -a profiles
@@ -1079,7 +1079,7 @@ def resolve_profile_env(profile_name: str) -> str:
     if profile_name != "default" and not profile_dir.is_dir():
         raise FileNotFoundError(
             f"Profile '{profile_name}' does not exist. "
-            f"Create it with: hermes profile create {profile_name}"
+            f"Create it with: myai profile create {profile_name}"
         )
 
     return str(profile_dir)

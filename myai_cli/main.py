@@ -55,7 +55,7 @@ from typing import Optional
 def _require_tty(command_name: str) -> None:
     """Exit with a clear error if stdin is not a terminal.
 
-    Interactive TUI commands (hermes tools, hermes setup, hermes model) use
+    Interactive TUI commands (myai tools, myai setup, myai model) use
     curses or input() prompts that spin at 100% CPU when stdin is a pipe.
     This guard prevents accidental non-interactive invocation.
     """
@@ -751,9 +751,9 @@ def _print_tui_exit_summary(session_id: Optional[str]) -> None:
 
     print()
     print("Resume this session with:")
-    print(f"  hermes --tui --resume {target}")
+    print(f"  myai --tui --resume {target}")
     if title:
-        print(f'  hermes --tui -c "{title}"')
+        print(f'  myai --tui -c "{title}"')
     print()
     print(f"Session:        {target}")
     if title:
@@ -1019,7 +1019,7 @@ def cmd_chat(args):
                 args.resume = resolved
             else:
                 print(f"No session found matching '{continue_val}'.")
-                print("Use 'hermes sessions list' to see available sessions.")
+                print("Use 'myai sessions list' to see available sessions.")
                 sys.exit(1)
         else:
             # -c with no argument — continue the most recent session
@@ -1050,7 +1050,7 @@ def cmd_chat(args):
             "It looks like MyAIOne isn't configured yet -- no API keys or providers found."
         )
         print()
-        print("  Run:  hermes setup")
+        print("  Run:  myai setup")
         print()
 
         from myai_cli.setup import (
@@ -1072,7 +1072,7 @@ def cmd_chat(args):
             cmd_setup(args)
             return
         print()
-        print("You can run 'hermes setup' at any time to configure.")
+        print("You can run 'myai setup' at any time to configure.")
         sys.exit(1)
 
     # Start update check in background (runs while other init happens)
@@ -1289,7 +1289,7 @@ def cmd_whatsapp(args):
             print("  ✓ Session cleared")
         else:
             print("\n✓ WhatsApp is configured and paired!")
-            print("  Start the gateway with: hermes gateway")
+            print("  Start the gateway with: myai gateway")
             return
 
     # ── Step 6: QR code pairing ──────────────────────────────────────────
@@ -1320,23 +1320,23 @@ def cmd_whatsapp(args):
         print()
         if wa_mode == "bot":
             print("  Next steps:")
-            print("    1. Start the gateway:  hermes gateway")
+            print("    1. Start the gateway:  myai gateway")
             print("    2. Send a message to the bot's WhatsApp number")
             print("    3. The agent will reply automatically")
             print()
             print("  Tip: Agent responses are prefixed with '⚕ MyAIOne Agent'")
         else:
             print("  Next steps:")
-            print("    1. Start the gateway:  hermes gateway")
+            print("    1. Start the gateway:  myai gateway")
             print("    2. Open WhatsApp → Message Yourself")
             print("    3. Type a message — the agent will reply")
             print()
             print("  Tip: Agent responses are prefixed with '⚕ MyAIOne Agent'")
             print("  so you can tell them apart from your own messages.")
         print()
-        print("  Or install as a service: hermes gateway install")
+        print("  Or install as a service: myai gateway install")
     else:
-        print("⚠ Pairing may not have completed. Run 'hermes whatsapp' to try again.")
+        print("⚠ Pairing may not have completed. Run 'myai whatsapp' to try again.")
 
 
 def cmd_setup(args):
@@ -1355,7 +1355,7 @@ def cmd_model(args):
 def select_provider_and_model(args=None):
     """Core provider selection + model picking logic.
 
-    Shared by ``cmd_model`` (``hermes model``) and the setup wizard
+    Shared by ``cmd_model`` (``myai model``) and the setup wizard
     (``setup_model_provider`` in setup.py).  Handles the full flow:
     provider picker, credential prompting, model selection, and config
     persistence.
@@ -1596,9 +1596,9 @@ def _clear_stale_openai_base_url():
 # its own provider+model pair in config.yaml under `auxiliary.<task>`.
 #
 # The UI lives behind "Configure auxiliary models..." at the bottom of the
-# `hermes model` provider picker. It does NOT re-run credential setup — it
+# `myai model` provider picker. It does NOT re-run credential setup — it
 # only routes already-authenticated providers to specific aux tasks. Users
-# configure new providers through the normal `hermes model` flow first.
+# configure new providers through the normal `myai model` flow first.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # (task_key, display_name, short_description)
@@ -1754,7 +1754,7 @@ def _aux_select_for_task(task: str) -> None:
     Uses ``list_authenticated_providers()`` to only show providers the user
     has already configured. This avoids re-running OAuth/credential flows
     inside the aux picker — users set up new providers through the normal
-    ``hermes model`` flow, then route aux tasks to them here.
+    ``myai model`` flow, then route aux tasks to them here.
     """
     from myai_cli.config import load_config
     from myai_cli.model_switch import list_authenticated_providers
@@ -2213,7 +2213,7 @@ def _model_flow_openai_codex(config, current_model=""):
             return
 
     _codex_token = None
-    # Prefer credential pool (where `hermes auth` stores device_code tokens),
+    # Prefer credential pool (where `myai auth` stores device_code tokens),
     # fall back to legacy provider state.
     try:
         _codex_status = get_codex_auth_status()
@@ -2551,7 +2551,7 @@ def _model_flow_custom(config):
             _caller_model["api_key"] = effective_key
         _caller_model.pop("api_mode", None)
         config["model"] = _caller_model
-        print("Endpoint saved. Use `/model` in chat or `hermes model` to set a model.")
+        print("Endpoint saved. Use `/model` in chat or `myai model` to set a model.")
 
     # Auto-save to custom_providers so it appears in the menu next time
     _save_custom_provider(
@@ -4009,7 +4009,7 @@ def _model_flow_anthropic(config, current_model=""):
         # Update config with provider — clear base_url since
         # resolve_runtime_provider() always hardcodes Anthropic's URL.
         # Leaving a stale base_url in config can contaminate other
-        # providers if the user switches without running 'hermes model'.
+        # providers if the user switches without running 'myai model'.
         cfg = load_config()
         model = cfg.get("model")
         if not isinstance(model, dict):
@@ -4192,7 +4192,7 @@ def _gateway_prompt(prompt_text: str, default: str = "", timeout: float = 300.0)
     Writes a prompt marker file so the gateway can forward the question to the
     user, then polls for a response file.  Falls back to *default* on timeout.
 
-    Used by ``hermes update --gateway`` so interactive prompts (stash restore,
+    Used by ``myai update --gateway`` so interactive prompts (stash restore,
     config migration) are forwarded to the messenger instead of being silently
     skipped.
     """
@@ -4606,7 +4606,7 @@ def _restore_stashed_changes(
 
 
 # =========================================================================
-# Fork detection and upstream management for `hermes update`
+# Fork detection and upstream management for `myai update`
 # =========================================================================
 
 OFFICIAL_REPO_URLS = {
@@ -4849,7 +4849,7 @@ def _invalidate_update_cache():
     reports a stale "commits behind" count after a successful update.
 
     The git repo is shared across profiles — when one profile runs
-    ``hermes update``, every profile is now current.
+    ``myai update``, every profile is now current.
     """
     homes = []
     # Default profile home (Docker-aware — uses /opt/data in Docker)
@@ -4990,7 +4990,7 @@ def _update_node_dependencies() -> None:
 
 
 class _UpdateOutputStream:
-    """Stream wrapper used during ``hermes update`` to survive terminal loss.
+    """Stream wrapper used during ``myai update`` to survive terminal loss.
 
     Wraps the process's original stdout/stderr so that:
 
@@ -5003,7 +5003,7 @@ class _UpdateOutputStream:
       stops.
 
     Combined with ``SIGHUP -> SIG_IGN`` installed by
-    ``_install_hangup_protection``, this makes ``hermes update`` safe to
+    ``_install_hangup_protection``, this makes ``myai update`` safe to
     run in a plain SSH session that might disconnect mid-install.
     """
 
@@ -5065,7 +5065,7 @@ class _UpdateOutputStream:
 def _install_hangup_protection(gateway_mode: bool = False):
     """Protect ``cmd_update`` from SIGHUP and broken terminal pipes.
 
-    Users commonly run ``hermes update`` in an SSH session or a terminal
+    Users commonly run ``myai update`` in an SSH session or a terminal
     that may close mid-install.  Without protection, ``SIGHUP`` from the
     terminal kills the Python process during ``pip install`` and leaves
     the venv half-installed; the documented workaround ("use screen /
@@ -5084,7 +5084,7 @@ def _install_hangup_protection(gateway_mode: bool = False):
     **intentionally left alone** — those are legitimate cancellation
     signals the user or OS sent on purpose.
 
-    In gateway mode (``hermes update --gateway``) the update is already
+    In gateway mode (``myai update --gateway``) the update is already
     spawned detached from a terminal, so this function is a no-op.
 
     Returns a dict that ``cmd_update`` can pass to
@@ -5125,7 +5125,7 @@ def _install_hangup_protection(gateway_mode: bool = False):
         import datetime as _dt
 
         log_file.write(
-            f"\n=== hermes update started "
+            f"\n=== myai update started "
             f"{_dt.datetime.now().isoformat(timespec='seconds')} ===\n"
         )
 
@@ -5569,7 +5569,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
             elif not (sys.stdin.isatty() and sys.stdout.isatty()):
                 print("  ℹ Non-interactive session — skipping config migration prompt.")
                 print(
-                    "    Run 'hermes config migrate' later to apply any new config/env options."
+                    "    Run 'myai config migrate' later to apply any new config/env options."
                 )
                 response = "n"
             else:
@@ -5592,10 +5592,10 @@ def _cmd_update_impl(args, gateway_mode: bool):
                     print()
                     print("✓ Configuration updated!")
                 if gateway_mode and missing_env:
-                    print("  ℹ API keys require manual entry: hermes config migrate")
+                    print("  ℹ API keys require manual entry: myai config migrate")
             else:
                 print()
-                print("Skipped. Run 'hermes config migrate' later to configure.")
+                print("Skipped. Run 'myai config migrate' later to configure.")
         else:
             print("  ✓ Configuration is up to date")
 
@@ -5603,7 +5603,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         print("✓ Update complete!")
 
         # Write exit code *before* the gateway restart attempt.
-        # When running as ``hermes update --gateway`` (spawned by the gateway's
+        # When running as ``myai update --gateway`` (spawned by the gateway's
         # /update command), this process lives inside the gateway's systemd
         # cgroup.  ``systemctl restart hermes-gateway`` kills everything in the
         # cgroup (KillMode=mixed → SIGKILL to remaining processes), including
@@ -5787,11 +5787,11 @@ def _cmd_update_impl(args, gateway_mode: bool):
                     print(f"  ✓ Restarted {svc}")
                 if killed_pids:
                     print(f"  → Stopped {len(killed_pids)} manual gateway process(es)")
-                    print("    Restart manually: hermes gateway run")
+                    print("    Restart manually: myai gateway run")
                     # Also restart for each profile if needed
                     if len(killed_pids) > 1:
                         print(
-                            "    (or: hermes -p <profile> gateway run  for each profile)"
+                            "    (or: myai -p <profile> gateway run  for each profile)"
                         )
 
             if not restarted_services and not killed_pids:
@@ -5805,7 +5805,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # When both hermes.service (from a pre-rename install) and the
         # current hermes-gateway.service are enabled, they SIGTERM-fight
         # for the same bot token (see PR #11909). Flagging here means
-        # every `hermes update` surfaces the issue until the user migrates.
+        # every `myai update` surfaces the issue until the user migrates.
         try:
             from myai_cli.gateway import (
                 has_legacy_hermes_units,
@@ -5832,7 +5832,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 
         print()
         print("Tip: You can now select a provider and model:")
-        print("  hermes model              # Select provider and model")
+        print("  myai model              # Select provider and model")
 
     except subprocess.CalledProcessError as e:
         if sys.platform == "win32":
@@ -5848,7 +5848,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 def _coalesce_session_name_args(argv: list) -> list:
     """Join unquoted multi-word session names after -c/--continue and -r/--resume.
 
-    When a user types ``hermes -c Pokemon Agent Dev`` without quoting the
+    When a user types ``myai -c Pokemon Agent Dev`` without quoting the
     session name, argparse sees three separate tokens.  This function merges
     them into a single argument so argparse receives
     ``['-c', 'Pokemon Agent Dev']`` instead.
@@ -5939,7 +5939,7 @@ def cmd_profile(args):
     action = getattr(args, "profile_action", None)
 
     if action is None:
-        # Bare `hermes profile` — show current profile status
+        # Bare `myai profile` — show current profile status
         profile_name = get_active_profile_name()
         dhh = display_hermes_home()
         print(f"\nActive profile: {profile_name}")
@@ -5958,7 +5958,7 @@ def cmd_profile(args):
                 )
                 print(f"Skills:         {p.skill_count} installed")
                 if p.alias_path:
-                    print(f"Alias:          {p.name} → hermes -p {p.name}")
+                    print(f"Alias:          {p.name} → myai -p {p.name}")
                 break
         print()
         return
@@ -6058,7 +6058,7 @@ def cmd_profile(args):
                 if collision:
                     print(f"\n⚠ Cannot create alias '{name}' — {collision}")
                     print(
-                        f"  Choose a custom alias:  hermes profile alias {name} --name <custom>"
+                        f"  Choose a custom alias:  myai profile alias {name} --name <custom>"
                     )
                     print(f"  Or access via flag:     myai -p {name} chat")
                 else:
@@ -6169,7 +6169,7 @@ def cmd_profile(args):
             if wrapper_path:
                 # If custom name, write the profile name into the wrapper
                 if custom_name:
-                    wrapper_path.write_text(f'#!/bin/sh\nexec hermes -p {name} "$@"\n')
+                    wrapper_path.write_text(f'#!/bin/sh\nexec myai -p {name} "$@"\n')
                 print(f"✓ Alias created: {wrapper_path}")
                 if not _is_wrapper_dir_in_path():
                     print(f"⚠ {_get_wrapper_dir()} is not in your PATH.")
@@ -6377,6 +6377,16 @@ For more help on a command:
         action="store_true",
         default=False,
         help="With --tui: run TypeScript sources via tsx (skip dist build)",
+    )
+    parser.add_argument(
+        "--onboarding",
+        action="store_true",
+        default=False,
+        help=(
+            "Force the first-run onboarding flow: launches the guided `myai setup` "
+            "wizard and then drops into the TUI when setup completes. Designed for "
+            "DevStation / MyAIOne Rig containers so a fresh shell can hand off cleanly."
+        ),
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
@@ -6703,7 +6713,7 @@ For more help on a command:
         "setup",
         help="Interactive setup wizard",
         description="Configure MyAIOne Agent with an interactive wizard. "
-        "Run a specific section: hermes setup model|tts|terminal|gateway|tools|agent",
+        "Run a specific section: myai setup model|tts|terminal|gateway|tools|agent",
     )
     setup_parser.add_argument(
         "section",
@@ -7057,7 +7067,7 @@ For more help on a command:
     debug_parser = subparsers.add_parser(
         "debug",
         help="Debug tools — upload logs and system info for support",
-        description="Debug utilities for MyAIOne Agent. Use 'hermes debug share' to "
+        description="Debug utilities for MyAIOne Agent. Use 'myai debug share' to "
         "upload a debug report (system info + recent logs) to a paste "
         "service and get a shareable URL.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -7094,7 +7104,7 @@ Examples:
     )
     delete_parser = debug_sub.add_parser(
         "delete",
-        help="Delete a paste uploaded by 'hermes debug share'",
+        help="Delete a paste uploaded by 'myai debug share'",
     )
     delete_parser.add_argument(
         "urls",
@@ -7332,7 +7342,7 @@ Examples:
         help="Reset a bundled skill — clears 'user-modified' tracking so updates work again",
         description=(
             "Clear a bundled skill's entry from the sync manifest (~/.hermes/skills/.bundled_manifest) "
-            "so future 'hermes update' runs stop marking it as user-modified. Pass --restore to also "
+            "so future 'myai update' runs stop marking it as user-modified. Pass --restore to also "
             "replace the current copy with the bundled version."
         ),
     )
@@ -7591,7 +7601,7 @@ Examples:
             "Enable, disable, or list tools for CLI, Telegram, Discord, etc.\n\n"
             "Built-in toolsets use plain names (e.g. web, memory).\n"
             "MCP tools use server:tool notation (e.g. github:create_issue).\n\n"
-            "Run 'hermes tools' with no subcommand for the interactive configuration UI."
+            "Run 'myai tools' with no subcommand for the interactive configuration UI."
         ),
     )
     tools_parser.add_argument(
@@ -7601,7 +7611,7 @@ Examples:
     )
     tools_sub = tools_parser.add_subparsers(dest="tools_action")
 
-    # hermes tools list [--platform cli]
+    # myai tools list [--platform cli]
     tools_list_p = tools_sub.add_parser(
         "list",
         help="Show all tools and their enabled/disabled status",
@@ -7612,7 +7622,7 @@ Examples:
         help="Platform to show (default: cli)",
     )
 
-    # hermes tools disable <name...> [--platform cli]
+    # myai tools disable <name...> [--platform cli]
     tools_disable_p = tools_sub.add_parser(
         "disable",
         help="Disable toolsets or MCP tools",
@@ -7629,7 +7639,7 @@ Examples:
         help="Platform to apply to (default: cli)",
     )
 
-    # hermes tools enable <name...> [--platform cli]
+    # myai tools enable <name...> [--platform cli]
     tools_enable_p = tools_sub.add_parser(
         "enable",
         help="Enable toolsets or MCP tools",
@@ -7668,8 +7678,8 @@ Examples:
         description=(
             "Manage MCP server connections and run MyAIOne as an MCP server.\n\n"
             "MCP servers provide additional tools via the Model Context Protocol.\n"
-            "Use 'hermes mcp add' to connect to a new server, or\n"
-            "'hermes mcp serve' to expose MyAIOne conversations over MCP."
+            "Use 'myai mcp add' to connect to a new server, or\n"
+            "'myai mcp serve' to expose MyAIOne conversations over MCP."
         ),
     )
     mcp_sub = mcp_parser.add_subparsers(dest="mcp_action")
@@ -7939,7 +7949,7 @@ Examples:
                 print("Cancelled.")
                 return
 
-            # Launch hermes --resume <id> by replacing the current process
+            # Launch myai --resume <id> by replacing the current process
             print(f"Resuming session: {selected_id}")
             import shutil
 
@@ -8343,7 +8353,7 @@ Examples:
     # =========================================================================
     # Pre-process argv so unquoted multi-word session names after -c / -r
     # are merged into a single token before argparse sees them.
-    # e.g. ``hermes -c Pokemon Agent Dev`` → ``hermes -c 'Pokemon Agent Dev'``
+    # e.g. ``myai -c Pokemon Agent Dev`` → ``myai -c 'Pokemon Agent Dev'``
     # ── Container-aware routing ────────────────────────────────────────
     # When NixOS container mode is active, route ALL subcommands into
     # the managed container.  This MUST run before parse_args() so that
@@ -8368,7 +8378,7 @@ Examples:
     #
     # Fix: when argv contains a token matching a known subcommand, set
     # subparsers.required=True to force deterministic routing.  If that
-    # fails (e.g. 'hermes -c model' where 'model' is consumed as the
+    # fails (e.g. 'myai -c model' where 'model' is consumed as the
     # session name for --continue), fall back to the default behaviour.
     import io as _io
 
@@ -8405,6 +8415,41 @@ Examples:
     if args.version:
         cmd_version(args)
         return
+
+    # Handle --onboarding: run setup wizard, then drop into TUI on success.
+    # Used by DevStation welcome.sh so a fresh shell can opt into the full
+    # first-run flow with one keystroke.
+    if getattr(args, "onboarding", False):
+        try:
+            from myai_cli.setup import run_setup_wizard
+        except ImportError:
+            print("error: onboarding requires the myai_cli.setup module", file=sys.stderr)
+            sys.exit(1)
+
+        print()
+        print("━━━ MyAIOne Agent · Guided Onboarding ━━━")
+        print()
+        print("Running the setup wizard, then dropping you into the agent.")
+        print("Ctrl+C at any point exits cleanly.")
+        print()
+
+        wizard_args = argparse.Namespace(
+            reset=False,
+            non_interactive=False,
+            section=None,
+        )
+        try:
+            run_setup_wizard(wizard_args)
+        except KeyboardInterrupt:
+            print("\nonboarding cancelled — re-run `myai --onboarding` when you're ready.")
+            sys.exit(130)
+        except Exception as e:
+            print(f"\nsetup wizard failed: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Force the default chat dispatch so the TUI launches with the fresh config.
+        args.command = None
+        args.onboarding = False
 
     # Handle top-level --resume / --continue as shortcut to chat
     if (args.resume or args.continue_last) and args.command is None:

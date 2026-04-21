@@ -422,7 +422,7 @@ def _check_unavailable_skill(command_name: str) -> str | None:
                 if name == normalized and name in disabled:
                     return (
                         f"The **{command_name}** skill is installed but disabled.\n"
-                        f"Enable it with: `hermes skills config`"
+                        f"Enable it with: `myai skills config`"
                     )
 
         # Check optional skills (shipped with repo but not installed)
@@ -439,7 +439,7 @@ def _check_unavailable_skill(command_name: str) -> str | None:
                     install_path = f"official/{'/'.join(parts)}"
                     return (
                         f"The **{command_name}** skill is available but not installed.\n"
-                        f"Install it with: `hermes skills install {install_path}`"
+                        f"Install it with: `myai skills install {install_path}`"
                     )
     except Exception:
         pass
@@ -964,7 +964,7 @@ class GatewayRunner:
             )
 
         # When the config has no model.default but a provider was resolved
-        # (e.g. user ran `hermes auth add openai-codex` without `hermes model`),
+        # (e.g. user ran `myai auth add openai-codex` without `myai model`),
         # fall back to the provider's first catalog model so the API call
         # doesn't fail with "model must be a non-empty string".
         if not model and runtime_kwargs.get("provider"):
@@ -1840,8 +1840,8 @@ class GatewayRunner:
         #
         # SKIP suspension after a clean (graceful) shutdown — the previous
         # process already drained active agents, so sessions aren't stuck.
-        # This prevents unwanted auto-resets after `hermes update`,
-        # `hermes gateway restart`, or `/restart`.
+        # This prevents unwanted auto-resets after `myai update`,
+        # `myai gateway restart`, or `/restart`.
         _clean_marker = _hermes_home / ".clean_shutdown"
         if _clean_marker.exists():
             logger.info("Previous gateway exited cleanly — skipping session suspension")
@@ -2848,7 +2848,7 @@ class GatewayRunner:
                             f"Hi~ I don't recognize you yet!\n\n"
                             f"Here's your pairing code: `{code}`\n\n"
                             f"Ask the bot owner to run:\n"
-                            f"`hermes pairing approve {platform_name} {code}`"
+                            f"`myai pairing approve {platform_name} {code}`"
                         )
                 else:
                     adapter = self.adapters.get(source.platform)
@@ -3414,7 +3414,7 @@ class GatewayRunner:
                         if _skill_name in _get_plat_disabled(platform=_plat):
                             return (
                                 f"The **{_skill_name}** skill is disabled for {_plat}.\n"
-                                f"Enable it with: `hermes skills config`"
+                                f"Enable it with: `myai skills config`"
                             )
                     user_instruction = event.get_command_args().strip()
                     msg = build_skill_invocation_message(
@@ -4876,7 +4876,7 @@ class GatewayRunner:
             self.request_restart(detached=True, via_service=False)
         if active_agents:
             return f"⏳ Draining {active_agents} active agent(s) before restart..."
-        return "♻ Restarting gateway. If you aren't notified within 60 seconds, restart from the console with `hermes gateway restart`."
+        return "♻ Restarting gateway. If you aren't notified within 60 seconds, restart from the console with `myai gateway restart`."
 
     def _is_stale_restart_redelivery(self, event: MessageEvent) -> bool:
         """Return True if this /restart is a Telegram re-delivery we already handled.
@@ -5386,7 +5386,7 @@ class GatewayRunner:
 
         lines.append("")
         lines.append("Switch: `/model provider:model-name`")
-        lines.append("Setup: `hermes setup`")
+        lines.append("Setup: `myai setup`")
         return "\n".join(lines)
     
     async def _handle_personality_command(self, event: MessageEvent) -> str:
@@ -7240,7 +7240,7 @@ class GatewayRunner:
 
         Gateway uploads ONLY the summary report (system info + log tails),
         NOT full log files, to protect conversation privacy.  Users who need
-        full log uploads should use ``hermes debug share`` from the CLI.
+        full log uploads should use ``myai debug share`` from the CLI.
         """
         import asyncio
         from myai_cli.debug import (
@@ -7272,7 +7272,7 @@ class GatewayRunner:
 
             lines.append("")
             lines.append("⏱ Pastes will auto-delete in 6 hours.")
-            lines.append("For full log uploads, use `hermes debug share` from the CLI.")
+            lines.append("For full log uploads, use `myai debug share` from the CLI.")
             lines.append("Share these links with the Hermes team for support.")
             return "\n".join(lines)
 
@@ -7281,8 +7281,8 @@ class GatewayRunner:
     async def _handle_update_command(self, event: MessageEvent) -> str:
         """Handle /update command — update Hermes Agent to the latest version.
 
-        Spawns ``hermes update`` in a detached session (via ``setsid``) so it
-        survives the gateway restart that ``hermes update`` may trigger. Marker
+        Spawns ``myai update`` in a detached session (via ``setsid``) so it
+        survives the gateway restart that ``myai update`` may trigger. Marker
         files are written so either the current gateway process or the next one
         can notify the user when the update finishes.
         """
@@ -7295,7 +7295,7 @@ class GatewayRunner:
         # Block non-messaging platforms (API server, webhooks, ACP)
         platform = event.source.platform
         if platform not in self._UPDATE_ALLOWED_PLATFORMS:
-            return "✗ /update is only available from messaging platforms. Run `hermes update` from the terminal."
+            return "✗ /update is only available from messaging platforms. Run `myai update` from the terminal."
 
         if is_managed():
             return f"✗ {format_managed_message('update Hermes Agent')}"
@@ -7312,7 +7312,7 @@ class GatewayRunner:
                 "✗ Could not locate the `hermes` command. "
                 "Hermes is running, but the update command could not find the "
                 "executable on PATH or via the current Python interpreter. "
-                "Try running `hermes update` manually in your terminal."
+                "Try running `myai update` manually in your terminal."
             )
 
         pending_path = _hermes_home / ".update_pending.json"
@@ -7331,7 +7331,7 @@ class GatewayRunner:
         _tmp_pending.replace(pending_path)
         exit_code_path.unlink(missing_ok=True)
 
-        # Spawn `hermes update --gateway` detached so it survives gateway restart.
+        # Spawn `myai update --gateway` detached so it survives gateway restart.
         # --gateway enables file-based IPC for interactive prompts (stash
         # restore, config migration) so the gateway can forward them to the
         # user instead of silently skipping them.
@@ -7390,7 +7390,7 @@ class GatewayRunner:
         stream_interval: float = 4.0,
         timeout: float = 1800.0,
     ) -> None:
-        """Watch ``hermes update --gateway``, streaming output + forwarding prompts.
+        """Watch ``myai update --gateway``, streaming output + forwarding prompts.
 
         Polls ``.update_output.txt`` for new content and sends chunks to the
         user periodically.  Detects ``.update_prompt.json`` (written by the
@@ -7653,7 +7653,7 @@ class GatewayRunner:
                     if exit_code == 0:
                         msg = "✅ Hermes update finished successfully."
                     else:
-                        msg = "❌ Hermes update failed. Check the gateway logs or run `hermes update` manually for details."
+                        msg = "❌ Hermes update failed. Check the gateway logs or run `myai update` manually for details."
                 await adapter.send(chat_id, msg)
                 logger.info(
                     "Sent post-update notification to %s:%s (exit=%s)",
@@ -10129,7 +10129,7 @@ def _start_cron_ticker(stop_event: threading.Event, adapters=None, loop=None, in
     Background thread that ticks the cron scheduler at a regular interval.
     
     Runs inside the gateway process so cronjobs fire automatically without
-    needing a separate `hermes cron daemon` or system cron entry.
+    needing a separate `myai cron daemon` or system cron entry.
 
     When ``adapters`` and ``loop`` are provided, passes them through to the
     cron delivery path so live adapters can be used for E2EE rooms.
@@ -10273,14 +10273,14 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
             hermes_home = str(get_hermes_home())
             logger.error(
                 "Another gateway instance is already running (PID %d, HERMES_HOME=%s). "
-                "Use 'hermes gateway restart' to replace it, or 'hermes gateway stop' first.",
+                "Use 'myai gateway restart' to replace it, or 'myai gateway stop' first.",
                 existing_pid, hermes_home,
             )
             print(
                 f"\n❌ Gateway already running (PID {existing_pid}).\n"
-                f"   Use 'hermes gateway restart' to replace it,\n"
-                f"   or 'hermes gateway stop' to kill it first.\n"
-                f"   Or use 'hermes gateway run --replace' to auto-replace.\n"
+                f"   Use 'myai gateway restart' to replace it,\n"
+                f"   or 'myai gateway stop' to kill it first.\n"
+                f"   Or use 'myai gateway run --replace' to auto-replace.\n"
             )
             return False
 
@@ -10348,7 +10348,7 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
             _signal_initiated_shutdown = True
             logger.info("Received SIGTERM/SIGINT — initiating shutdown")
         # Diagnostic: log all hermes-related processes so we can identify
-        # what triggered the signal (hermes update, hermes gateway restart,
+        # what triggered the signal (myai update, myai gateway restart,
         # a stale detached subprocess, etc.).
         try:
             import subprocess as _sp
@@ -10442,7 +10442,7 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
     # When a signal (SIGTERM/SIGINT) caused the shutdown and it wasn't a
     # planned restart (/restart, /update, SIGUSR1), exit non-zero so
     # systemd's Restart=on-failure revives the process.  This covers:
-    #   - hermes update killing the gateway mid-work
+    #   - myai update killing the gateway mid-work
     #   - External kill commands
     #   - WSL2/container runtime sending unexpected signals
     # systemctl stop is safe: systemd tracks "stop requested" state

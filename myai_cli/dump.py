@@ -244,7 +244,7 @@ def run_dump(args):
     os_info = f"{platform.system()} {platform.release()} {platform.machine()}"
 
     lines = []
-    lines.append("--- hermes dump ---")
+    lines.append("--- myai dump ---")
     ver_str = f"{__version__}"
     if __release_date__:
         ver_str += f" ({__release_date__})"

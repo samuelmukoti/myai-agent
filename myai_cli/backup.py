@@ -1,10 +1,10 @@
 """
 Backup and import commands for hermes CLI.
 
-`hermes backup` creates a zip archive of the entire ~/.hermes/ directory
+`myai backup` creates a zip archive of the entire ~/.hermes/ directory
 (excluding the hermes-agent repo and transient files).
 
-`hermes import` restores from a backup zip, overlaying onto the current
+`myai import` restores from a backup zip, overlaying onto the current
 HERMES_HOME root.
 """
 
@@ -232,7 +232,7 @@ def run_backup(args) -> None:
         if len(errors) > 10:
             print(f"  ... and {len(errors) - 10} more")
 
-    print(f"\nRestore with: hermes import {out_path.name}")
+    print(f"\nRestore with: myai import {out_path.name}")
 
 
 # ---------------------------------------------------------------------------
@@ -430,25 +430,25 @@ def run_import(args) -> None:
                 # myai_cli.profiles might not be available (fresh install)
                 if any(profiles_dir.iterdir()):
                     print(f"\n  Profiles detected but aliases could not be created.")
-                    print(f"  Run: hermes profile list  (after installing hermes)")
+                    print(f"  Run: myai profile list  (after installing hermes)")
 
         # Guidance
         print()
         if not (hermes_root / "hermes-agent").is_dir():
             print("Note: The hermes-agent codebase was not included in the backup.")
-            print("  If this is a fresh install, run: hermes update")
+            print("  If this is a fresh install, run: myai update")
 
         if restored_profiles:
             gw_profiles = [n for n, _ in restored_profiles]
             print("\nTo re-enable gateway services for profiles:")
             for pname in gw_profiles:
-                print(f"  hermes -p {pname} gateway install")
+                print(f"  myai -p {pname} gateway install")
 
         print("Done. Your Hermes configuration has been restored.")
 
 
 # ---------------------------------------------------------------------------
-# Quick state snapshots (used by /snapshot slash command and hermes backup --quick)
+# Quick state snapshots (used by /snapshot slash command and myai backup --quick)
 # ---------------------------------------------------------------------------
 
 # Critical state files to include in quick snapshots (relative to HERMES_HOME).
@@ -643,7 +643,7 @@ def prune_quick_snapshots(
 
 
 def run_quick_backup(args) -> None:
-    """CLI entry point for hermes backup --quick."""
+    """CLI entry point for myai backup --quick."""
     label = getattr(args, "label", None)
     snap_id = create_quick_snapshot(label=label)
     if snap_id:

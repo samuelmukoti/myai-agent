@@ -120,7 +120,7 @@ def _looks_like_gateway_process(pid: int) -> bool:
     patterns = (
         "myai_cli.main gateway",
         "myai_cli/main.py gateway",
-        "hermes gateway",
+        "myai gateway",
         "gateway/run.py",
     )
     return any(pattern in cmdline for pattern in patterns)
@@ -139,7 +139,7 @@ def _record_looks_like_gateway(record: dict[str, Any]) -> bool:
     patterns = (
         "myai_cli.main gateway",
         "myai_cli/main.py gateway",
-        "hermes gateway",
+        "myai gateway",
         "gateway/run.py",
     )
     return any(pattern in cmdline for pattern in patterns)

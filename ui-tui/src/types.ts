@@ -36,6 +36,7 @@ export interface ClarifyReq {
 }
 
 export interface Msg {
+  firstRun?: boolean
   info?: SessionInfo
   kind?: 'intro' | 'panel' | 'slash' | 'trail'
   panelData?: PanelData

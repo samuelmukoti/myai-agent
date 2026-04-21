@@ -2656,7 +2656,7 @@ class DiscordAdapter(BasePlatformAdapter):
     ) -> SendResult:
         """Send an interactive button-based update prompt (Yes / No).
 
-        Used by the gateway ``/update`` watcher when ``hermes update --gateway``
+        Used by the gateway ``/update`` watcher when ``myai update --gateway``
         needs user input (stash restore, config migration).
         """
         if not self._client or not DISCORD_AVAILABLE:
@@ -3354,7 +3354,7 @@ if DISCORD_AVAILABLE:
                 child.disabled = True
 
     class UpdatePromptView(discord.ui.View):
-        """Interactive Yes/No buttons for ``hermes update`` prompts.
+        """Interactive Yes/No buttons for ``myai update`` prompts.
 
         Clicking a button writes the answer to ``.update_response`` so the
         detached update process can pick it up.  Only authorized users can

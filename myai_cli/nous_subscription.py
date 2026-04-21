@@ -259,7 +259,7 @@ def get_nous_subscription_features(
     )
 
     # use_gateway flags — when True, the user explicitly opted into the
-    # Tool Gateway via `hermes model`, so direct credentials should NOT
+    # Tool Gateway via `myai model`, so direct credentials should NOT
     # prevent gateway routing.
     web_use_gateway = bool(web_cfg.get("use_gateway"))
     tts_use_gateway = bool(tts_cfg.get("use_gateway"))

@@ -565,7 +565,7 @@ def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str
 
     Skills are the only tier that gets trimmed when the cap is hit.
     User-installed hub skills are excluded — accessible via /skills.
-    Skills disabled for the ``"telegram"`` platform (via ``hermes skills
+    Skills disabled for the ``"telegram"`` platform (via ``myai skills
     config``) are excluded from the menu entirely.
 
     Returns:
@@ -732,8 +732,8 @@ def discord_skill_commands_by_category(
 def slack_subcommand_map() -> dict[str, str]:
     """Return subcommand -> /command mapping for Slack /hermes handler.
 
-    Maps both canonical names and aliases so /hermes bg do stuff works
-    the same as /hermes background do stuff.
+    Maps both canonical names and aliases so /myai bg do stuff works
+    the same as /myai background do stuff.
     """
     overrides = _resolve_config_gates()
     mapping: dict[str, str] = {}

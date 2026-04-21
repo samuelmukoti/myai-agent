@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://docs.myai1.ai/"><img src="https://img.shields.io/badge/Docs-docs.myai1.ai-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://github.com/melivo/myaione-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/samuelmukoti/myai-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
   <a href="https://myai1.ai"><img src="https://img.shields.io/badge/Part%20of-MyAIOne%20Rig-blueviolet?style=for-the-badge" alt="Part of MyAIOne Rig"></a>
 </p>
 
@@ -27,7 +27,7 @@ Use any model you want — OpenAI, Anthropic, [OpenRouter](https://openrouter.ai
 ## Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/melivo/myaione-agent/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/samuelmukoti/myai-agent/main/scripts/install.sh | bash
 ```
 
 Works on Linux, macOS, WSL2, and Android via Termux. The installer handles the platform-specific setup for you.
@@ -42,7 +42,7 @@ After installation:
 
 ```bash
 source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-hermes              # start chatting!
+myai              # start chatting!
 ```
 
 ---
@@ -50,18 +50,18 @@ hermes              # start chatting!
 ## Getting Started
 
 ```bash
-hermes              # Interactive CLI — start a conversation
-hermes model        # Choose your LLM provider and model
-hermes tools        # Configure which tools are enabled
-hermes config set   # Set individual config values
-hermes gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-hermes setup        # Run the full setup wizard (configures everything at once)
-hermes claw migrate # Migrate from OpenClaw (if coming from OpenClaw)
-hermes update       # Update to the latest version
-hermes doctor       # Diagnose any issues
+myai              # Interactive CLI — start a conversation
+myai model        # Choose your LLM provider and model
+myai tools        # Configure which tools are enabled
+myai config set   # Set individual config values
+myai gateway      # Start the messaging gateway (Telegram, Discord, etc.)
+myai setup        # Run the full setup wizard (configures everything at once)
+myai claw migrate # Migrate from OpenClaw (if coming from OpenClaw)
+myai update       # Update to the latest version
+myai doctor       # Diagnose any issues
 ```
 
-📖 **[Full documentation →](https://hermes-agent.nousresearch.com/docs/)**
+📖 **[Full documentation →](https://docs.myai1.ai/)**
 
 ## CLI vs Messaging Quick Reference
 
@@ -79,31 +79,31 @@ MyAIOne Agent has two entry points: start the terminal UI with `myai`, or run th
 | Interrupt current work | `Ctrl+C` or send a new message | `/stop` or send a new message |
 | Platform-specific status | `/platforms` | `/status`, `/sethome` |
 
-For the full command lists, see the [CLI guide](https://hermes-agent.nousresearch.com/docs/user-guide/cli) and the [Messaging Gateway guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging).
+For the full command lists, see the [CLI guide](https://docs.myai1.ai/user-guide/cli) and the [Messaging Gateway guide](https://docs.myai1.ai/user-guide/messaging).
 
 ---
 
 ## Documentation
 
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**:
+All documentation lives at **[docs.myai1.ai](https://docs.myai1.ai/)**:
 
 | Section | What's Covered |
 |---------|---------------|
-| [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) | Install → setup → first conversation in 2 minutes |
-| [CLI Usage](https://hermes-agent.nousresearch.com/docs/user-guide/cli) | Commands, keybindings, personalities, sessions |
-| [Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) | Config file, providers, models, all options |
-| [Messaging Gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
-| [Security](https://hermes-agent.nousresearch.com/docs/user-guide/security) | Command approval, DM pairing, container isolation |
-| [Tools & Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools) | 40+ tools, toolset system, terminal backends |
-| [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) | Procedural memory, Skills Hub, creating skills |
-| [Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory) | Persistent memory, user profiles, best practices |
-| [MCP Integration](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) | Connect any MCP server for extended capabilities |
-| [Cron Scheduling](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron) | Scheduled tasks with platform delivery |
-| [Context Files](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) | Project context that shapes every conversation |
-| [Architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture) | Project structure, agent loop, key classes |
-| [Contributing](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) | Development setup, PR process, code style |
-| [CLI Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands) | All commands and flags |
-| [Environment Variables](https://hermes-agent.nousresearch.com/docs/reference/environment-variables) | Complete env var reference |
+| [Quickstart](https://docs.myai1.ai/getting-started/quickstart) | Install → setup → first conversation in 2 minutes |
+| [CLI Usage](https://docs.myai1.ai/user-guide/cli) | Commands, keybindings, personalities, sessions |
+| [Configuration](https://docs.myai1.ai/user-guide/configuration) | Config file, providers, models, all options |
+| [Messaging Gateway](https://docs.myai1.ai/user-guide/messaging) | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
+| [Security](https://docs.myai1.ai/user-guide/security) | Command approval, DM pairing, container isolation |
+| [Tools & Toolsets](https://docs.myai1.ai/user-guide/features/tools) | 40+ tools, toolset system, terminal backends |
+| [Skills System](https://docs.myai1.ai/user-guide/features/skills) | Procedural memory, Skills Hub, creating skills |
+| [Memory](https://docs.myai1.ai/user-guide/features/memory) | Persistent memory, user profiles, best practices |
+| [MCP Integration](https://docs.myai1.ai/user-guide/features/mcp) | Connect any MCP server for extended capabilities |
+| [Cron Scheduling](https://docs.myai1.ai/user-guide/features/cron) | Scheduled tasks with platform delivery |
+| [Context Files](https://docs.myai1.ai/user-guide/features/context-files) | Project context that shapes every conversation |
+| [Architecture](https://docs.myai1.ai/developer-guide/architecture) | Project structure, agent loop, key classes |
+| [Contributing](https://docs.myai1.ai/developer-guide/contributing) | Development setup, PR process, code style |
+| [CLI Reference](https://docs.myai1.ai/reference/cli-commands) | All commands and flags |
+| [Environment Variables](https://docs.myai1.ai/reference/environment-variables) | Complete env var reference |
 
 ---
 
@@ -116,10 +116,10 @@ If you're coming from OpenClaw, MyAIOne Agent can automatically import your sett
 **Anytime after install:**
 
 ```bash
-hermes claw migrate              # Interactive migration (full preset)
-hermes claw migrate --dry-run    # Preview what would be migrated
-hermes claw migrate --preset user-data   # Migrate without secrets
-hermes claw migrate --overwrite  # Overwrite existing conflicts
+myai claw migrate              # Interactive migration (full preset)
+myai claw migrate --dry-run    # Preview what would be migrated
+myai claw migrate --preset user-data   # Migrate without secrets
+myai claw migrate --overwrite  # Overwrite existing conflicts
 ```
 
 What gets imported:
@@ -132,7 +132,7 @@ What gets imported:
 - **TTS assets** — workspace audio files
 - **Workspace instructions** — AGENTS.md (with `--workspace-target`)
 
-See `hermes claw migrate --help` for all options, or use the `openclaw-migration` skill for an interactive agent-guided migration with dry-run previews.
+See `myai claw migrate --help` for all options, or use the `openclaw-migration` skill for an interactive agent-guided migration with dry-run previews.
 
 ---
 
@@ -143,7 +143,7 @@ We welcome contributions! See the [Contributing Guide](https://docs.myai1.ai/dev
 Quick start for contributors — clone and go with `setup-hermes.sh`:
 
 ```bash
-git clone https://github.com/melivo/myaione-agent.git
+git clone https://github.com/samuelmukoti/myai-agent.git
 cd myaione-agent
 ./setup-hermes.sh     # installs uv, creates venv, installs .[all], symlinks ~/.local/bin/myai
 ./hermes              # auto-detects the venv (compat wrapper; calls myai)
@@ -171,8 +171,8 @@ python -m pytest tests/ -q
 
 - 🌐 [myai1.ai](https://myai1.ai) — MyAIOne Rig home
 - 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/melivo/myaione-agent/issues)
-- 💡 [Discussions](https://github.com/melivo/myaione-agent/discussions)
+- 🐛 [Issues](https://github.com/samuelmukoti/myai-agent/issues)
+- 💡 [Discussions](https://github.com/samuelmukoti/myai-agent/discussions)
 - ⬆ Upstream: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) — the agent core this is forked from.
 
 ---

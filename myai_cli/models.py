@@ -542,6 +542,7 @@ class ProviderEntry(NamedTuple):
 
 
 CANONICAL_PROVIDERS: list[ProviderEntry] = [
+    ProviderEntry("myaione",        "MyAIOne Inference",        "MyAIOne Inference (api.myai1.ai — local qwen3 + proxied models; auth via myaidev-method login)"),
     ProviderEntry("openrouter",     "OpenRouter",               "OpenRouter (100+ models, pay-per-use)"),
     ProviderEntry("anthropic",      "Anthropic",                "Anthropic (Claude models — API key or Claude Code)"),
     ProviderEntry("gemini",         "Google AI Studio",         "Google AI Studio (Gemini models — OpenAI-compatible endpoint)"),

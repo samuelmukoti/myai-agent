@@ -105,6 +105,18 @@ class ProviderConfig:
 
 
 PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
+    "myaione": ProviderConfig(
+        id="myaione",
+        name="MyAIOne Inference",
+        auth_type="api_key",
+        # OpenAI-compatible endpoint at ``api.myai1.ai``.  Users obtain keys
+        # via ``myaidev-method login`` (which exchanges the session token
+        # for a ``myai-<64>`` inference key and caches it in
+        # ``~/.myai/.env``); manual key pasting also works.
+        inference_base_url="https://api.myai1.ai/v1",
+        api_key_env_vars=("MYAIONE_API_KEY",),
+        base_url_env_var="MYAIONE_BASE_URL",
+    ),
     "nous": ProviderConfig(
         id="nous",
         name="Nous Portal",

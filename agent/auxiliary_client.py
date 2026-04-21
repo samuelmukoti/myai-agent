@@ -183,6 +183,7 @@ NOUS_EXTRA_BODY = {"tags": ["product=hermes-agent"]}
 auxiliary_is_nous: bool = False
 
 # Default auxiliary models per provider
+_MYAIONE_MODEL = "qwen3.6-35b-a3b"
 _OPENROUTER_MODEL = "google/gemini-3-flash-preview"
 _NOUS_MODEL = "google/gemini-3-flash-preview"
 _NOUS_FREE_TIER_VISION_MODEL = "xiaomi/mimo-v2-omni"
@@ -812,6 +813,29 @@ def _resolve_api_key_provider() -> Tuple[Optional[OpenAI], Optional[str]]:
 
 
 
+def _try_myaione() -> Tuple[Optional[OpenAI], Optional[str]]:
+    """Resolve the MyAIOne Inference provider (api.myai1.ai).
+
+    Credentials are read from ``MYAIONE_API_KEY`` (loaded from
+    ``~/.myai/.env`` on startup).  Returns ``(None, None)`` when no key is
+    configured so the next provider in the chain gets a chance — this is
+    the first provider tried, so it only "wins" on a successful key read.
+    """
+    try:
+        from myai_cli.providers.myaione import get_myaione_api_key, myaione_base_url
+    except ImportError:
+        return None, None
+
+    api_key = get_myaione_api_key()
+    if not api_key:
+        return None, None
+
+    base_url = myaione_base_url()
+    model = os.getenv("MYAIONE_MODEL", "").strip() or _MYAIONE_MODEL
+    logger.debug("Auxiliary client: MyAIOne Inference (%s)", model)
+    return OpenAI(api_key=api_key, base_url=base_url), model
+
+
 def _try_openrouter() -> Tuple[Optional[OpenAI], Optional[str]]:
     pool_present, entry = _select_pool_entry("openrouter")
     if pool_present:
@@ -1105,6 +1129,7 @@ def _try_anthropic() -> Tuple[Optional[Any], Optional[str]]:
 
 
 _AUTO_PROVIDER_LABELS = {
+    "_try_myaione": "myaione",
     "_try_openrouter": "openrouter",
     "_try_nous": "nous",
     "_try_custom_endpoint": "local/custom",
@@ -1137,6 +1162,9 @@ def _get_provider_chain() -> List[tuple]:
     on the ``_try_*`` functions are picked up correctly.
     """
     return [
+        # MyAIOne Inference wins when MYAIONE_API_KEY is set — this is the
+        # default provider for MyAIOne Rig containers.
+        ("myaione", _try_myaione),
         ("openrouter", _try_openrouter),
         ("nous", _try_nous),
         ("local/custom", _try_custom_endpoint),

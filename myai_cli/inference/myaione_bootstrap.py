@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from myai_cli.providers.myaione import (
+from myai_cli.inference.myaione import (
     MYAIONE_API_KEY_ENV,
     MyaidevAuth,
     MyaidevAuthError,

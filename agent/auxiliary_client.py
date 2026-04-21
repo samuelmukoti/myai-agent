@@ -822,7 +822,7 @@ def _try_myaione() -> Tuple[Optional[OpenAI], Optional[str]]:
     the first provider tried, so it only "wins" on a successful key read.
     """
     try:
-        from myai_cli.providers.myaione import get_myaione_api_key, myaione_base_url
+        from myai_cli.inference.myaione import get_myaione_api_key, myaione_base_url
     except ImportError:
         return None, None
 

@@ -8427,7 +8427,7 @@ Examples:
         print()
 
         try:
-            from myai_cli.providers.myaione_bootstrap import run_onboarding
+            from myai_cli.inference.myaione_bootstrap import run_onboarding
         except ImportError as exc:
             print(f"error: onboarding bootstrap unavailable: {exc}", file=sys.stderr)
             sys.exit(1)

@@ -8417,36 +8417,46 @@ Examples:
         cmd_version(args)
         return
 
-    # Handle --onboarding: run setup wizard, then drop into TUI on success.
-    # Used by DevStation welcome.sh so a fresh shell can opt into the full
-    # first-run flow with one keystroke.
+    # Handle --onboarding: auto-configure MyAIOne Inference (the default
+    # provider for MyAIOne Rig containers), then drop into the TUI.  Falls
+    # back to the legacy `myai setup` wizard only if the MyAIOne bootstrap
+    # isn't applicable (no myaidev-method login AND no MYAIONE_API_KEY).
     if getattr(args, "onboarding", False):
-        try:
-            from myai_cli.setup import run_setup_wizard
-        except ImportError:
-            print("error: onboarding requires the myai_cli.setup module", file=sys.stderr)
-            sys.exit(1)
-
         print()
         print("━━━ MyAIOne Agent · Guided Onboarding ━━━")
         print()
-        print("Running the setup wizard, then dropping you into the agent.")
-        print("Ctrl+C at any point exits cleanly.")
-        print()
 
-        wizard_args = argparse.Namespace(
-            reset=False,
-            non_interactive=False,
-            section=None,
-        )
         try:
-            run_setup_wizard(wizard_args)
+            from myai_cli.providers.myaione_bootstrap import run_onboarding
+        except ImportError as exc:
+            print(f"error: onboarding bootstrap unavailable: {exc}", file=sys.stderr)
+            sys.exit(1)
+
+        try:
+            rc = run_onboarding()
         except KeyboardInterrupt:
             print("\nonboarding cancelled — re-run `myai --onboarding` when you're ready.")
             sys.exit(130)
-        except Exception as e:
-            print(f"\nsetup wizard failed: {e}", file=sys.stderr)
-            sys.exit(1)
+
+        if rc == 3:
+            # No myaidev-method login and no MYAIONE_API_KEY.  Offer the
+            # legacy setup wizard so users without a MyAIOne subscription
+            # can still configure an alternative provider.
+            print()
+            print("  Falling back to the generic setup wizard so you can pick a different provider.")
+            print()
+            try:
+                from myai_cli.setup import run_setup_wizard
+                wizard_args = argparse.Namespace(reset=False, non_interactive=False, section=None)
+                run_setup_wizard(wizard_args)
+            except KeyboardInterrupt:
+                print("\nsetup cancelled — re-run `myai setup` when you're ready.")
+                sys.exit(130)
+            except Exception as exc:  # noqa: BLE001 — surface the actual error
+                print(f"\nsetup wizard failed: {exc}", file=sys.stderr)
+                sys.exit(1)
+        elif rc != 0:
+            sys.exit(rc)
 
         # Force the default chat dispatch so the TUI launches with the fresh config.
         args.command = None

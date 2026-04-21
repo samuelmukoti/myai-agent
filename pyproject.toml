@@ -8,8 +8,31 @@ version = "0.10.0"
 description = "MyAIOne Agent — the self-improving AI agent that creates skills from experience, improves them during use, and runs anywhere"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Melivo" }]
+authors = [{ name = "Samuel Mukoti", email = "samuelm@openmy.ai" }]
 license = { text = "MIT" }
+keywords = [
+  "ai", "agent", "llm", "cli", "tui", "myaione", "hermes",
+  "qwen", "openai", "anthropic", "openrouter",
+  "skills", "tool-calling", "self-improving", "mcp",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Environment :: Console :: Curses",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development",
+  "Topic :: Utilities",
+]
+
 dependencies = [
   # Core — pinned to known-good ranges to limit supply chain attack surface
   "openai>=2.21.0,<3",
@@ -35,6 +58,13 @@ dependencies = [
   # Skills Hub (GitHub App JWT auth — optional, only needed for bot identity)
   "PyJWT[crypto]>=2.12.0,<3",  # CVE-2026-32597
 ]
+
+[project.urls]
+Homepage = "https://myai1.ai"
+Documentation = "https://docs.myai1.ai"
+Repository = "https://github.com/samuelmukoti/myai-agent"
+Issues = "https://github.com/samuelmukoti/myai-agent/issues"
+"Upstream (Hermes Agent)" = "https://github.com/NousResearch/hermes-agent"
 
 [project.optional-dependencies]
 modal = ["modal>=1.0.0,<2"]

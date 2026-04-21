@@ -1,9 +1,12 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import { getMyaiHome } from './myaiHome.js'
+
 const MAX = 1000
-const dir = process.env.HERMES_HOME ?? join(homedir(), '.hermes')
+const dir = getMyaiHome()
+// Filename kept as `.hermes_history` so existing users don't lose shell history
+// after the dir-rename migration — the file migrates along with its parent.
 const file = join(dir, '.hermes_history')
 
 let cache: string[] | null = null

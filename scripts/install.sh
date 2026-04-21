@@ -28,7 +28,11 @@ BOLD='\033[1m'
 # Configuration
 REPO_URL_SSH="git@github.com:samuelmukoti/myai-agent.git"
 REPO_URL_HTTPS="https://github.com/samuelmukoti/myai-agent.git"
-HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
+MYAI_HOME="${MYAI_HOME:-${HERMES_HOME:-$HOME/.myai}}"
+# Back-compat export so existing scripts / hooks that still read HERMES_HOME
+# keep working during the ~/.hermes → ~/.myai transition.
+HERMES_HOME="$MYAI_HOME"
+export MYAI_HOME HERMES_HOME
 INSTALL_DIR="${HERMES_INSTALL_DIR:-$HERMES_HOME/hermes-agent}"
 PYTHON_VERSION="3.11"
 NODE_VERSION="22"
@@ -66,7 +70,9 @@ while [[ $# -gt 0 ]]; do
             INSTALL_DIR="$2"
             shift 2
             ;;
-        --hermes-home)
+        --myai-home|--hermes-home)
+            # --hermes-home kept as an alias for scripts pinned to the old name.
+            MYAI_HOME="$2"
             HERMES_HOME="$2"
             shift 2
             ;;
@@ -79,8 +85,9 @@ while [[ $# -gt 0 ]]; do
             echo "  --no-venv      Don't create virtual environment"
             echo "  --skip-setup   Skip interactive setup wizard"
             echo "  --branch NAME  Git branch to install (default: main)"
-            echo "  --dir PATH     Installation directory (default: ~/.hermes/hermes-agent)"
-            echo "  --hermes-home PATH  Data directory (default: ~/.hermes, or \$HERMES_HOME)"
+            echo "  --dir PATH     Installation directory (default: ~/.myai/myaione-agent)"
+            echo "  --myai-home PATH    Data directory (default: ~/.myai, or \$MYAI_HOME)"
+            echo "                      (--hermes-home accepted as a legacy alias)"
             echo "  -h, --help     Show this help"
             exit 0
             ;;
@@ -487,7 +494,7 @@ install_node() {
         return 0
     fi
 
-    log_info "Extracting to ~/.hermes/node/..."
+    log_info "Extracting to ~/.myai/node/..."
     if [[ "$tarball_name" == *.tar.xz ]]; then
         tar xf "$tmp_dir/$tarball_name" -C "$tmp_dir"
     else
@@ -504,7 +511,7 @@ install_node() {
         return 0
     fi
 
-    # Place into ~/.hermes/node/ and symlink binaries to ~/.local/bin/
+    # Place into ~/.myai/node/ and symlink binaries to ~/.local/bin/
     rm -rf "$HERMES_HOME/node"
     mkdir -p "$HERMES_HOME"
     mv "$extracted_dir" "$HERMES_HOME/node"
@@ -519,7 +526,7 @@ install_node() {
 
     local installed_ver
     installed_ver=$("$HERMES_HOME/node/bin/node" --version 2>/dev/null)
-    log_success "Node.js $installed_ver installed to ~/.hermes/node/"
+    log_success "Node.js $installed_ver installed to ~/.myai/node/"
     HAS_NODE=true
 }
 
@@ -1051,30 +1058,30 @@ setup_path() {
 copy_config_templates() {
     log_info "Setting up configuration files..."
 
-    # Create ~/.hermes directory structure (config at top level, code in subdir)
+    # Create ~/.myai directory structure (config at top level, code in subdir)
     mkdir -p "$HERMES_HOME"/{cron,sessions,logs,pairing,hooks,image_cache,audio_cache,memories,skills,whatsapp/session}
 
-    # Create .env at ~/.hermes/.env (top level, easy to find)
+    # Create .env at ~/.myai/.env (top level, easy to find)
     if [ ! -f "$HERMES_HOME/.env" ]; then
         if [ -f "$INSTALL_DIR/.env.example" ]; then
             cp "$INSTALL_DIR/.env.example" "$HERMES_HOME/.env"
-            log_success "Created ~/.hermes/.env from template"
+            log_success "Created ~/.myai/.env from template"
         else
             touch "$HERMES_HOME/.env"
-            log_success "Created ~/.hermes/.env"
+            log_success "Created ~/.myai/.env"
         fi
     else
-        log_info "~/.hermes/.env already exists, keeping it"
+        log_info "~/.myai/.env already exists, keeping it"
     fi
 
-    # Create config.yaml at ~/.hermes/config.yaml (top level, easy to find)
+    # Create config.yaml at ~/.myai/config.yaml (top level, easy to find)
     if [ ! -f "$HERMES_HOME/config.yaml" ]; then
         if [ -f "$INSTALL_DIR/cli-config.yaml.example" ]; then
             cp "$INSTALL_DIR/cli-config.yaml.example" "$HERMES_HOME/config.yaml"
-            log_success "Created ~/.hermes/config.yaml from template"
+            log_success "Created ~/.myai/config.yaml from template"
         fi
     else
-        log_info "~/.hermes/config.yaml already exists, keeping it"
+        log_info "~/.myai/config.yaml already exists, keeping it"
     fi
 
     # Create SOUL.md if it doesn't exist (global persona file)
@@ -1096,20 +1103,20 @@ This file is loaded fresh each message -- no restart needed.
 Delete the contents (or this file) to use the default personality.
 -->
 SOUL_EOF
-        log_success "Created ~/.hermes/SOUL.md (edit to customize personality)"
+        log_success "Created ~/.myai/SOUL.md (edit to customize personality)"
     fi
 
-    log_success "Configuration directory ready: ~/.hermes/"
+    log_success "Configuration directory ready: ~/.myai/"
 
-    # Seed bundled skills into ~/.hermes/skills/ (manifest-based, one-time per skill)
-    log_info "Syncing bundled skills to ~/.hermes/skills/ ..."
+    # Seed bundled skills into ~/.myai/skills/ (manifest-based, one-time per skill)
+    log_info "Syncing bundled skills to ~/.myai/skills/ ..."
     if "$INSTALL_DIR/venv/bin/python" "$INSTALL_DIR/tools/skills_sync.py" 2>/dev/null; then
-        log_success "Skills synced to ~/.hermes/skills/"
+        log_success "Skills synced to ~/.myai/skills/"
     else
         # Fallback: simple directory copy if Python sync fails
         if [ -d "$INSTALL_DIR/skills" ] && [ ! "$(ls -A "$HERMES_HOME/skills/" 2>/dev/null | grep -v '.bundled_manifest')" ]; then
             cp -r "$INSTALL_DIR/skills/"* "$HERMES_HOME/skills/" 2>/dev/null || true
-            log_success "Skills copied to ~/.hermes/skills/"
+            log_success "Skills copied to ~/.myai/skills/"
         fi
     fi
 }
@@ -1326,7 +1333,7 @@ maybe_start_gateway() {
             fi
             nohup $HERMES_CMD gateway > "$HERMES_HOME/logs/gateway.log" 2>&1 &
             GATEWAY_PID=$!
-            log_success "Gateway started (PID $GATEWAY_PID). Logs: ~/.hermes/logs/gateway.log"
+            log_success "Gateway started (PID $GATEWAY_PID). Logs: ~/.myai/logs/gateway.log"
             log_info "To stop: kill $GATEWAY_PID"
             log_info "To restart later: hermes gateway"
             if [ "$DISTRO" = "termux" ]; then
@@ -1348,12 +1355,12 @@ print_success() {
     echo ""
 
     # Show file locations
-    echo -e "${CYAN}${BOLD}📁 Your files (all in ~/.hermes/):${NC}"
+    echo -e "${CYAN}${BOLD}📁 Your files (all in ~/.myai/):${NC}"
     echo ""
-    echo -e "   ${YELLOW}Config:${NC}    ~/.hermes/config.yaml"
-    echo -e "   ${YELLOW}API Keys:${NC}  ~/.hermes/.env"
-    echo -e "   ${YELLOW}Data:${NC}      ~/.hermes/cron/, sessions/, logs/"
-    echo -e "   ${YELLOW}Code:${NC}      ~/.hermes/hermes-agent/"
+    echo -e "   ${YELLOW}Config:${NC}    ~/.myai/config.yaml"
+    echo -e "   ${YELLOW}API Keys:${NC}  ~/.myai/.env"
+    echo -e "   ${YELLOW}Data:${NC}      ~/.myai/cron/, sessions/, logs/"
+    echo -e "   ${YELLOW}Code:${NC}      ~/.myai/myaione-agent/"
     echo ""
 
     echo -e "${CYAN}─────────────────────────────────────────────────────────${NC}"

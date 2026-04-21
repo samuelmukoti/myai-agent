@@ -1162,11 +1162,14 @@ def _hermes_home_for_target_user(target_home_dir: str) -> str:
       /opt/custom-hermes               → /opt/custom-hermes  (kept as-is)
     """
     current_hermes = get_hermes_home().resolve()
-    current_default = (Path.home() / ".hermes").resolve()
-    target_default = Path(target_home_dir) / ".hermes"
+    # Accept either the new ~/.myai or the legacy ~/.hermes as "the default"
+    # for this user, so gateway migrations continue to work across the rename.
+    home = Path.home()
+    default_candidates = [(home / ".myai").resolve(), (home / ".hermes").resolve()]
+    target_default = Path(target_home_dir) / ".myai"
 
-    # Default ~/.hermes → remap to target user's default
-    if current_hermes == current_default:
+    # Default ~/.myai (or legacy ~/.hermes) → remap to target user's default
+    if current_hermes in default_candidates:
         return str(target_default)
 
     # Profile or subdir of ~/.hermes → preserve the relative structure

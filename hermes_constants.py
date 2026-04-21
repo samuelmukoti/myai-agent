@@ -1,47 +1,120 @@
-"""Shared constants for Hermes Agent.
+"""Shared constants for MyAIOne Agent.
 
 Import-safe module with no dependencies — can be imported from anywhere
 without risk of circular imports.
+
+Home-directory resolution
+-------------------------
+The agent stores its state under ``~/.myai`` (new default). Legacy installs
+using ``~/.hermes`` are migrated automatically on first resolve. The env-var
+fallback chain for power users is:
+
+    $MYAI_HOME → $HERMES_HOME → ~/.myai → (migrated) ~/.hermes → ~/.myai
+
+``get_hermes_home()`` is kept as the public name for back-compat with the
+~240 call sites throughout the codebase; a ``get_myai_home()`` alias is
+exposed for new code.
 """
 
 import os
 from pathlib import Path
 
 
-def get_hermes_home() -> Path:
-    """Return the Hermes home directory (default: ~/.hermes).
+# Module-level guard so the ~/.hermes → ~/.myai migration is attempted once
+# per process.  Migration is best-effort — failures are swallowed so the
+# agent still boots with whichever dir exists.
+_migration_attempted = False
 
-    Reads HERMES_HOME env var, falls back to ~/.hermes.
+
+def _maybe_migrate_legacy_home(new_home: Path, legacy_home: Path) -> None:
+    """One-shot: if ``~/.hermes`` exists and ``~/.myai`` doesn't, rename and
+    leave a symlink at the legacy path so any external tool (shell aliases,
+    cron jobs written pre-rename) keeps working.  Never destructive.
+    """
+    global _migration_attempted
+    if _migration_attempted:
+        return
+    _migration_attempted = True
+
+    try:
+        if not legacy_home.exists() or legacy_home.is_symlink():
+            return
+        if new_home.exists():
+            return
+        os.rename(str(legacy_home), str(new_home))
+        try:
+            os.symlink(str(new_home), str(legacy_home), target_is_directory=True)
+        except OSError:
+            # symlink creation can fail on some Windows/cross-fs setups —
+            # rename already succeeded, so the agent works without the
+            # back-compat symlink.
+            pass
+    except OSError:
+        # Any failure (permissions, cross-mount, concurrent rename) is
+        # non-fatal: the agent falls back to whichever dir is readable.
+        pass
+
+
+def get_myai_home() -> Path:
+    """Return the MyAIOne home directory (default: ``~/.myai``).
+
+    Resolution order:
+        1. ``$MYAI_HOME`` env var
+        2. ``$HERMES_HOME`` env var (back-compat — old installers & users)
+        3. ``~/.myai`` if it exists on disk
+        4. ``~/.hermes`` if it exists (triggers one-time migration → ``~/.myai``)
+        5. ``~/.myai`` as the new-install default
+
     This is the single source of truth — all other copies should import this.
     """
-    val = os.environ.get("HERMES_HOME", "").strip()
-    return Path(val) if val else Path.home() / ".hermes"
+    for env_var in ("MYAI_HOME", "HERMES_HOME"):
+        val = os.environ.get(env_var, "").strip()
+        if val:
+            return Path(val)
+
+    home = Path.home()
+    new_home = home / ".myai"
+    legacy_home = home / ".hermes"
+
+    if new_home.exists():
+        return new_home
+    if legacy_home.exists():
+        _maybe_migrate_legacy_home(new_home, legacy_home)
+        # After migration ``new_home`` is the dir; before it, fall back to
+        # legacy so a failed migration still lets the agent find existing state.
+        return new_home if new_home.exists() else legacy_home
+    return new_home
+
+
+# Back-compat alias — 200+ call sites import this by name.
+get_hermes_home = get_myai_home
 
 
 def get_default_hermes_root() -> Path:
-    """Return the root Hermes directory for profile-level operations.
+    """Return the root MyAIOne directory for profile-level operations.
 
-    In standard deployments this is ``~/.hermes``.
+    In standard deployments this is ``~/.myai`` (or the legacy ``~/.hermes``
+    if that's what the system was installed with).
 
-    In Docker or custom deployments where ``HERMES_HOME`` points outside
-    ``~/.hermes`` (e.g. ``/opt/data``), returns ``HERMES_HOME`` directly
-    — that IS the root.
+    In Docker or custom deployments where ``MYAI_HOME`` / ``HERMES_HOME``
+    points outside the native home (e.g. ``/opt/data``), returns that path
+    directly — that IS the root.
 
-    In profile mode where ``HERMES_HOME`` is ``<root>/profiles/<name>``,
-    returns ``<root>`` so that ``profile list`` can see all profiles.
-    Works both for standard (``~/.hermes/profiles/coder``) and Docker
-    (``/opt/data/profiles/coder``) layouts.
+    In profile mode where ``*_HOME`` is ``<root>/profiles/<name>``, returns
+    ``<root>`` so that ``profile list`` can see all profiles.
 
     Import-safe — no dependencies beyond stdlib.
     """
-    native_home = Path.home() / ".hermes"
-    env_home = os.environ.get("HERMES_HOME", "")
+    # Resolve via get_myai_home so the ~/.hermes migration (if applicable)
+    # has already happened and we see the post-migration layout.
+    native_home = get_myai_home()
+    env_home = os.environ.get("MYAI_HOME", "") or os.environ.get("HERMES_HOME", "")
     if not env_home:
         return native_home
     env_path = Path(env_home)
     try:
         env_path.resolve().relative_to(native_home.resolve())
-        # HERMES_HOME is under ~/.hermes (normal or profile mode)
+        # env var points inside native home (normal or profile mode)
         return native_home
     except ValueError:
         pass
@@ -53,7 +126,7 @@ def get_default_hermes_root() -> Path:
     if env_path.parent.name == "profiles":
         return env_path.parent.parent
 
-    # Not a profile path — HERMES_HOME itself is the root
+    # Not a profile path — the env-var path itself is the root
     return env_path
 
 
@@ -61,31 +134,35 @@ def get_optional_skills_dir(default: Path | None = None) -> Path:
     """Return the optional-skills directory, honoring package-manager wrappers.
 
     Packaged installs may ship ``optional-skills`` outside the Python package
-    tree and expose it via ``HERMES_OPTIONAL_SKILLS``.
+    tree and expose it via ``MYAI_OPTIONAL_SKILLS`` (or the legacy
+    ``HERMES_OPTIONAL_SKILLS``).
     """
-    override = os.getenv("HERMES_OPTIONAL_SKILLS", "").strip()
+    override = (
+        os.getenv("MYAI_OPTIONAL_SKILLS", "").strip()
+        or os.getenv("HERMES_OPTIONAL_SKILLS", "").strip()
+    )
     if override:
         return Path(override)
     if default is not None:
         return default
-    return get_hermes_home() / "optional-skills"
+    return get_myai_home() / "optional-skills"
 
 
 def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
-    """Resolve a Hermes subdirectory with backward compatibility.
+    """Resolve a MyAIOne subdirectory with backward compatibility.
 
     New installs get the consolidated layout (e.g. ``cache/images``).
     Existing installs that already have the old path (e.g. ``image_cache``)
     keep using it — no migration required.
 
     Args:
-        new_subpath: Preferred path relative to HERMES_HOME (e.g. ``"cache/images"``).
-        old_name: Legacy path relative to HERMES_HOME (e.g. ``"image_cache"``).
+        new_subpath: Preferred path relative to the home dir (e.g. ``"cache/images"``).
+        old_name: Legacy path relative to the home dir (e.g. ``"image_cache"``).
 
     Returns:
         Absolute ``Path`` — old location if it exists on disk, otherwise the new one.
     """
-    home = get_hermes_home()
+    home = get_myai_home()
     old_path = home / old_name
     if old_path.exists():
         return old_path
@@ -93,31 +170,36 @@ def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
 
 
 def display_hermes_home() -> str:
-    """Return a user-friendly display string for the current HERMES_HOME.
+    """Return a user-friendly display string for the current home dir.
 
     Uses ``~/`` shorthand for readability::
 
-        default:  ``~/.hermes``
-        profile:  ``~/.hermes/profiles/coder``
-        custom:   ``/opt/hermes-custom``
+        default:  ``~/.myai``
+        profile:  ``~/.myai/profiles/coder``
+        legacy:   ``~/.hermes`` (symlinked to ``~/.myai`` post-migration)
+        custom:   ``/opt/myai-custom``
 
     Use this in **user-facing** print/log messages instead of hardcoding
-    ``~/.hermes``.  For code that needs a real ``Path``, use
-    :func:`get_hermes_home` instead.
+    ``~/.myai``.  For code that needs a real ``Path``, use
+    :func:`get_myai_home` instead.
     """
-    home = get_hermes_home()
+    home = get_myai_home()
     try:
         return "~/" + str(home.relative_to(Path.home()))
     except ValueError:
         return str(home)
 
 
+# Back-compat alias.
+display_myai_home = display_hermes_home
+
+
 def get_subprocess_home() -> str | None:
     """Return a per-profile HOME directory for subprocesses, or None.
 
-    When ``{HERMES_HOME}/home/`` exists on disk, subprocesses should use it
+    When ``{MYAI_HOME}/home/`` exists on disk, subprocesses should use it
     as ``HOME`` so system tools (git, ssh, gh, npm …) write their configs
-    inside the Hermes data directory instead of the OS-level ``/root`` or
+    inside the MyAIOne data directory instead of the OS-level ``/root`` or
     ``~/``.  This provides:
 
     * **Docker persistence** — tool configs land inside the persistent volume.
@@ -129,10 +211,10 @@ def get_subprocess_home() -> str | None:
     Activation is directory-based: if the ``home/`` subdirectory doesn't
     exist, returns ``None`` and behavior is unchanged.
     """
-    hermes_home = os.getenv("HERMES_HOME")
-    if not hermes_home:
+    myai_home = os.getenv("MYAI_HOME") or os.getenv("HERMES_HOME")
+    if not myai_home:
         return None
-    profile_home = os.path.join(hermes_home, "home")
+    profile_home = os.path.join(myai_home, "home")
     if os.path.isdir(profile_home):
         return profile_home
     return None
@@ -225,23 +307,18 @@ def is_container() -> bool:
 
 
 def get_config_path() -> Path:
-    """Return the path to ``config.yaml`` under HERMES_HOME.
-
-    Replaces the ``get_hermes_home() / "config.yaml"`` pattern repeated
-    in 7+ files (skill_utils.py, hermes_logging.py, hermes_time.py, etc.).
-    """
-    return get_hermes_home() / "config.yaml"
+    """Return the path to ``config.yaml`` under the MyAIOne home dir."""
+    return get_myai_home() / "config.yaml"
 
 
 def get_skills_dir() -> Path:
-    """Return the path to the skills directory under HERMES_HOME."""
-    return get_hermes_home() / "skills"
-
+    """Return the path to the skills directory under the MyAIOne home dir."""
+    return get_myai_home() / "skills"
 
 
 def get_env_path() -> Path:
-    """Return the path to the ``.env`` file under HERMES_HOME."""
-    return get_hermes_home() / ".env"
+    """Return the path to the ``.env`` file under the MyAIOne home dir."""
+    return get_myai_home() / ".env"
 
 
 # ─── Network Preferences ─────────────────────────────────────────────────────

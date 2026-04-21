@@ -1,4 +1,4 @@
-"""Tests for hermes_constants module."""
+"""Tests for myai_constants module."""
 
 import os
 from pathlib import Path
@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-import hermes_constants
-from hermes_constants import get_default_hermes_root, is_container
+import myai_constants
+from myai_constants import get_default_hermes_root, is_container
 
 
 class TestGetDefaultHermesRoot:
@@ -68,7 +68,7 @@ class TestIsContainer:
 
     def _reset_cache(self, monkeypatch):
         """Reset the cached detection result before each test."""
-        monkeypatch.setattr(hermes_constants, "_container_detected", None)
+        monkeypatch.setattr(myai_constants, "_container_detected", None)
 
     def test_detects_dockerenv(self, monkeypatch, tmp_path):
         """/.dockerenv triggers container detection."""
@@ -106,7 +106,7 @@ class TestIsContainer:
 
     def test_caches_result(self, monkeypatch):
         """Second call uses cached value without re-probing."""
-        monkeypatch.setattr(hermes_constants, "_container_detected", True)
+        monkeypatch.setattr(myai_constants, "_container_detected", True)
         assert is_container() is True
         # Even if we make os.path.exists return False, cached value wins
         monkeypatch.setattr(os.path, "exists", lambda p: False)

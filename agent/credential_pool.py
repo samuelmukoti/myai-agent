@@ -13,7 +13,7 @@ from dataclasses import dataclass, fields, replace
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import OPENROUTER_BASE_URL
+from myai_constants import OPENROUTER_BASE_URL
 import myai_cli.auth as auth_mod
 from myai_cli.auth import (
     CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS,

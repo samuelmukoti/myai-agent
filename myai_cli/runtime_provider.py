@@ -28,7 +28,7 @@ from myai_cli.auth import (
     has_usable_secret,
 )
 from myai_cli.config import get_compatible_custom_providers, load_config
-from hermes_constants import OPENROUTER_BASE_URL
+from myai_constants import OPENROUTER_BASE_URL
 
 
 def _normalize_custom_provider_name(value: str) -> str:

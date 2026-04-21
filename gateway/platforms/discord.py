@@ -3402,7 +3402,7 @@ if DISCORD_AVAILABLE:
 
             # Write response file
             try:
-                from hermes_constants import get_hermes_home
+                from myai_constants import get_hermes_home
                 home = get_hermes_home()
                 response_path = home / ".update_response"
                 tmp = response_path.with_suffix(".tmp")

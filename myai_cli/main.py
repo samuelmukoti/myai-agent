@@ -103,7 +103,7 @@ def _apply_profile_override() -> None:
     # 2. If no flag, check active_profile in the hermes root
     if profile_name is None:
         try:
-            from hermes_constants import get_default_hermes_root
+            from myai_constants import get_default_hermes_root
 
             active_path = get_default_hermes_root() / "active_profile"
             if active_path.exists():
@@ -156,7 +156,7 @@ load_hermes_dotenv(project_env=PROJECT_ROOT / ".env")
 # Initialize centralized file logging early — all `hermes` subcommands
 # (chat, setup, gateway, config, etc.) write to agent.log + errors.log.
 try:
-    from hermes_logging import setup_logging as _setup_logging
+    from myai_logging import setup_logging as _setup_logging
 
     _setup_logging(mode="cli")
 except Exception:
@@ -165,7 +165,7 @@ except Exception:
 # Apply IPv4 preference early, before any HTTP clients are created.
 try:
     from myai_cli.config import load_config as _load_config_early
-    from hermes_constants import apply_ipv4_preference as _apply_ipv4
+    from myai_constants import apply_ipv4_preference as _apply_ipv4
 
     _early_cfg = _load_config_early()
     _net = _early_cfg.get("network", {})
@@ -180,7 +180,7 @@ import time as _time
 from datetime import datetime
 
 from myai_cli import __version__, __release_date__
-from hermes_constants import OPENROUTER_BASE_URL
+from myai_constants import OPENROUTER_BASE_URL
 
 logger = logging.getLogger(__name__)
 
@@ -563,7 +563,7 @@ def _session_browse_picker(sessions: list) -> Optional[str]:
 def _resolve_last_session(source: str = "cli") -> Optional[str]:
     """Look up the most recent session ID for a source."""
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         db = SessionDB()
         sessions = db.search_sessions(source=source, limit=1)
@@ -695,7 +695,7 @@ def _resolve_session_by_name_or_id(name_or_id: str) -> Optional[str]:
     - Falls back to the other method if the first doesn't match.
     """
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         db = SessionDB()
 
@@ -722,7 +722,7 @@ def _print_tui_exit_summary(session_id: Optional[str]) -> None:
 
     db = None
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         db = SessionDB()
         session = db.get_session(target)
@@ -857,7 +857,7 @@ def _ensure_tui_node() -> None:
     if not helper.is_file():
         return
 
-    from hermes_constants import get_myai_home
+    from myai_constants import get_myai_home
     hermes_home = str(get_myai_home())
     try:
         # Helper writes logs to stderr; we ask bash to print `command -v node`
@@ -3825,7 +3825,7 @@ def _run_anthropic_oauth_flow(save_env_value):
         ):
             use_anthropic_claude_code_credentials(save_fn=save_env_value)
             print("  ✓ Claude Code credentials linked.")
-            from hermes_constants import display_hermes_home as _dhh_fn
+            from myai_constants import display_hermes_home as _dhh_fn
 
             print(
                 f"    MyAIOne will use Claude's credential store directly instead of copying a setup-token into {_dhh_fn()}/.env."
@@ -4199,7 +4199,7 @@ def _gateway_prompt(prompt_text: str, default: str = "", timeout: float = 300.0)
     """
     import json as _json
     import uuid as _uuid
-    from hermes_constants import get_hermes_home
+    from myai_constants import get_hermes_home
 
     home = get_hermes_home()
     prompt_path = home / ".update_prompt.json"
@@ -4699,7 +4699,7 @@ def _count_commits_between(git_cmd: list[str], cwd: Path, base: str, head: str) 
 
 def _should_skip_upstream_prompt() -> bool:
     """Check if user previously declined to add upstream."""
-    from hermes_constants import get_hermes_home
+    from myai_constants import get_hermes_home
 
     return (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).exists()
 
@@ -4707,7 +4707,7 @@ def _should_skip_upstream_prompt() -> bool:
 def _mark_skip_upstream_prompt():
     """Create marker file to skip future upstream prompts."""
     try:
-        from hermes_constants import get_hermes_home
+        from myai_constants import get_hermes_home
 
         (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).touch()
     except Exception:
@@ -4854,7 +4854,7 @@ def _invalidate_update_cache():
     """
     homes = []
     # Default profile home (Docker-aware — uses /opt/data in Docker)
-    from hermes_constants import get_default_hermes_root
+    from myai_constants import get_default_hermes_root
 
     default_home = get_default_hermes_root()
     homes.append(default_home)
@@ -5404,7 +5404,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 
         # Clear stale .pyc bytecode cache — prevents ImportError on gateway
         # restart when updated source references names that didn't exist in
-        # the old bytecode (e.g. get_hermes_home added to hermes_constants).
+        # the old bytecode (e.g. get_hermes_home added to myai_constants).
         removed = _clear_bytecode_cache(PROJECT_ROOT)
         if removed:
             print(
@@ -5453,12 +5453,12 @@ def _cmd_update_impl(args, gateway_mode: bool):
         print("✓ Code updated!")
 
         # After git pull, source files on disk are newer than cached Python
-        # modules in this process.  Reload hermes_constants so that any lazy
+        # modules in this process.  Reload myai_constants so that any lazy
         # import executed below (skills sync, gateway restart) sees new
         # attributes like display_hermes_home() added since the last release.
         try:
             import importlib
-            import hermes_constants as _hc
+            import myai_constants as _hc
 
             importlib.reload(_hc)
         except Exception:
@@ -5935,7 +5935,7 @@ def cmd_profile(args):
         _is_wrapper_dir_in_path,
         _get_wrapper_dir,
     )
-    from hermes_constants import display_hermes_home
+    from myai_constants import display_hermes_home
 
     action = getattr(args, "profile_action", None)
 
@@ -7541,7 +7541,7 @@ Examples:
             print("\n  ✓ Memory provider: built-in only")
             print("  Saved to config.yaml\n")
         elif sub == "reset":
-            from hermes_constants import get_hermes_home, display_hermes_home
+            from myai_constants import get_hermes_home, display_hermes_home
 
             mem_dir = get_hermes_home() / "memories"
             target = getattr(args, "target", "all")
@@ -7817,7 +7817,7 @@ Examples:
         import json as _json
 
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
 
             db = SessionDB()
         except Exception as e:
@@ -8003,7 +8003,7 @@ Examples:
 
     def cmd_insights(args):
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             from agent.insights import InsightsEngine
 
             db = SessionDB()

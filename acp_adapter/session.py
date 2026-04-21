@@ -8,7 +8,7 @@ history.
 """
 from __future__ import annotations
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 
 import copy
 import json
@@ -355,7 +355,7 @@ class SessionManager:
         if self._db_instance is not None:
             return self._db_instance
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             hermes_home = get_hermes_home()
             self._db_instance = SessionDB(db_path=hermes_home / "state.db")
             return self._db_instance

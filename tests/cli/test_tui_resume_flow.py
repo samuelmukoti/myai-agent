@@ -110,7 +110,7 @@ def test_print_tui_exit_summary_includes_resume_and_token_totals(monkeypatch, ca
         def close(self):
             return None
 
-    monkeypatch.setitem(sys.modules, "hermes_state", types.SimpleNamespace(SessionDB=lambda: _FakeDB()))
+    monkeypatch.setitem(sys.modules, "myai_state", types.SimpleNamespace(SessionDB=lambda: _FakeDB()))
 
     main_mod._print_tui_exit_summary("20260409_000001_abc123")
     out = capsys.readouterr().out

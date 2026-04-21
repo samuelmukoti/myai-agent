@@ -1811,7 +1811,7 @@ def _fetch_ai_gateway_models(timeout: float = 5.0) -> Optional[list[str]]:
         return None
     base_url = os.getenv("AI_GATEWAY_BASE_URL", "").strip()
     if not base_url:
-        from hermes_constants import AI_GATEWAY_BASE_URL
+        from myai_constants import AI_GATEWAY_BASE_URL
         base_url = AI_GATEWAY_BASE_URL
 
     url = base_url.rstrip("/") + "/models"
@@ -1855,7 +1855,7 @@ _OLLAMA_CLOUD_CACHE_TTL = 3600  # 1 hour
 
 def _ollama_cloud_cache_path() -> Path:
     """Return the path for the Ollama Cloud model cache."""
-    from hermes_constants import get_hermes_home
+    from myai_constants import get_hermes_home
     return get_hermes_home() / "ollama_cloud_models_cache.json"
 
 

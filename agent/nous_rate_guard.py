@@ -28,10 +28,10 @@ _STATE_FILENAME = "nous.json"
 def _state_path() -> str:
     """Return the path to the Nous rate limit state file."""
     try:
-        from hermes_constants import get_myai_home
+        from myai_constants import get_myai_home
         base = str(get_myai_home())
     except ImportError:
-        # Packaged installs always provide hermes_constants; this branch
+        # Packaged installs always provide myai_constants; this branch
         # only fires in exotic dev setups missing the project root on sys.path.
         base = os.path.join(os.path.expanduser("~"), ".myai")
     return os.path.join(base, _STATE_SUBDIR, _STATE_FILENAME)

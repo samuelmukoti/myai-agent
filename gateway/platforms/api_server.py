@@ -499,7 +499,7 @@ class APIServerAdapter(BasePlatformAdapter):
         """
         if self._session_db is None:
             try:
-                from hermes_state import SessionDB
+                from myai_state import SessionDB
                 self._session_db = SessionDB()
             except Exception as e:
                 logger.debug("SessionDB unavailable for API server: %s", e)

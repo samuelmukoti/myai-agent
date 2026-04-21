@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from myai_cli.env_loader import load_hermes_dotenv
 
 _hermes_home = get_hermes_home()
@@ -122,7 +122,7 @@ atexit.register(lambda: [
 def _get_db():
     global _db
     if _db is None:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
         _db = SessionDB()
     return _db
 
@@ -355,7 +355,7 @@ def _write_config_key(key_path: str, value):
 
 
 def _load_reasoning_config() -> dict | None:
-    from hermes_constants import parse_reasoning_effort
+    from myai_constants import parse_reasoning_effort
 
     effort = str(_load_cfg().get("agent", {}).get("reasoning_effort", "") or "").strip()
     return parse_reasoning_effort(effort)
@@ -1755,7 +1755,7 @@ def _(rid, params: dict) -> dict:
 
     if key == "reasoning":
         try:
-            from hermes_constants import parse_reasoning_effort
+            from myai_constants import parse_reasoning_effort
 
             arg = str(value or "").strip().lower()
             if arg in ("show", "on"):
@@ -1863,7 +1863,7 @@ def _(rid, params: dict) -> dict:
         except Exception as e:
             return _err(rid, 5013, str(e))
     if key == "profile":
-        from hermes_constants import display_hermes_home
+        from myai_constants import display_hermes_home
         return _ok(rid, {"home": str(_hermes_home), "display": display_hermes_home()})
     if key == "full":
         return _ok(rid, {"config": _load_cfg()})

@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 
 from myai_cli.config import get_project_root, get_hermes_home, get_env_path
-from hermes_constants import display_hermes_home
+from myai_constants import display_hermes_home
 
 PROJECT_ROOT = get_project_root()
 HERMES_HOME = get_hermes_home()
@@ -29,7 +29,7 @@ if _env_path.exists():
 load_dotenv(PROJECT_ROOT / ".env", override=False, encoding="utf-8")
 
 from myai_cli.colors import Colors, color
-from hermes_constants import OPENROUTER_MODELS_URL
+from myai_constants import OPENROUTER_MODELS_URL
 
 
 _PROVIDER_ENV_HINTS = (
@@ -57,7 +57,7 @@ _PROVIDER_ENV_HINTS = (
 )
 
 
-from hermes_constants import is_termux as _is_termux
+from myai_constants import is_termux as _is_termux
 
 
 def _python_install_cmd() -> str:

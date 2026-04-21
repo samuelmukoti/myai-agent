@@ -360,7 +360,7 @@ def read_file_tool(path: str, offset: int = 1, limit: int = 500, task_id: str = 
 
         # ── Hermes internal path guard ────────────────────────────────
         # Prevent prompt injection via catalog or hub metadata files.
-        from hermes_constants import get_hermes_home as _get_hh
+        from myai_constants import get_hermes_home as _get_hh
         _hermes_home = _get_hh().resolve()
         _blocked_dirs = [
             _hermes_home / "skills" / ".hub" / "index-cache",

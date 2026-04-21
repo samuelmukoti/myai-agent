@@ -140,12 +140,12 @@ See `myai claw migrate --help` for all options, or use the `openclaw-migration` 
 
 We welcome contributions! See the [Contributing Guide](https://docs.myai1.ai/developer-guide/contributing) for development setup, code style, and PR process.
 
-Quick start for contributors — clone and go with `setup-hermes.sh`:
+Quick start for contributors — clone and go with `setup-myai.sh`:
 
 ```bash
 git clone https://github.com/samuelmukoti/myai-agent.git
 cd myaione-agent
-./setup-hermes.sh     # installs uv, creates venv, installs .[all], symlinks ~/.local/bin/myai
+./setup-myai.sh     # installs uv, creates venv, installs .[all], symlinks ~/.local/bin/myai
 ./hermes              # auto-detects the venv (compat wrapper; calls myai)
 ```
 

@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 from myai_cli.config import get_hermes_home, get_config_path, load_config, save_config
-from hermes_constants import get_optional_skills_dir
+from myai_constants import get_optional_skills_dir
 from myai_cli.setup import (
     Colors,
     color,
@@ -37,7 +37,7 @@ _OPENCLAW_SCRIPT = (
     / "migration"
     / "openclaw-migration"
     / "scripts"
-    / "openclaw_to_hermes.py"
+    / "openclaw_to_myaione.py"
 )
 
 # Fallback: user may have installed the skill from the Hub
@@ -47,7 +47,7 @@ _OPENCLAW_SCRIPT_INSTALLED = (
     / "migration"
     / "openclaw-migration"
     / "scripts"
-    / "openclaw_to_hermes.py"
+    / "openclaw_to_myaione.py"
 )
 
 # Known OpenClaw directory names (current + legacy)
@@ -192,7 +192,7 @@ _WORKSPACE_STATE_GLOBS = (
 
 
 def _find_migration_script() -> Path | None:
-    """Find the openclaw_to_hermes.py script in known locations."""
+    """Find the openclaw_to_myaione.py script in known locations."""
     for candidate in [_OPENCLAW_SCRIPT, _OPENCLAW_SCRIPT_INSTALLED]:
         if candidate.exists():
             return candidate
@@ -201,7 +201,7 @@ def _find_migration_script() -> Path | None:
 
 def _load_migration_module(script_path: Path):
     """Dynamically load the migration script as a module."""
-    spec = importlib.util.spec_from_file_location("openclaw_to_hermes", script_path)
+    spec = importlib.util.spec_from_file_location("openclaw_to_myaione", script_path)
     if spec is None or spec.loader is None:
         return None
     mod = importlib.util.module_from_spec(spec)

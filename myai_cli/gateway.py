@@ -30,7 +30,7 @@ from myai_cli.config import (
     save_env_value,
 )
 # display_hermes_home is imported lazily at call sites to avoid ImportError
-# when hermes_constants is cached from a pre-update version during `myai update`.
+# when myai_constants is cached from a pre-update version during `myai update`.
 from myai_cli.setup import (
     print_header, print_info, print_success, print_warning, print_error,
     prompt, prompt_choice, prompt_yes_no,
@@ -357,7 +357,7 @@ def get_gateway_runtime_snapshot(system: bool = False) -> GatewayRuntimeSnapshot
             gateway_pids=gateway_pids,
         )
 
-    from hermes_constants import is_container
+    from myai_constants import is_container
 
     if is_linux() and is_container():
         return GatewayRuntimeSnapshot(
@@ -478,7 +478,7 @@ def is_linux() -> bool:
     return sys.platform.startswith('linux')
 
 
-from hermes_constants import is_container, is_termux, is_wsl
+from myai_constants import is_container, is_termux, is_wsl
 
 
 def _wsl_systemd_operational() -> bool:
@@ -552,7 +552,7 @@ def _profile_suffix() -> str:
     """
     import hashlib
     import re
-    from hermes_constants import get_default_hermes_root
+    from myai_constants import get_default_hermes_root
     home = get_hermes_home().resolve()
     default = get_default_hermes_root().resolve()
     if home == default:
@@ -582,7 +582,7 @@ def _profile_arg(hermes_home: str | None = None) -> str:
             service definition for a different user (e.g. system service).
     """
     import re
-    from hermes_constants import get_default_hermes_root
+    from myai_constants import get_default_hermes_root
     home = Path(hermes_home or str(get_hermes_home())).resolve()
     default = get_default_hermes_root().resolve()
     if home == default:
@@ -1806,7 +1806,7 @@ def launchd_install(force: bool = False):
     print()
     print("Next steps:")
     print("  myai gateway status             # Check status")
-    from hermes_constants import display_hermes_home as _dhh
+    from myai_constants import display_hermes_home as _dhh
     print(f"  tail -f {_dhh()}/logs/gateway.log  # View logs")
 
 def launchd_uninstall():
@@ -3472,7 +3472,7 @@ def gateway_setup():
                 print_info("  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'")
             else:
                 if is_termux():
-                    from hermes_constants import display_hermes_home as _dhh
+                    from myai_constants import display_hermes_home as _dhh
                     print_info("  Termux does not use systemd/launchd services.")
                     print_info("  Run in foreground: myai gateway run")
                     print_info(f"  Or start it manually in the background (best effort): nohup myai gateway run >{_dhh()}/logs/gateway.log 2>&1 &")

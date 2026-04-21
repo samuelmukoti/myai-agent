@@ -47,7 +47,7 @@ from openai import OpenAI
 
 from agent.credential_pool import load_pool
 from myai_cli.config import get_hermes_home
-from hermes_constants import OPENROUTER_BASE_URL
+from myai_constants import OPENROUTER_BASE_URL
 
 logger = logging.getLogger(__name__)
 

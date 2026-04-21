@@ -361,7 +361,7 @@ def _build_child_agent(
         delegation_cfg = _load_config()
         delegation_effort = str(delegation_cfg.get("reasoning_effort") or "").strip()
         if delegation_effort:
-            from hermes_constants import parse_reasoning_effort
+            from myai_constants import parse_reasoning_effort
             parsed = parse_reasoning_effort(delegation_effort)
             if parsed is not None:
                 child_reasoning = parsed

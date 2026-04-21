@@ -85,7 +85,7 @@ _ensure_ssl_certs()
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Resolve Hermes home directory (respects HERMES_HOME override)
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from utils import atomic_yaml_write, is_truthy_value
 _hermes_home = get_hermes_home()
 
@@ -226,7 +226,7 @@ if _config_path.exists():
 
 # Apply IPv4 preference if configured (before any HTTP clients are created).
 try:
-    from hermes_constants import apply_ipv4_preference
+    from myai_constants import apply_ipv4_preference
     _network_cfg = (_cfg if '_cfg' in dir() else {}).get("network", {})
     if isinstance(_network_cfg, dict) and _network_cfg.get("force_ipv4"):
         apply_ipv4_preference(force=True)
@@ -426,7 +426,7 @@ def _check_unavailable_skill(command_name: str) -> str | None:
                     )
 
         # Check optional skills (shipped with repo but not installed)
-        from hermes_constants import get_optional_skills_dir
+        from myai_constants import get_optional_skills_dir
         repo_root = Path(__file__).resolve().parent.parent
         optional_dir = get_optional_skills_dir(repo_root / "optional-skills")
         if optional_dir.exists():
@@ -671,7 +671,7 @@ class GatewayRunner:
         # Initialize session database for session_search tool support
         self._session_db = None
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             self._session_db = SessionDB()
         except Exception as e:
             logger.debug("SQLite session store not available: %s", e)
@@ -1192,7 +1192,7 @@ class GatewayRunner:
         "minimal", "low", "medium", "high", "xhigh". Returns None to use
         default (medium).
         """
-        from hermes_constants import parse_reasoning_effort
+        from myai_constants import parse_reasoning_effort
         effort = ""
         try:
             import yaml as _y
@@ -4630,7 +4630,7 @@ class GatewayRunner:
     
     async def _handle_profile_command(self, event: MessageEvent) -> str:
         """Handle /profile — show active profile name and home directory."""
-        from hermes_constants import display_hermes_home
+        from myai_constants import display_hermes_home
         from myai_cli.profiles import get_active_profile_name
 
         display = display_hermes_home()
@@ -5392,7 +5392,7 @@ class GatewayRunner:
     async def _handle_personality_command(self, event: MessageEvent) -> str:
         """Handle /personality command - list or set a personality."""
         import yaml
-        from hermes_constants import display_hermes_home
+        from myai_constants import display_hermes_home
 
         args = event.get_command_args().strip().lower()
         config_path = _hermes_home / 'config.yaml'
@@ -7037,7 +7037,7 @@ class GatewayRunner:
                     i += 1
 
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             from agent.insights import InsightsEngine
 
             loop = _asyncio.get_running_loop()
@@ -10294,7 +10294,7 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
     # Centralized logging — agent.log (INFO+), errors.log (WARNING+),
     # and gateway.log (INFO+, gateway-component records only).
     # Idempotent, so repeated calls from AIAgent.__init__ won't duplicate.
-    from hermes_logging import setup_logging
+    from myai_logging import setup_logging
     setup_logging(hermes_home=_hermes_home, mode="gateway")
 
     # Optional stderr handler — level driven by -v/-q flags on the CLI.

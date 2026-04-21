@@ -12,7 +12,7 @@ import getpass
 
 from myai_cli.banner import cprint, _DIM, _RST
 from myai_cli.config import save_env_value_secure
-from hermes_constants import display_hermes_home
+from myai_constants import display_hermes_home
 
 
 def clarify_callback(cli, question, choices):

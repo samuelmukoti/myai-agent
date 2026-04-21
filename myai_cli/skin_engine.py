@@ -108,7 +108,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
 

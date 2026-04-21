@@ -11,7 +11,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 
 from myai_cli.colors import Colors, color
 

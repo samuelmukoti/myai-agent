@@ -16,7 +16,7 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 
 
 # ---------------------------------------------------------------------------

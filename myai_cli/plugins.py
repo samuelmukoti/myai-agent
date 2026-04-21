@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from utils import env_var_enabled
 
 try:

@@ -291,7 +291,7 @@ class TestBuildSessionContextPrompt:
         )
         ctx = build_session_context(source, config)
 
-        with patch("hermes_constants.display_hermes_home", return_value="~/.hermes/profiles/coder"):
+        with patch("myai_constants.display_hermes_home", return_value="~/.hermes/profiles/coder"):
             prompt = build_session_context_prompt(ctx)
 
         assert "~/.hermes/profiles/coder/cron/output/" in prompt
@@ -478,7 +478,7 @@ class TestLoadTranscriptPreferLongerSource:
     @pytest.fixture()
     def store_with_db(self, tmp_path):
         """SessionStore with both SQLite and JSONL active."""
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         config = GatewayConfig()
         with patch("gateway.session.SessionStore._ensure_loaded"):
@@ -569,7 +569,7 @@ class TestSessionStoreSwitchSession:
     """Regression coverage for gateway /resume session switching semantics."""
 
     def test_switch_session_reopens_target_session_in_db(self, tmp_path):
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         config = GatewayConfig()
         with patch("gateway.session.SessionStore._ensure_loaded"):
@@ -1025,7 +1025,7 @@ class TestRewriteTranscriptPreservesReasoning:
     """rewrite_transcript must not drop reasoning fields from SQLite."""
 
     def test_reasoning_survives_rewrite(self, tmp_path):
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "test.db")
         session_id = "reasoning-test"

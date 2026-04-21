@@ -308,7 +308,7 @@ def write_api_key_to_env(
     """
     if env_path is None:
         try:
-            from hermes_constants import get_myai_home
+            from myai_constants import get_myai_home
             env_path = get_myai_home() / ".env"
         except ImportError:
             env_path = Path.home() / ".myai" / ".env"

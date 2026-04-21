@@ -442,7 +442,7 @@ async def get_status():
 
     active_sessions = 0
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
         db = SessionDB()
         try:
             sessions = db.list_sessions_rich(limit=50)
@@ -479,7 +479,7 @@ async def get_status():
 @app.get("/api/sessions")
 async def get_sessions(limit: int = 20, offset: int = 0):
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
         db = SessionDB()
         try:
             sessions = db.list_sessions_rich(limit=limit, offset=offset)
@@ -504,7 +504,7 @@ async def search_sessions(q: str = "", limit: int = 20):
     if not q or not q.strip():
         return {"results": []}
     try:
-        from hermes_state import SessionDB
+        from myai_state import SessionDB
         db = SessionDB()
         try:
             # Auto-add prefix wildcards so partial words match
@@ -1671,7 +1671,7 @@ async def cancel_oauth_session(session_id: str, request: Request):
 
 @app.get("/api/sessions/{session_id}")
 async def get_session_detail(session_id: str):
-    from hermes_state import SessionDB
+    from myai_state import SessionDB
     db = SessionDB()
     try:
         sid = db.resolve_session_id(session_id)
@@ -1685,7 +1685,7 @@ async def get_session_detail(session_id: str):
 
 @app.get("/api/sessions/{session_id}/messages")
 async def get_session_messages(session_id: str):
-    from hermes_state import SessionDB
+    from myai_state import SessionDB
     db = SessionDB()
     try:
         sid = db.resolve_session_id(session_id)
@@ -1699,7 +1699,7 @@ async def get_session_messages(session_id: str):
 
 @app.delete("/api/sessions/{session_id}")
 async def delete_session_endpoint(session_id: str):
-    from hermes_state import SessionDB
+    from myai_state import SessionDB
     db = SessionDB()
     try:
         if not db.delete_session(session_id):
@@ -1732,7 +1732,7 @@ async def get_logs(
         return {"file": file, "lines": []}
 
     try:
-        from hermes_logging import COMPONENT_PREFIXES
+        from myai_logging import COMPONENT_PREFIXES
     except ImportError:
         COMPONENT_PREFIXES = {}
 
@@ -1957,7 +1957,7 @@ async def update_config_raw(body: RawConfigUpdate):
 
 @app.get("/api/analytics/usage")
 async def get_usage_analytics(days: int = 30):
-    from hermes_state import SessionDB
+    from myai_state import SessionDB
     db = SessionDB()
     try:
         cutoff = time.time() - (days * 86400)

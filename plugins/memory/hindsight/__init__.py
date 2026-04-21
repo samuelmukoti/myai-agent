@@ -24,11 +24,11 @@ import logging
 import os
 import threading
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from typing import Any, Dict, List
 
 from agent.memory_provider import MemoryProvider
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from tools.registry import tool_error
 
 logger = logging.getLogger(__name__)

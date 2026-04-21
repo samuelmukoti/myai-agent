@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import get_config_path, get_skills_dir
+from myai_constants import get_config_path, get_skills_dir
 
 logger = logging.getLogger(__name__)
 

@@ -29,7 +29,7 @@ from agent.credential_pool import (
 )
 import myai_cli.auth as auth_mod
 from myai_cli.auth import PROVIDER_REGISTRY
-from hermes_constants import OPENROUTER_BASE_URL
+from myai_constants import OPENROUTER_BASE_URL
 
 
 # Providers that support OAuth login in addition to API keys.
@@ -391,7 +391,7 @@ def auth_remove_command(args) -> None:
                 print(f"Cleared {provider} OAuth tokens from auth store")
 
     elif removed.source == "hermes_pkce" and provider == "anthropic":
-        from hermes_constants import get_hermes_home
+        from myai_constants import get_hermes_home
         oauth_file = get_hermes_home() / ".anthropic_oauth.json"
         if oauth_file.exists():
             oauth_file.unlink()

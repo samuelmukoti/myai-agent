@@ -72,7 +72,7 @@ _COMMAND_SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧
 
 # Load .env from ~/.hermes/.env first, then project root as dev fallback.
 # User-managed env files should override stale shell exports on restart.
-from hermes_constants import get_hermes_home, display_hermes_home
+from myai_constants import get_hermes_home, display_hermes_home
 from myai_cli.env_loader import load_hermes_dotenv
 
 _hermes_home = get_hermes_home()
@@ -151,7 +151,7 @@ def _load_prefill_messages(file_path: str) -> List[Dict[str, Any]]:
 
 def _parse_reasoning_config(effort: str) -> dict | None:
     """Parse a reasoning effort level into an OpenRouter reasoning config dict."""
-    from hermes_constants import parse_reasoning_effort
+    from myai_constants import parse_reasoning_effort
     result = parse_reasoning_effort(effort)
     if effort and effort.strip() and result is None:
         logger.warning("Unknown reasoning_effort '%s', using default (medium)", effort)
@@ -576,7 +576,7 @@ CLI_CONFIG = load_cli_config()
 # Initialize centralized logging early — agent.log + errors.log in ~/.hermes/logs/.
 # This ensures CLI sessions produce a log trail even before AIAgent is instantiated.
 try:
-    from hermes_logging import setup_logging
+    from myai_logging import setup_logging
     setup_logging(mode="cli")
 except Exception:
     pass  # Logging setup is best-effort — don't crash the CLI
@@ -1133,7 +1133,7 @@ _IMAGE_EXTENSIONS = frozenset({
 })
 
 
-from hermes_constants import is_termux as _is_termux_environment
+from myai_constants import is_termux as _is_termux_environment
 
 
 def _termux_example_image_path(filename: str = "cat.png") -> str:
@@ -1838,7 +1838,7 @@ class HermesCLI:
         # Initialize SQLite session store early so /title works before first message
         self._session_db = None
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             self._session_db = SessionDB()
         except Exception as e:
             logger.warning("Failed to initialize SessionDB — session will NOT be indexed for search: %s", e)
@@ -2897,7 +2897,7 @@ class HermesCLI:
         # Initialize SQLite session store for CLI sessions (if not already done in __init__)
         if self._session_db is None:
             try:
-                from hermes_state import SessionDB
+                from myai_state import SessionDB
                 self._session_db = SessionDB()
             except Exception as e:
                 logger.warning("SQLite session store not available — session will NOT be indexed: %s", e)
@@ -3461,7 +3461,7 @@ class HermesCLI:
             create_quick_snapshot, list_quick_snapshots,
             restore_quick_snapshot, prune_quick_snapshots,
         )
-        from hermes_constants import display_hermes_home
+        from myai_constants import display_hermes_home
 
         parts = command.split()
         subcmd = parts[1].lower() if len(parts) > 1 else "list"
@@ -4039,7 +4039,7 @@ class HermesCLI:
     
     def _handle_profile_command(self):
         """Display active profile name and home directory."""
-        from hermes_constants import display_hermes_home
+        from myai_constants import display_hermes_home
         from myai_cli.profiles import get_active_profile_name
 
         display = display_hermes_home()
@@ -5576,7 +5576,7 @@ class HermesCLI:
                     if self._session_db:
                         # Sanitize the title early so feedback matches what gets stored
                         try:
-                            from hermes_state import SessionDB
+                            from myai_state import SessionDB
                             new_title = SessionDB.sanitize_title(raw_title)
                         except ValueError as e:
                             _cprint(f"  {e}")
@@ -6749,7 +6749,7 @@ class HermesCLI:
                 i += 1
 
         try:
-            from hermes_state import SessionDB
+            from myai_state import SessionDB
             from agent.insights import InsightsEngine
 
             db = SessionDB()

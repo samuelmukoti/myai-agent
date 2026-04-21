@@ -167,7 +167,7 @@ def get_container_exec_info() -> Optional[dict]:
     if os.environ.get("HERMES_DEV") == "1":
         return None
 
-    from hermes_constants import is_container
+    from myai_constants import is_container
     if is_container():
         return None
 
@@ -202,8 +202,8 @@ def get_container_exec_info() -> Optional[dict]:
 # Config paths
 # =============================================================================
 
-# Re-export from hermes_constants — canonical definition lives there.
-from hermes_constants import get_hermes_home  # noqa: F811,E402
+# Re-export from myai_constants — canonical definition lives there.
+from myai_constants import get_hermes_home  # noqa: F811,E402
 
 def get_config_path() -> Path:
     """Get the main config file path."""

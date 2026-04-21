@@ -39,7 +39,7 @@ import re
 import shutil
 import tempfile
 from pathlib import Path
-from hermes_constants import get_hermes_home, display_hermes_home
+from myai_constants import get_hermes_home, display_hermes_home
 from typing import Dict, Any, Optional, Tuple
 
 logger = logging.getLogger(__name__)

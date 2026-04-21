@@ -19,7 +19,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+from myai_constants import get_hermes_home
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:

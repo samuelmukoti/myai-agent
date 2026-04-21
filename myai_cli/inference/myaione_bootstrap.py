@@ -111,7 +111,7 @@ def _write_default_config(model_id: str) -> Path:
     """
     import yaml
 
-    from hermes_constants import get_config_path
+    from myai_constants import get_config_path
 
     config_path = get_config_path()
     config_path.parent.mkdir(parents=True, exist_ok=True)

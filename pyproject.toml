@@ -130,7 +130,11 @@ py-modules = ["run_agent", "model_tools", "toolsets", "batch_runner", "trajector
 myai_cli = ["web_dist/**/*"]
 
 [tool.setuptools.packages.find]
-include = ["agent", "tools", "tools.*", "myai_cli", "gateway", "gateway.*", "tui_gateway", "tui_gateway.*", "cron", "acp_adapter", "plugins", "plugins.*"]
+# Include wildcards for packages with subpackages.  Without `myai_cli.*`,
+# the Phase 3 `myai_cli/providers/` subpackage was silently dropped from
+# built wheels — `uv tool install` would produce a broken install that
+# failed at import time for any consumer of `myai_cli.providers.*`.
+include = ["agent", "tools", "tools.*", "myai_cli", "myai_cli.*", "gateway", "gateway.*", "tui_gateway", "tui_gateway.*", "cron", "acp_adapter", "plugins", "plugins.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

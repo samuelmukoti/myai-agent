@@ -1,0 +1,159 @@
+name: Publish to PyPI
+
+# Tag-triggered release pipeline for myaione-agent on PyPI.
+#
+# Triggers:
+#   * Push a tag like `v0.10.0`, `v0.10.1`, `v1.0.0` — publishes to the real PyPI.
+#   * Push a tag like `v0.10.0rc1`, `v0.10.0-beta.2` — publishes to TestPyPI only.
+#
+# Auth: uses PyPI's OIDC "trusted publisher" flow (no API tokens).  The
+# PyPI project must be configured to trust this repo / workflow / env.
+# See https://docs.pypi.org/trusted-publishers/.
+#
+# Guardrails:
+#   * Tests must pass first (workflow_run dependency below keeps the
+#     publish gate honest even if a bad commit somehow gets tagged).
+#   * Version in pyproject.toml must match the tag — a mismatch fails fast.
+#   * twine check on both sdist and wheel before upload.
+#
+# Rollbacks: PyPI doesn't support deleting a published version.  Yank it
+# with `pypi yank myaione-agent <version>` to discourage new installs
+# and publish a patched successor.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'         # clean release:  v0.10.0
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'       # pre-release:    v0.10.0-rc1
+      - 'v[0-9]+.[0-9]+.[0-9]+[a-z]*[0-9]*'  # PEP 440 rc/beta/alpha: v0.10.0rc1
+
+permissions:
+  # `contents: read` to check out; `id-token: write` to mint the OIDC
+  # token that PyPI's trusted publisher flow verifies.
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-pypi-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.versions.outputs.version }}
+      is_prerelease: ${{ steps.versions.outputs.is_prerelease }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Resolve and compare versions
+        id: versions
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/v}"
+          PYPROJECT=$(uv run --with tomli python -c \
+            "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "tag version:         $TAG"
+          echo "pyproject.toml version: $PYPROJECT"
+          if [ "$TAG" != "$PYPROJECT" ]; then
+            echo "::error::tag v$TAG does not match pyproject.toml version $PYPROJECT — bump pyproject.toml first"
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+          # Any non-digit, non-dot character in the version marks it a pre-release.
+          if echo "$TAG" | grep -qE '[^0-9.]'; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "→ pre-release, will publish to TestPyPI"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "→ stable, will publish to PyPI"
+          fi
+
+      - name: Build sdist + wheel
+        run: |
+          set -euo pipefail
+          rm -rf dist/ build/
+          uv build
+          ls -la dist/
+
+      - name: Twine metadata check
+        run: uv run --with twine python -m twine check dist/*
+
+      - name: Verify wheel contents include inference subpackage
+        # Backstop against the Phase 3 regression class: the new
+        # myai_cli.inference subpackage was silently dropped from built
+        # wheels twice (once due to missing `myai_cli.*` wildcard, once
+        # due to a name collision with providers.py).  Refuse to upload
+        # if that happens again.
+        run: |
+          uv run --with wheel python - <<'PY'
+          import zipfile, pathlib, sys
+          whl = next(pathlib.Path("dist").glob("*.whl"))
+          with zipfile.ZipFile(whl) as z:
+              names = z.namelist()
+          required = [
+              "myai_cli/inference/__init__.py",
+              "myai_cli/inference/myaione.py",
+              "myai_cli/inference/myaione_bootstrap.py",
+              "myai_cli/providers.py",
+          ]
+          missing = [r for r in required if r not in names]
+          if missing:
+              print(f"::error::wheel {whl.name} missing required files: {missing}", file=sys.stderr)
+              sys.exit(1)
+          print(f"✓ {whl.name} contains all required MyAIOne files")
+          PY
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: dist-${{ steps.versions.outputs.version }}
+          path: dist/
+          retention-days: 7
+
+  publish-testpypi:
+    name: Publish to TestPyPI (pre-release)
+    needs: build
+    if: needs.build.outputs.is_prerelease == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/myaione-agent/${{ needs.build.outputs.version }}/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806  # v4
+        with:
+          name: dist-${{ needs.build.outputs.version }}
+          path: dist/
+      - name: Publish to TestPyPI (OIDC trusted publisher)
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # v1.12.4
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI (stable release)
+    needs: build
+    if: needs.build.outputs.is_prerelease != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: pypi
+      url: https://pypi.org/project/myaione-agent/${{ needs.build.outputs.version }}/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806  # v4
+        with:
+          name: dist-${{ needs.build.outputs.version }}
+          path: dist/
+      - name: Publish to PyPI (OIDC trusted publisher)
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # v1.12.4

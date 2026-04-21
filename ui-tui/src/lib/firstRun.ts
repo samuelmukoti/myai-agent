@@ -1,8 +1,9 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-const dir = process.env.HERMES_HOME ?? join(homedir(), '.hermes')
+import { getMyaiHome } from './myaiHome.js'
+
+const dir = getMyaiHome()
 const stateDir = join(dir, 'state')
 const flagFile = join(stateDir, 'first_run_seen')
 

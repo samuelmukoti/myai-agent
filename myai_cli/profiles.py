@@ -988,7 +988,8 @@ def generate_bash_completion() -> str:
 # Add to ~/.bashrc: eval "$(myai completion bash)"
 
 _hermes_profiles() {
-    local profiles_dir="$HOME/.hermes/profiles"
+    local profiles_dir="${MYAI_HOME:-${HERMES_HOME:-$HOME/.myai}}/profiles"
+    [ ! -d "$profiles_dir" ] && profiles_dir="$HOME/.hermes/profiles"
     local profiles="default"
     if [ -d "$profiles_dir" ]; then
         profiles="$profiles $(ls "$profiles_dir" 2>/dev/null)"
@@ -1041,8 +1042,10 @@ def generate_zsh_completion() -> str:
 _hermes() {
     local -a profiles
     profiles=(default)
-    if [[ -d "$HOME/.hermes/profiles" ]]; then
-        profiles+=("${(@f)$(ls $HOME/.hermes/profiles 2>/dev/null)}")
+    local dir="${MYAI_HOME:-${HERMES_HOME:-$HOME/.myai}}/profiles"
+    [[ ! -d "$dir" ]] && dir="$HOME/.hermes/profiles"
+    if [[ -d "$dir" ]]; then
+        profiles+=("${(@f)$(ls "$dir" 2>/dev/null)}")
     fi
 
     _arguments \\

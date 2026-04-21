@@ -150,7 +150,7 @@ describe('createGatewayEventHandler', () => {
     onEvent({
       payload: {
         message:
-          'agent init failed: No LLM provider configured. Run `hermes model` to select a provider, or run `hermes setup` for first-time configuration.'
+          'agent init failed: No LLM provider configured. Run `myai model` to select a provider, or run `myai setup` for first-time configuration.'
       },
       type: 'error'
     } as any)
@@ -158,7 +158,7 @@ describe('createGatewayEventHandler', () => {
     expect(appended).toHaveLength(1)
     expect(appended[0]).toMatchObject({
       kind: 'panel',
-      panelData: { title: 'Setup Required' },
+      panelData: { title: 'Welcome to MyAIOne Agent' },
       role: 'system'
     })
   })

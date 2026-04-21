@@ -139,7 +139,7 @@ from myai_cli.config import (
     get_env_value,
     ensure_hermes_home,
 )
-# display_hermes_home imported lazily at call sites (stale-module safety during hermes update)
+# display_hermes_home imported lazily at call sites (stale-module safety during myai update)
 
 from myai_cli.colors import Colors, color
 
@@ -179,12 +179,12 @@ def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     print_info("The interactive wizard cannot be used here.")
     print()
     print_info("Configure MyAIOne using environment variables or config commands:")
-    print_info("  hermes config set model.provider custom")
-    print_info("  hermes config set model.base_url http://localhost:8080/v1")
-    print_info("  hermes config set model.default your-model-name")
+    print_info("  myai config set model.provider custom")
+    print_info("  myai config set model.base_url http://localhost:8080/v1")
+    print_info("  myai config set model.default your-model-name")
     print()
     print_info("Or set OPENROUTER_API_KEY / OPENAI_API_KEY in your environment.")
-    print_info("Run 'hermes setup' in an interactive terminal to use the full wizard.")
+    print_info("Run 'myai setup' in an interactive terminal to use the full wizard.")
     print()
 
 
@@ -337,7 +337,7 @@ def _prompt_api_key(var: dict):
         save_env_value(var["name"], value)
         print_success("  ✓ Saved")
     else:
-        print_warning("  Skipped (configure later with 'hermes setup')")
+        print_warning("  Skipped (configure later with 'myai setup')")
 
 
 def _print_setup_summary(config: dict, hermes_home):
@@ -360,7 +360,7 @@ def _print_setup_summary(config: dict, hermes_home):
     if _vision_backends:
         tool_status.append(("Vision (image analysis)", True, None))
     else:
-        tool_status.append(("Vision (image analysis)", False, "run 'hermes setup' to configure"))
+        tool_status.append(("Vision (image analysis)", False, "run 'myai setup' to configure"))
 
     # Mixture of Agents — requires OpenRouter specifically (calls multiple models)
     if get_env_value("OPENROUTER_API_KEY"):
@@ -440,7 +440,7 @@ def _print_setup_summary(config: dict, hermes_home):
         if neutts_ok:
             tool_status.append(("Text-to-Speech (NeuTTS local)", True, None))
         else:
-            tool_status.append(("Text-to-Speech (NeuTTS — not installed)", False, "run 'hermes setup tts'"))
+            tool_status.append(("Text-to-Speech (NeuTTS — not installed)", False, "run 'myai setup tts'"))
     else:
         tool_status.append(("Text-to-Speech (Edge TTS)", True, None))
 
@@ -450,7 +450,7 @@ def _print_setup_summary(config: dict, hermes_home):
         if subscription_features.modal.direct_override:
             tool_status.append(("Modal Execution (direct Modal)", True, None))
         else:
-            tool_status.append(("Modal Execution", False, "run 'hermes setup terminal'"))
+            tool_status.append(("Modal Execution", False, "run 'myai setup terminal'"))
     elif managed_nous_tools_enabled() and subscription_features.nous_auth_present:
         tool_status.append(("Modal Execution (optional via Nous subscription)", True, None))
 
@@ -501,7 +501,7 @@ def _print_setup_summary(config: dict, hermes_home):
     disabled_tools = [(name, var) for name, avail, var in tool_status if not avail]
     if disabled_tools:
         print_warning(
-            "Some tools are disabled. Run 'hermes setup tools' to configure them,"
+            "Some tools are disabled. Run 'myai setup tools' to configure them,"
         )
         from hermes_constants import display_hermes_home as _dhh
         print_warning(f"or edit {_dhh()}/.env directly to add the missing API keys.")
@@ -541,17 +541,17 @@ def _print_setup_summary(config: dict, hermes_home):
     print()
     print(color("📝 To edit your configuration:", Colors.CYAN, Colors.BOLD))
     print()
-    print(f"   {color('hermes setup', Colors.GREEN)}          Re-run the full wizard")
-    print(f"   {color('hermes setup model', Colors.GREEN)}    Change model/provider")
-    print(f"   {color('hermes setup terminal', Colors.GREEN)} Change terminal backend")
-    print(f"   {color('hermes setup gateway', Colors.GREEN)}  Configure messaging")
-    print(f"   {color('hermes setup tools', Colors.GREEN)}    Configure tool providers")
+    print(f"   {color('myai setup', Colors.GREEN)}          Re-run the full wizard")
+    print(f"   {color('myai setup model', Colors.GREEN)}    Change model/provider")
+    print(f"   {color('myai setup terminal', Colors.GREEN)} Change terminal backend")
+    print(f"   {color('myai setup gateway', Colors.GREEN)}  Configure messaging")
+    print(f"   {color('myai setup tools', Colors.GREEN)}    Configure tool providers")
     print()
-    print(f"   {color('hermes config', Colors.GREEN)}         View current settings")
+    print(f"   {color('myai config', Colors.GREEN)}         View current settings")
     print(
-        f"   {color('hermes config edit', Colors.GREEN)}    Open config in your editor"
+        f"   {color('myai config edit', Colors.GREEN)}    Open config in your editor"
     )
-    print(f"   {color('hermes config set <key> <value>', Colors.GREEN)}")
+    print(f"   {color('myai config set <key> <value>', Colors.GREEN)}")
     print("                          Set a specific value")
     print()
     print("   Or edit the files directly:")
@@ -564,8 +564,8 @@ def _print_setup_summary(config: dict, hermes_home):
     print(color("🚀 Ready to go!", Colors.CYAN, Colors.BOLD))
     print()
     print(f"   {color('hermes', Colors.GREEN)}              Start chatting")
-    print(f"   {color('hermes gateway', Colors.GREEN)}      Start messaging gateway")
-    print(f"   {color('hermes doctor', Colors.GREEN)}       Check for issues")
+    print(f"   {color('myai gateway', Colors.GREEN)}      Start messaging gateway")
+    print(f"   {color('myai doctor', Colors.GREEN)}       Check for issues")
     print()
 
 
@@ -612,7 +612,7 @@ def _prompt_container_resources(config: dict):
 
 
 # Tool categories and provider config are now in tools_config.py (shared
-# between `hermes tools` and `hermes setup tools`).
+# between `myai tools` and `myai setup tools`).
 
 
 # =============================================================================
@@ -624,10 +624,10 @@ def _prompt_container_resources(config: dict):
 def setup_model_provider(config: dict, *, quick: bool = False):
     """Configure the inference provider and default model.
 
-    Delegates to ``cmd_model()`` (the same flow used by ``hermes model``)
+    Delegates to ``cmd_model()`` (the same flow used by ``myai model``)
     for provider selection, credential prompting, and model picking.
     This ensures a single code path for all provider setup — any new
-    provider added to ``hermes model`` is automatically available here.
+    provider added to ``myai model`` is automatically available here.
 
     When *quick* is True, skips credential rotation, vision, and TTS
     configuration — used by the streamlined first-time quick setup.
@@ -639,7 +639,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     print_info(f"   Guide: {_DOCS_BASE}/integrations/providers")
     print()
 
-    # Delegate to the shared hermes model flow — handles provider picker,
+    # Delegate to the shared myai model flow — handles provider picker,
     # credential prompting, model selection, and config persistence.
     from myai_cli.main import select_provider_and_model
     try:
@@ -650,7 +650,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     except Exception as exc:
         logger.debug("select_provider_and_model error during setup: %s", exc)
         print_warning(f"Provider setup encountered an error: {exc}")
-        print_info("You can try again later with: hermes model")
+        print_info("You can try again later with: myai model")
 
     # Re-sync the wizard's config dict from what cmd_model saved to disk.
     # This is critical: cmd_model writes to disk via its own load/save cycle,
@@ -830,7 +830,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
             else:
                 print_info("Skipped — vision won't be available")
         else:
-            print_info("Skipped — add later with 'hermes setup' or configure AUXILIARY_VISION_* settings")
+            print_info("Skipped — add later with 'myai setup' or configure AUXILIARY_VISION_* settings")
 
 
     # Tool Gateway prompt is already shown by _model_flow_nous() above.
@@ -1019,7 +1019,7 @@ def _setup_tts_provider(config: dict):
                 from hermes_constants import display_hermes_home as _dhh
                 print_warning(
                     "No xAI API key provided for TTS. Configure XAI_API_KEY via "
-                    f"hermes setup model or {_dhh()}/.env to use xAI TTS. "
+                    f"myai setup model or {_dhh()}/.env to use xAI TTS. "
                     "Falling back to Edge TTS."
                 )
                 selected = "edge"
@@ -1070,7 +1070,7 @@ def _setup_tts_provider(config: dict):
 
 
 def setup_tts(config: dict):
-    """Standalone TTS setup (for 'hermes setup tts')."""
+    """Standalone TTS setup (for 'myai setup tts')."""
     _setup_tts_provider(config)
 
 
@@ -1444,7 +1444,7 @@ def _apply_default_agent_settings(config: dict):
     print_info("  Tool progress: all")
     print_info("  Compression threshold: 0.50")
     print_info("  Session reset: inactivity (1440 min) + daily (4:00)")
-    print_info("  Run `hermes setup agent` later to customize.")
+    print_info("  Run `myai setup agent` later to customize.")
 
 
 def setup_agent_settings(config: dict):
@@ -1947,12 +1947,12 @@ def _setup_whatsapp():
         return
 
     print_info("WhatsApp connects via a built-in bridge (Baileys).")
-    print_info("Requires Node.js. Run 'hermes whatsapp' for guided setup.")
+    print_info("Requires Node.js. Run 'myai whatsapp' for guided setup.")
     print()
     if prompt_yes_no("Enable WhatsApp now?", True):
         save_env_value("WHATSAPP_ENABLED", "true")
         print_success("WhatsApp enabled")
-        print_info("Run 'hermes whatsapp' to choose your mode (separate bot number")
+        print_info("Run 'myai whatsapp' to choose your mode (separate bot number")
         print_info("or personal self-chat) and pair via QR code.")
 
 
@@ -2120,7 +2120,7 @@ def _setup_webhooks():
     print_info("   Route configuration guide:")
     print_info("   https://docs.myai1.ai/docs/user-guide/messaging/webhooks/#configuring-routes")
     print()
-    print_info("   Open config in your editor:  hermes config edit")
+    print_info("   Open config in your editor:  myai config edit")
 
 
 # Platform registry for the gateway checklist
@@ -2168,7 +2168,7 @@ def setup_gateway(config: dict):
     selected = prompt_checklist("Select platforms to configure:", items, pre_selected)
 
     if not selected:
-        print_info("No platforms selected. Run 'hermes setup gateway' later to configure.")
+        print_info("No platforms selected. Run 'myai setup gateway' later to configure.")
         return
 
     for idx in selected:
@@ -2227,7 +2227,7 @@ def setup_gateway(config: dict):
             print_info("   Set one later with /set-home in your chat, or:")
             for plat in missing_home:
                 print_info(
-                    f"     hermes config set {plat.upper()}_HOME_CHANNEL <channel_id>"
+                    f"     myai config set {plat.upper()}_HOME_CHANNEL <channel_id>"
                 )
 
         # Offer to install the gateway as a system service
@@ -2309,24 +2309,24 @@ def setup_gateway(config: dict):
                             print_error(f"  Start failed: {e}")
                 except Exception as e:
                     print_error(f"  Install failed: {e}")
-                    print_info("  You can try manually: hermes gateway install")
+                    print_info("  You can try manually: myai gateway install")
             else:
-                print_info("  You can install later: hermes gateway install")
+                print_info("  You can install later: myai gateway install")
                 if supports_systemd:
-                    print_info("  Or as a boot-time service: sudo hermes gateway install --system")
-                print_info("  Or run in foreground:  hermes gateway")
+                    print_info("  Or as a boot-time service: sudo myai gateway install --system")
+                print_info("  Or run in foreground:  myai gateway")
         else:
             from hermes_constants import is_container
             if is_container():
                 print_info("Start the gateway to bring your bots online:")
-                print_info("   hermes gateway run          # Run as container main process")
+                print_info("   myai gateway run          # Run as container main process")
                 print_info("")
                 print_info("For automatic restarts, use a Docker restart policy:")
                 print_info("   docker run --restart unless-stopped ...")
                 print_info("   docker restart <container>  # Manual restart")
             else:
                 print_info("Start the gateway to bring your bots online:")
-                print_info("   hermes gateway              # Run in foreground")
+                print_info("   myai gateway              # Run in foreground")
 
         print_info("━" * 50)
 
@@ -2339,7 +2339,7 @@ def setup_gateway(config: dict):
 def setup_tools(config: dict, first_install: bool = False):
     """Configure tools — delegates to the unified tools_command() in tools_config.py.
 
-    Both `hermes setup tools` and `hermes tools` use the same flow:
+    Both `myai setup tools` and `myai tools` use the same flow:
     platform selection → toolset toggles → provider/API key configuration.
 
     Args:
@@ -2605,7 +2605,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
 
     if not prompt_yes_no("Would you like to see what can be imported?", default=True):
         print_info(
-            "Skipping migration. You can run it later with: hermes claw migrate --dry-run"
+            "Skipping migration. You can run it later with: myai claw migrate --dry-run"
         )
         return False
 
@@ -2663,7 +2663,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
     # ── Phase 2: Confirm and execute ──
     if not prompt_yes_no("Proceed with migration?", default=False):
         print_info(
-            "Migration cancelled. You can run it later with: hermes claw migrate"
+            "Migration cancelled. You can run it later with: myai claw migrate"
         )
         print_info(
             "Use --dry-run to preview again, or --preset minimal for a lighter import."
@@ -2701,7 +2701,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
     if migrated:
         print_success(f"Imported {migrated} item(s) from OpenClaw.")
     if conflicts:
-        print_info(f"Skipped {conflicts} item(s) that already exist in MyAIOne (use hermes claw migrate --overwrite to force).")
+        print_info(f"Skipped {conflicts} item(s) that already exist in MyAIOne (use myai claw migrate --overwrite to force).")
     if skipped:
         print_info(f"Skipped {skipped} item(s) (not found or unchanged).")
     if errors:
@@ -2744,13 +2744,13 @@ def run_setup_wizard(args):
     """Run the interactive setup wizard.
 
     Supports full, quick, and section-specific setup:
-      hermes setup           — full or quick (auto-detected)
-      hermes setup model     — just model/provider
-      hermes setup tts       — just text-to-speech
-      hermes setup terminal  — just terminal backend
-      hermes setup gateway   — just messaging platforms
-      hermes setup tools     — just tool configuration
-      hermes setup agent     — just agent settings
+      myai setup           — full or quick (auto-detected)
+      myai setup model     — just model/provider
+      myai setup tts       — just text-to-speech
+      myai setup terminal  — just terminal backend
+      myai setup gateway   — just messaging platforms
+      myai setup tools     — just tool configuration
+      myai setup agent     — just agent settings
     """
     from myai_cli.config import is_managed, managed_error
     if is_managed():
@@ -2880,7 +2880,7 @@ def run_setup_wizard(args):
             # Full setup — fall through to run all sections
             pass
         elif choice == 7:
-            print_info("Exiting. Run 'hermes setup' again when ready.")
+            print_info("Exiting. Run 'myai setup' again when ready.")
             return
         elif 2 <= choice <= 6:
             # Individual section — map by key, not by position.
@@ -2919,7 +2919,7 @@ def run_setup_wizard(args):
     print_info(f"Data folder:  {hermes_home}")
     print_info(f"Install dir:  {PROJECT_ROOT}")
     print()
-    print_info("You can edit these files directly or use 'hermes config edit'")
+    print_info("You can edit these files directly or use 'myai config edit'")
 
     if migration_ran:
         print()
@@ -2955,7 +2955,7 @@ def run_setup_wizard(args):
 
 
 def _resolve_hermes_chat_argv() -> Optional[list[str]]:
-    """Resolve argv for launching ``hermes chat`` in a fresh process."""
+    """Resolve argv for launching ``myai chat`` in a fresh process."""
     hermes_bin = shutil.which("hermes")
     if hermes_bin:
         return [hermes_bin, "chat"]
@@ -2972,12 +2972,12 @@ def _resolve_hermes_chat_argv() -> Optional[list[str]]:
 def _offer_launch_chat():
     """Prompt the user to jump straight into chat after setup."""
     print()
-    if not prompt_yes_no("Launch hermes chat now?", True):
+    if not prompt_yes_no("Launch myai chat now?", True):
         return
 
     chat_argv = _resolve_hermes_chat_argv()
     if not chat_argv:
-        print_info("Could not relaunch MyAIOne automatically. Run 'hermes chat' manually.")
+        print_info("Could not relaunch MyAIOne automatically. Run 'myai chat' manually.")
         return
 
     os.execvp(chat_argv[0], chat_argv)
@@ -2988,7 +2988,7 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
 
     Applies sensible defaults for TTS (Edge), terminal (local), agent
     settings, and tools — the user can customize later via
-    ``hermes setup <section>``.
+    ``myai setup <section>``.
     """
     # Step 1: Model & Provider (essential — skips rotation/vision/TTS)
     setup_model_provider(config, quick=True)
@@ -3005,7 +3005,7 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
         "Connect a messaging platform? (Telegram, Discord, etc.)",
         [
             "Set up messaging now (recommended)",
-            "Skip — set up later with 'hermes setup gateway'",
+            "Skip — set up later with 'myai setup gateway'",
         ],
         0,
     )
@@ -3017,9 +3017,9 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
     print()
     print_success("Setup complete! You're ready to go.")
     print()
-    print_info("  Configure all settings:    hermes setup")
+    print_info("  Configure all settings:    myai setup")
     if gateway_choice != 0:
-        print_info("  Connect Telegram/Discord:  hermes setup gateway")
+        print_info("  Connect Telegram/Discord:  myai setup gateway")
     print()
 
     _print_setup_summary(config, hermes_home)
@@ -3058,7 +3058,7 @@ def _run_quick_setup(config: dict, hermes_home):
     if not has_anything_missing:
         print_success("Everything is configured! Nothing to do.")
         print()
-        print_info("Run 'hermes setup' and choose 'Full Setup' to reconfigure,")
+        print_info("Run 'myai setup' and choose 'Full Setup' to reconfigure,")
         print_info("or pick a specific section from the menu.")
         return
 
@@ -3121,7 +3121,7 @@ def _run_quick_setup(config: dict, hermes_home):
         print()
         print_header("Messaging Platforms")
         print_info("Connect MyAIOne to messaging apps to chat from anywhere.")
-        print_info("You can configure these later with 'hermes setup gateway'.")
+        print_info("You can configure these later with 'myai setup gateway'.")
 
         # Group by platform (preserving order)
         platform_order = []

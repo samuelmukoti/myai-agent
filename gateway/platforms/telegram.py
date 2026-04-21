@@ -444,7 +444,7 @@ class TelegramAdapter(BasePlatformAdapter):
             "(possibly OpenClaw or another Hermes instance). "
             "Hermes stopped Telegram polling after %d retries. "
             "Only one poller can run per token — stop the other process "
-            "and restart with 'hermes start'."
+            "and restart with 'myai start'."
             % MAX_CONFLICT_RETRIES
         )
         logger.error("[%s] %s Original error: %s", self.name, message, error)
@@ -1167,7 +1167,7 @@ class TelegramAdapter(BasePlatformAdapter):
     ) -> SendResult:
         """Send an inline-keyboard update prompt (Yes / No buttons).
 
-        Used by the gateway ``/update`` watcher when ``hermes update --gateway``
+        Used by the gateway ``/update`` watcher when ``myai update --gateway``
         needs user input (stash restore, config migration).
         """
         if not self._bot:

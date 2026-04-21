@@ -229,7 +229,7 @@ def auth_add_command(args) -> None:
         return
 
     if provider == "openai-codex":
-        # Clear any existing suppression marker so a re-link after `hermes auth
+        # Clear any existing suppression marker so a re-link after `myai auth
         # remove openai-codex` works without the new tokens being skipped.
         auth_mod.unsuppress_credential_source(provider, "device_code")
         creds = auth_mod._codex_device_code_login()
@@ -294,7 +294,7 @@ def auth_add_command(args) -> None:
         print(f'Added {provider} OAuth credential #{len(pool.entries())}: "{entry.label}"')
         return
 
-    raise SystemExit(f"`hermes auth add {provider}` is not implemented for auth type {requested_type} yet.")
+    raise SystemExit(f"`myai auth add {provider}` is not implemented for auth type {requested_type} yet.")
 
 
 def auth_list_command(args) -> None:
@@ -376,7 +376,7 @@ def auth_remove_command(args) -> None:
         suppress_credential_source(provider, "device_code")
         print("Suppressed openai-codex device_code source — it will not be re-seeded.")
         print("Note: Codex CLI credentials still live in ~/.codex/auth.json")
-        print("Run `hermes auth add openai-codex` to re-enable if needed.")
+        print("Run `myai auth add openai-codex` to re-enable if needed.")
 
     elif removed.source == "device_code" and provider == "nous":
         from myai_cli.auth import (
@@ -402,7 +402,7 @@ def auth_remove_command(args) -> None:
         suppress_credential_source(provider, "claude_code")
         print("Suppressed claude_code credential — it will not be re-seeded.")
         print("Note: Claude Code credentials still live in ~/.claude/.credentials.json")
-        print("Run `hermes auth add anthropic` to re-enable if needed.")
+        print("Run `myai auth add anthropic` to re-enable if needed.")
 
 
 def auth_reset_command(args) -> None:
@@ -413,7 +413,7 @@ def auth_reset_command(args) -> None:
 
 
 def _interactive_auth() -> None:
-    """Interactive credential pool management when `hermes auth` is called bare."""
+    """Interactive credential pool management when `myai auth` is called bare."""
     # Show current pool status first
     print("Credential Pool Status")
     print("=" * 50)

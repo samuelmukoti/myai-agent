@@ -1,7 +1,7 @@
 """
 Gateway subcommand for hermes CLI.
 
-Handles: hermes gateway [run|start|stop|restart|status|install|uninstall|setup]
+Handles: myai gateway [run|start|stop|restart|status|install|uninstall|setup]
 """
 
 import asyncio
@@ -30,7 +30,7 @@ from myai_cli.config import (
     save_env_value,
 )
 # display_hermes_home is imported lazily at call sites to avoid ImportError
-# when hermes_constants is cached from a pre-update version during `hermes update`.
+# when hermes_constants is cached from a pre-update version during `myai update`.
 from myai_cli.setup import (
     print_header, print_info, print_success, print_warning, print_error,
     prompt, prompt_choice, prompt_yes_no,
@@ -198,7 +198,7 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
         "myai_cli/main.py gateway",
         "myai_cli/main.py --profile",
         "myai_cli/main.py -p",
-        "hermes gateway",
+        "myai gateway",
         "gateway/run.py",
     ]
     current_home = str(get_hermes_home().resolve())
@@ -294,7 +294,7 @@ def find_gateway_pids(exclude_pids: set | None = None, all_profiles: bool = Fals
         exclude_pids: PIDs to exclude from the result (e.g. service-managed
             PIDs that should not be killed during a stale-process sweep).
         all_profiles: When ``True``, return gateway PIDs across **all**
-            profiles (the pre-7923 global behaviour).  ``hermes update``
+            profiles (the pre-7923 global behaviour).  ``myai update``
             needs this because a code update affects every profile.
             When ``False`` (default), only PIDs belonging to the current
             Hermes profile are returned.
@@ -404,7 +404,7 @@ def _print_gateway_process_mismatch(snapshot: GatewayRuntimeSnapshot) -> None:
     print()
     print("⚠ Gateway process is running for this profile, but the service is not active")
     print(f"  PID(s): {_format_gateway_pids(snapshot.gateway_pids, limit=None)}")
-    print("  This is usually a manual foreground/tmux/nohup run, so `hermes gateway`")
+    print("  This is usually a manual foreground/tmux/nohup run, so `myai gateway`")
     print("  can refuse to start another copy until this process stops.")
 
 
@@ -699,8 +699,8 @@ _LEGACY_UNIT_EXECSTART_MARKERS: tuple[str, ...] = (
     "myai_cli.main gateway",
     "myai_cli/main.py gateway",
     "gateway/run.py",
-    " hermes gateway ",
-    "/hermes gateway ",
+    " myai gateway ",
+    "/myai gateway ",
 )
 
 
@@ -775,7 +775,7 @@ def print_legacy_unit_warning() -> None:
     print_info("  These run alongside the current hermes-gateway service and")
     print_info("  cause SIGTERM flap loops — both try to use the same bot token.")
     print_info("  Remove them with:")
-    print_info("    hermes gateway migrate-legacy")
+    print_info("    myai gateway migrate-legacy")
 
 
 def remove_legacy_hermes_units(
@@ -818,7 +818,7 @@ def remove_legacy_hermes_units(
         return 0, [p for _, p, _ in legacy]
 
     if interactive and not prompt_yes_no("Remove these legacy units?", True):
-        print("Skipped. Run again with: hermes gateway migrate-legacy")
+        print("Skipped. Run again with: myai gateway migrate-legacy")
         return 0, [p for _, p, _ in legacy]
 
     removed = 0
@@ -847,7 +847,7 @@ def remove_legacy_hermes_units(
         if os.geteuid() != 0:
             print()
             print_warning("System-scope legacy units require root to remove.")
-            print_info("  Re-run with: sudo hermes gateway migrate-legacy")
+            print_info("  Re-run with: sudo myai gateway migrate-legacy")
             for _, path in system_units:
                 remaining.append(path)
         else:
@@ -886,8 +886,8 @@ def print_systemd_scope_conflict_warning() -> None:
     print_info("  This is confusing and can make start/stop/status behavior ambiguous.")
     print_info("  Default gateway commands target the user service unless you pass --system.")
     print_info("  Keep one of these:")
-    print_info("    hermes gateway uninstall")
-    print_info("    sudo hermes gateway uninstall --system")
+    print_info("    myai gateway uninstall")
+    print_info("    sudo myai gateway uninstall --system")
 
 
 def _require_root_for_system_service(action: str) -> None:
@@ -960,10 +960,10 @@ def install_linux_gateway_from_setup(force: bool = False) -> tuple[str | None, b
         if os.geteuid() != 0:
             print_warning("  System service install requires sudo, so Hermes can't create it from this user session.")
             if run_as_user:
-                print_info(f"  After setup, run: sudo hermes gateway install --system --run-as-user {run_as_user}")
+                print_info(f"  After setup, run: sudo myai gateway install --system --run-as-user {run_as_user}")
             else:
-                print_info("  After setup, run: sudo hermes gateway install --system --run-as-user <your-user>")
-            print_info("  Then start it with: sudo hermes gateway start --system")
+                print_info("  After setup, run: sudo myai gateway install --system --run-as-user <your-user>")
+            print_info("  Then start it with: sudo myai gateway start --system")
             return scope, False
 
         if not run_as_user:
@@ -1447,8 +1447,8 @@ def systemd_install(force: bool = False, system: bool = False, run_as_user: str 
     print(f"✓ {_service_scope_label(system).capitalize()} service installed and enabled!")
     print()
     print("Next steps:")
-    print(f"  {'sudo ' if system else ''}hermes gateway start{scope_flag}              # Start the service")
-    print(f"  {'sudo ' if system else ''}hermes gateway status{scope_flag}             # Check status")
+    print(f"  {'sudo ' if system else ''}myai gateway start{scope_flag}              # Start the service")
+    print(f"  {'sudo ' if system else ''}myai gateway status{scope_flag}             # Check status")
     print(f"  {'journalctl' if system else 'journalctl --user'} -u {get_service_name()} -f  # View logs")
     print()
 
@@ -1561,7 +1561,7 @@ def systemd_restart(system: bool = False):
             pass
         print(
             f"⚠ {scope_label} service did not become active within 60s.\n"
-            f"  Check status: {'sudo ' if system else ''}hermes gateway status\n"
+            f"  Check status: {'sudo ' if system else ''}myai gateway status\n"
             f"  Check logs:   journalctl {'--user ' if not system else ''}-u {svc} --since '2 min ago'"
         )
         return
@@ -1577,7 +1577,7 @@ def systemd_status(deep: bool = False, system: bool = False):
 
     if not unit_path.exists():
         print("✗ Gateway service is not installed")
-        print(f"  Run: {'sudo ' if system else ''}hermes gateway install{scope_flag}")
+        print(f"  Run: {'sudo ' if system else ''}myai gateway install{scope_flag}")
         return
 
     if has_conflicting_systemd_units():
@@ -1590,7 +1590,7 @@ def systemd_status(deep: bool = False, system: bool = False):
 
     if not systemd_unit_is_current(system=system):
         print("⚠ Installed gateway service definition is outdated")
-        print(f"  Run: {'sudo ' if system else ''}hermes gateway restart{scope_flag}  # auto-refreshes the unit")
+        print(f"  Run: {'sudo ' if system else ''}myai gateway restart{scope_flag}  # auto-refreshes the unit")
         print()
 
     _run_systemctl(
@@ -1614,7 +1614,7 @@ def systemd_status(deep: bool = False, system: bool = False):
         print(f"✓ {_service_scope_label(system).capitalize()} gateway service is running")
     else:
         print(f"✗ {_service_scope_label(system).capitalize()} gateway service is stopped")
-        print(f"  Run: {'sudo ' if system else ''}hermes gateway start{scope_flag}")
+        print(f"  Run: {'sudo ' if system else ''}myai gateway start{scope_flag}")
 
     configured_user = _read_systemd_user_from_unit(unit_path) if system else None
     if configured_user:
@@ -1802,7 +1802,7 @@ def launchd_install(force: bool = False):
     print("✓ Service installed and loaded!")
     print()
     print("Next steps:")
-    print("  hermes gateway status             # Check status")
+    print("  myai gateway status             # Check status")
     from hermes_constants import display_hermes_home as _dhh
     print(f"  tail -f {_dhh()}/logs/gateway.log  # View logs")
 
@@ -1848,7 +1848,7 @@ def launchd_stop():
     # bootout unloads the service definition so KeepAlive doesn't respawn
     # the process.  A plain `kill SIGTERM` only signals the process — launchd
     # immediately restarts it because KeepAlive.SuccessfulExit = false.
-    # `hermes gateway start` re-bootstraps when it detects the job is unloaded.
+    # `myai gateway start` re-bootstraps when it detects the job is unloaded.
     try:
         subprocess.run(["launchctl", "bootout", target], check=True, timeout=90)
     except subprocess.CalledProcessError as e:
@@ -1954,7 +1954,7 @@ def launchd_status(deep: bool = False):
         print("✓ Service definition matches the current Hermes install")
     else:
         print("⚠ Service definition is stale relative to the current Hermes install")
-        print("  Run: hermes gateway start")
+        print("  Run: myai gateway start")
 
     if loaded:
         print("✓ Gateway service is loaded")
@@ -1962,7 +1962,7 @@ def launchd_status(deep: bool = False):
     else:
         print("✗ Gateway service is not loaded")
         print("  Service definition exists locally but launchd has not loaded it.")
-        print("  Run: hermes gateway start")
+        print("  Run: myai gateway start")
     
     if deep:
         log_file = get_hermes_home() / "logs" / "gateway.log"
@@ -2337,7 +2337,7 @@ _PLATFORMS = [
             "4. The server URL is typically http://<your-mac-ip>:1234",
             "5. Hermes connects via the BlueBubbles REST API and receives",
             "   incoming messages via a local webhook",
-            "6. To authorize users, use DM pairing: hermes pairing generate bluebubbles",
+            "6. To authorize users, use DM pairing: myai pairing generate bluebubbles",
             "   Share the code — the user sends it via iMessage to get approved",
         ],
         "vars": [
@@ -2526,7 +2526,7 @@ def _setup_standard_platform(platform: dict):
                 print()
                 access_choices = [
                     "Enable open access (anyone can message the bot)",
-                    "Use DM pairing (unknown users request access, you approve with 'hermes pairing approve')",
+                    "Use DM pairing (unknown users request access, you approve with 'myai pairing approve')",
                     "Skip for now (bot will deny all users until configured)",
                 ]
                 access_idx = prompt_choice("  How should unauthorized users be handled?", access_choices, 1)
@@ -2535,9 +2535,9 @@ def _setup_standard_platform(platform: dict):
                     print_warning("  Open access enabled — anyone can use your bot!")
                 elif access_idx == 1:
                     print_success("  DM pairing mode — users will receive a code to request access.")
-                    print_info("  Approve with: hermes pairing approve <platform> <code>")
+                    print_info("  Approve with: myai pairing approve <platform> <code>")
                 else:
-                    print_info("  Skipped — configure later with 'hermes gateway setup'")
+                    print_info("  Skipped — configure later with 'myai gateway setup'")
             continue
 
         value = prompt(f"  {var['prompt']}", password=var.get("password", False))
@@ -2726,7 +2726,7 @@ def _setup_weixin():
 
     if not check_weixin_requirements():
         print_error("  Missing dependencies: Weixin needs aiohttp and cryptography.")
-        print_info("  Install them, then rerun `hermes gateway setup`.")
+        print_info("  Install them, then rerun `myai gateway setup`.")
         return
 
     print()
@@ -2773,7 +2773,7 @@ def _setup_weixin():
         save_env_value("WEIXIN_ALLOW_ALL_USERS", "false")
         save_env_value("WEIXIN_ALLOWED_USERS", "")
         print_success("  DM pairing enabled.")
-        print_info("  Unknown DM users can request access and you approve them with `hermes pairing approve`.")
+        print_info("  Unknown DM users can request access and you approve them with `myai pairing approve`.")
     elif access_idx == 1:
         save_env_value("WEIXIN_DM_POLICY", "open")
         save_env_value("WEIXIN_ALLOW_ALL_USERS", "true")
@@ -2957,7 +2957,7 @@ def _setup_feishu():
         save_env_value("FEISHU_ALLOW_ALL_USERS", "false")
         save_env_value("FEISHU_ALLOWED_USERS", "")
         print_success("  DM pairing enabled.")
-        print_info("  Unknown users can request access; approve with `hermes pairing approve`.")
+        print_info("  Unknown users can request access; approve with `myai pairing approve`.")
     elif access_idx == 1:
         save_env_value("FEISHU_ALLOW_ALL_USERS", "true")
         save_env_value("FEISHU_ALLOWED_USERS", "")
@@ -3077,7 +3077,7 @@ def _setup_qqbot():
         else:
             save_env_value("QQ_ALLOWED_USERS", "")
         print_success("  DM pairing enabled.")
-        print_info("  Unknown users can request access; approve with `hermes pairing approve`.")
+        print_info("  Unknown users can request access; approve with `myai pairing approve`.")
     elif access_idx == 1:
         save_env_value("QQ_ALLOW_ALL_USERS", "true")
         save_env_value("QQ_ALLOWED_USERS", "")
@@ -3419,7 +3419,7 @@ def gateway_setup():
                         launchd_restart()
                     else:
                         stop_profile_gateway()
-                        print_info("Start manually: hermes gateway")
+                        print_info("Start manually: myai gateway")
                 except subprocess.CalledProcessError as e:
                     print_error(f"  Restart failed: {e}")
         elif service_installed:
@@ -3456,29 +3456,29 @@ def gateway_setup():
                                 print_error(f"  Start failed: {e}")
                     except subprocess.CalledProcessError as e:
                         print_error(f"  Install failed: {e}")
-                        print_info("  You can try manually: hermes gateway install")
+                        print_info("  You can try manually: myai gateway install")
                 else:
-                    print_info("  You can install later: hermes gateway install")
+                    print_info("  You can install later: myai gateway install")
                     if supports_systemd_services():
-                        print_info("  Or as a boot-time service: sudo hermes gateway install --system")
-                    print_info("  Or run in foreground:  hermes gateway run")
+                        print_info("  Or as a boot-time service: sudo myai gateway install --system")
+                    print_info("  Or run in foreground:  myai gateway run")
             elif is_wsl():
                 print_info("  WSL detected but systemd is not running.")
-                print_info("  Run in foreground: hermes gateway run")
-                print_info("  For persistence:   tmux new -s hermes 'hermes gateway run'")
+                print_info("  Run in foreground: myai gateway run")
+                print_info("  For persistence:   tmux new -s hermes 'myai gateway run'")
                 print_info("  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'")
             else:
                 if is_termux():
                     from hermes_constants import display_hermes_home as _dhh
                     print_info("  Termux does not use systemd/launchd services.")
-                    print_info("  Run in foreground: hermes gateway run")
-                    print_info(f"  Or start it manually in the background (best effort): nohup hermes gateway run >{_dhh()}/logs/gateway.log 2>&1 &")
+                    print_info("  Run in foreground: myai gateway run")
+                    print_info(f"  Or start it manually in the background (best effort): nohup myai gateway run >{_dhh()}/logs/gateway.log 2>&1 &")
                 else:
                     print_info("  Service install not supported on this platform.")
-                    print_info("  Run in foreground: hermes gateway run")
+                    print_info("  Run in foreground: myai gateway run")
     else:
         print()
-        print_info("No platforms configured. Run 'hermes gateway setup' when ready.")
+        print_info("No platforms configured. Run 'myai gateway setup' when ready.")
 
     print()
 
@@ -3513,13 +3513,13 @@ def gateway_command(args):
         run_as_user = getattr(args, 'run_as_user', None)
         if is_termux():
             print("Gateway service installation is not supported on Termux.")
-            print("Run manually: hermes gateway")
+            print("Run manually: myai gateway")
             sys.exit(1)
         if supports_systemd_services():
             if is_wsl():
                 print_warning("WSL detected — systemd services may not survive WSL restarts.")
-                print_info("  Consider running in foreground instead: hermes gateway run")
-                print_info("  Or use tmux/screen for persistence: tmux new -s hermes 'hermes gateway run'")
+                print_info("  Consider running in foreground instead: myai gateway run")
+                print_info("  Or use tmux/screen for persistence: tmux new -s hermes 'myai gateway run'")
                 print()
             systemd_install(force=force, system=system, run_as_user=run_as_user)
         elif is_macos():
@@ -3529,9 +3529,9 @@ def gateway_command(args):
             print("Either enable systemd (add systemd=true to /etc/wsl.conf and restart WSL)")
             print("or run the gateway in foreground mode:")
             print()
-            print("  hermes gateway run                              # direct foreground")
-            print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-            print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  myai gateway run                              # direct foreground")
+            print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
+            print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
             sys.exit(1)
         elif is_container():
             print("Service installation is not needed inside a Docker container.")
@@ -3540,11 +3540,11 @@ def gateway_command(args):
             print("  docker run --restart unless-stopped ...   # auto-restart on crash/reboot")
             print("  docker restart <container>                # manual restart")
             print()
-            print("To run the gateway: hermes gateway run")
+            print("To run the gateway: myai gateway run")
             sys.exit(0)
         else:
             print("Service installation not supported on this platform.")
-            print("Run manually: hermes gateway run")
+            print("Run manually: myai gateway run")
             sys.exit(1)
     
     elif subcmd == "uninstall":
@@ -3554,7 +3554,7 @@ def gateway_command(args):
         system = getattr(args, 'system', False)
         if is_termux():
             print("Gateway service uninstall is not supported on Termux because there is no managed service to remove.")
-            print("Stop manual runs with: hermes gateway stop")
+            print("Stop manual runs with: myai gateway stop")
             sys.exit(1)
         if supports_systemd_services():
             systemd_uninstall(system=system)
@@ -3584,7 +3584,7 @@ def gateway_command(args):
 
         if is_termux():
             print("Gateway service start is not supported on Termux because there is no system service manager.")
-            print("Run manually: hermes gateway")
+            print("Run manually: myai gateway")
             sys.exit(1)
         if supports_systemd_services():
             systemd_start(system=system)
@@ -3594,9 +3594,9 @@ def gateway_command(args):
             print("WSL detected but systemd is not available.")
             print("Run the gateway in foreground mode instead:")
             print()
-            print("  hermes gateway run                              # direct foreground")
-            print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-            print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  myai gateway run                              # direct foreground")
+            print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
+            print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
             print()
             print("To enable systemd: add systemd=true to /etc/wsl.conf and run 'wsl --shutdown' from PowerShell.")
             sys.exit(1)
@@ -3607,7 +3607,7 @@ def gateway_command(args):
             print("  docker start <container>     # start a stopped container")
             print("  docker restart <container>   # restart a running container")
             print()
-            print("Or run the gateway directly: hermes gateway run")
+            print("Or run the gateway directly: myai gateway run")
             sys.exit(0)
         else:
             print("Not supported on this platform.")
@@ -3730,14 +3730,14 @@ def gateway_command(args):
                     print(f"  Run:  sudo loginctl enable-linger {_username}")
                     print()
                     print("  Then restart the gateway:")
-                    print("    hermes gateway restart")
+                    print("    myai gateway restart")
                     return
 
             if service_configured:
                 print()
                 print("✗ Gateway service restart failed.")
                 print("  The service definition exists, but the service manager did not recover it.")
-                print("  Fix the service, then retry: hermes gateway start")
+                print("  Fix the service, then retry: myai gateway start")
                 sys.exit(1)
 
             # Manual restart: stop only this profile's gateway
@@ -3784,8 +3784,8 @@ def gateway_command(args):
                     print("  Use tmux or screen for persistence across terminal closes.")
                 else:
                     print("To install as a service:")
-                    print("  hermes gateway install")
-                    print("  sudo hermes gateway install --system")
+                    print("  myai gateway install")
+                    print("  sudo myai gateway install --system")
             else:
                 print("✗ Gateway is not running")
                 runtime_lines = _runtime_health_lines()
@@ -3796,15 +3796,15 @@ def gateway_command(args):
                         print(f"  {line}")
                 print()
                 print("To start:")
-                print("  hermes gateway run      # Run in foreground")
+                print("  myai gateway run      # Run in foreground")
                 if is_termux():
-                    print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # Best-effort background start")
+                    print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # Best-effort background start")
                 elif is_wsl():
-                    print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-                    print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+                    print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
+                    print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
                 else:
-                    print("  hermes gateway install  # Install as user service")
-                    print("  sudo hermes gateway install --system  # Install as boot-time system service")
+                    print("  myai gateway install  # Install as user service")
+                    print("  sudo myai gateway install --system  # Install as boot-time system service")
 
     elif subcmd == "migrate-legacy":
         # Stop, disable, and remove legacy Hermes gateway unit files from

@@ -104,6 +104,16 @@ const TranscriptPane = memo(function TranscriptPane({
                   <Banner t={ui.theme} />
 
                   {row.msg.info?.version && <SessionPanel info={row.msg.info} sid={ui.sid} t={ui.theme} />}
+
+                  {row.msg.firstRun && (
+                    <Box flexDirection="column" marginBottom={1} paddingX={2}>
+                      <Text color={ui.theme.color.gold}>Welcome — this is your first session. </Text>
+                      <Text color={ui.theme.color.dim}>
+                        Type <Text color={ui.theme.color.cornsilk}>/help</Text> to see every command, or just start
+                        typing. Use <Text color={ui.theme.color.cornsilk}>/model</Text> to swap providers at any time.
+                      </Text>
+                    </Box>
+                  )}
                 </Box>
               ) : row.msg.kind === 'panel' && row.msg.panelData ? (
                 <Panel sections={row.msg.panelData.sections} t={ui.theme} title={row.msg.panelData.title} />

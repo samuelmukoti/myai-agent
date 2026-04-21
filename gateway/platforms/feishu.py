@@ -3836,7 +3836,7 @@ class FeishuAdapter(BasePlatformAdapter):
 #
 # Device-code flow: user scans a QR code with Feishu/Lark mobile app and the
 # platform creates a fully configured bot application automatically.
-# Called by `hermes gateway setup` via _setup_feishu() in myai_cli/gateway.py.
+# Called by `myai gateway setup` via _setup_feishu() in myai_cli/gateway.py.
 # =============================================================================
 
 

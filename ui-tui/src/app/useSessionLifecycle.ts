@@ -5,6 +5,7 @@ import { buildSetupRequiredSections, SETUP_REQUIRED_TITLE } from '../content/set
 import { introMsg, toTranscriptMessages } from '../domain/messages.js'
 import { ZERO } from '../domain/usage.js'
 import { type GatewayClient } from '../gatewayClient.js'
+import { isFirstRun, markFirstRunSeen } from '../lib/firstRun.js'
 import type {
   SessionCloseResponse,
   SessionCreateResponse,
@@ -135,7 +136,11 @@ export function useSessionLifecycle(opts: UseSessionLifecycleOptions) {
       })
 
       if (info) {
-        setHistoryItems([introMsg(info)])
+        const firstRun = isFirstRun()
+        setHistoryItems([introMsg(info, firstRun)])
+        if (firstRun) {
+          markFirstRunSeen()
+        }
       }
 
       if (info?.credential_warning) {

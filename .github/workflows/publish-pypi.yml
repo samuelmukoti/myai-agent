@@ -139,6 +139,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # v1.12.4
         with:
           repository-url: https://test.pypi.org/legacy/
+          verbose: true
 
   publish-pypi:
     name: Publish to PyPI (stable release)
@@ -157,3 +158,5 @@ jobs:
           path: dist/
       - name: Publish to PyPI (OIDC trusted publisher)
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # v1.12.4
+        with:
+          verbose: true

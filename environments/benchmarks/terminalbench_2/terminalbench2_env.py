@@ -792,7 +792,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
         (same pattern as GPQA and other Atropos eval envs). Each task is
         wrapped with a wall-clock timeout so hung tasks auto-fail.
 
-        Suppresses noisy Modal/terminal output (HERMES_QUIET) so the tqdm
+        Suppresses noisy Modal/terminal output (MYAI_QUIET) so the tqdm
         bar stays visible.
         """
         start_time = time.time()

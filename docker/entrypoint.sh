@@ -10,16 +10,16 @@ INSTALL_DIR="/opt/hermes"
 # optionally remap the hermes user/group to match host-side ownership, fix volume
 # permissions, then re-exec as hermes.
 if [ "$(id -u)" = "0" ]; then
-    if [ -n "$HERMES_UID" ] && [ "$HERMES_UID" != "$(id -u hermes)" ]; then
-        echo "Changing hermes UID to $HERMES_UID"
-        usermod -u "$HERMES_UID" hermes
+    if [ -n "$MYAI_UID" ] && [ "$MYAI_UID" != "$(id -u hermes)" ]; then
+        echo "Changing hermes UID to $MYAI_UID"
+        usermod -u "$MYAI_UID" hermes
     fi
 
-    if [ -n "$HERMES_GID" ] && [ "$HERMES_GID" != "$(id -g hermes)" ]; then
-        echo "Changing hermes GID to $HERMES_GID"
+    if [ -n "$MYAI_GID" ] && [ "$MYAI_GID" != "$(id -g hermes)" ]; then
+        echo "Changing hermes GID to $MYAI_GID"
         # -o allows non-unique GID (e.g. macOS GID 20 "staff" may already exist
         # as "dialout" in the Debian-based container image)
-        groupmod -o -g "$HERMES_GID" hermes 2>/dev/null || true
+        groupmod -o -g "$MYAI_GID" hermes 2>/dev/null || true
     fi
 
     actual_hermes_uid=$(id -u hermes)

@@ -31,7 +31,7 @@ hermes --tui --dev
 You can also enable it via env var:
 
 ```bash
-export HERMES_TUI=1
+export MYAI_TUI=1
 hermes          # now uses the TUI
 hermes chat     # same
 ```
@@ -129,7 +129,7 @@ See [Sessions](sessions.md) for lifecycle, search, compression, and export.
 
 ## Reverting to the classic CLI
 
-Launching `hermes` (without `--tui`) stays on the classic CLI. To make a machine prefer the TUI, set `HERMES_TUI=1` in your shell profile. To go back, unset it.
+Launching `hermes` (without `--tui`) stays on the classic CLI. To make a machine prefer the TUI, set `MYAI_TUI=1` in your shell profile. To go back, unset it.
 
 If the TUI fails to launch (no Node, missing bundle, TTY issue), Hermes prints a diagnostic and falls back — rather than leaving you stuck.
 

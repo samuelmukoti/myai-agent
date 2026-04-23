@@ -163,7 +163,7 @@ Edit `~/.hermes/config.yaml`:
 model: openrouter/nous/hermes-3-llama-3.1-70b
 ```
 
-Or set the `HERMES_MODEL` environment variable.
+Or set the `MYAI_MODEL` environment variable.
 
 ### Toolsets
 

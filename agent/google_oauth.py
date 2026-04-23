@@ -134,7 +134,7 @@ CALLBACK_WAIT_SECONDS = 300
 LOCK_TIMEOUT_SECONDS = 30.0
 
 # Headless env detection
-_HEADLESS_ENV_VARS = ("SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY", "HERMES_HEADLESS")
+_HEADLESS_ENV_VARS = ("SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY", "MYAI_HEADLESS")
 
 
 # =============================================================================
@@ -1039,7 +1039,7 @@ def run_gemini_oauth_login_pure() -> Dict[str, Any]:
 def resolve_project_id_from_env() -> str:
     """Return a GCP project ID from env vars, in priority order."""
     for var in (
-        "HERMES_GEMINI_PROJECT_ID",
+        "MYAI_GEMINI_PROJECT_ID",
         "GOOGLE_CLOUD_PROJECT",
         "GOOGLE_CLOUD_PROJECT_ID",
     ):

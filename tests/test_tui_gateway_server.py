@@ -118,15 +118,15 @@ def test_config_set_yolo_toggles_session_scope():
 
 
 def test_enable_gateway_prompts_sets_gateway_env(monkeypatch):
-    monkeypatch.delenv("HERMES_EXEC_ASK", raising=False)
-    monkeypatch.delenv("HERMES_GATEWAY_SESSION", raising=False)
-    monkeypatch.delenv("HERMES_INTERACTIVE", raising=False)
+    monkeypatch.delenv("MYAI_EXEC_ASK", raising=False)
+    monkeypatch.delenv("MYAI_GATEWAY_SESSION", raising=False)
+    monkeypatch.delenv("MYAI_INTERACTIVE", raising=False)
 
     server._enable_gateway_prompts()
 
-    assert server.os.environ["HERMES_GATEWAY_SESSION"] == "1"
-    assert server.os.environ["HERMES_EXEC_ASK"] == "1"
-    assert server.os.environ["HERMES_INTERACTIVE"] == "1"
+    assert server.os.environ["MYAI_GATEWAY_SESSION"] == "1"
+    assert server.os.environ["MYAI_EXEC_ASK"] == "1"
+    assert server.os.environ["MYAI_INTERACTIVE"] == "1"
 
 
 def test_setup_status_reports_provider_config(monkeypatch):

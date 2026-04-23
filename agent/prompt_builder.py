@@ -609,8 +609,8 @@ def build_skills_system_prompt(
     # produce distinct cache entries (gateway serves multiple platforms).
     from gateway.session_context import get_session_env
     _platform_hint = (
-        os.environ.get("HERMES_PLATFORM")
-        or get_session_env("HERMES_SESSION_PLATFORM")
+        os.environ.get("MYAI_PLATFORM")
+        or get_session_env("MYAI_SESSION_PLATFORM")
         or ""
     )
     cache_key = (

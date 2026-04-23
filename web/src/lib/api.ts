@@ -4,7 +4,7 @@ const BASE = "";
 // Injected into index.html by the server — never fetched via API.
 declare global {
   interface Window {
-    __HERMES_SESSION_TOKEN__?: string;
+    __MYAI_SESSION_TOKEN__?: string;
   }
 }
 let _sessionToken: string | null = null;
@@ -12,7 +12,7 @@ let _sessionToken: string | null = null;
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
-  const token = window.__HERMES_SESSION_TOKEN__;
+  const token = window.__MYAI_SESSION_TOKEN__;
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -26,7 +26,7 @@ export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> 
 
 async function getSessionToken(): Promise<string> {
   if (_sessionToken) return _sessionToken;
-  const injected = window.__HERMES_SESSION_TOKEN__;
+  const injected = window.__MYAI_SESSION_TOKEN__;
   if (injected) {
     _sessionToken = injected;
     return _sessionToken;

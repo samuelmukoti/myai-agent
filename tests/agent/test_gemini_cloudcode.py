@@ -37,13 +37,13 @@ def _isolate_env(monkeypatch, tmp_path):
     for key in (
         "HERMES_GEMINI_CLIENT_ID",
         "HERMES_GEMINI_CLIENT_SECRET",
-        "HERMES_GEMINI_PROJECT_ID",
+        "MYAI_GEMINI_PROJECT_ID",
         "GOOGLE_CLOUD_PROJECT",
         "GOOGLE_CLOUD_PROJECT_ID",
         "SSH_CONNECTION",
         "SSH_CLIENT",
         "SSH_TTY",
-        "HERMES_HEADLESS",
+        "MYAI_HEADLESS",
     ):
         monkeypatch.delenv(key, raising=False)
     return home
@@ -338,7 +338,7 @@ class TestGetValidAccessToken:
 
 class TestProjectIdResolution:
     @pytest.mark.parametrize("env_var", [
-        "HERMES_GEMINI_PROJECT_ID",
+        "MYAI_GEMINI_PROJECT_ID",
         "GOOGLE_CLOUD_PROJECT",
         "GOOGLE_CLOUD_PROJECT_ID",
     ])
@@ -352,7 +352,7 @@ class TestProjectIdResolution:
         from agent.google_oauth import resolve_project_id_from_env
 
         monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "lower-priority")
-        monkeypatch.setenv("HERMES_GEMINI_PROJECT_ID", "higher-priority")
+        monkeypatch.setenv("MYAI_GEMINI_PROJECT_ID", "higher-priority")
         assert resolve_project_id_from_env() == "higher-priority"
 
     def test_no_env_returns_empty(self):
@@ -371,7 +371,7 @@ class TestHeadlessDetection:
     def test_detects_hermes_headless(self, monkeypatch):
         from agent.google_oauth import _is_headless
 
-        monkeypatch.setenv("HERMES_HEADLESS", "1")
+        monkeypatch.setenv("MYAI_HEADLESS", "1")
         assert _is_headless() is True
 
     def test_default_not_headless(self):
@@ -1042,7 +1042,7 @@ class TestProviderRegistration:
         for key in (
             "HERMES_GEMINI_CLIENT_ID",
             "HERMES_GEMINI_CLIENT_SECRET",
-            "HERMES_GEMINI_PROJECT_ID",
+            "MYAI_GEMINI_PROJECT_ID",
         ):
             assert key in OPTIONAL_ENV_VARS
 

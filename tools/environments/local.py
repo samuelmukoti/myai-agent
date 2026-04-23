@@ -149,7 +149,7 @@ def _find_bash() -> str:
             or "/bin/sh"
         )
 
-    custom = os.environ.get("HERMES_GIT_BASH_PATH")
+    custom = os.environ.get("MYAI_GIT_BASH_PATH")
     if custom and os.path.isfile(custom):
         return custom
 
@@ -168,7 +168,7 @@ def _find_bash() -> str:
     raise RuntimeError(
         "Git Bash not found. Hermes Agent requires Git for Windows on Windows.\n"
         "Install it from: https://git-scm.com/download/win\n"
-        "Or set HERMES_GIT_BASH_PATH to your bash.exe location."
+        "Or set MYAI_GIT_BASH_PATH to your bash.exe location."
     )
 
 

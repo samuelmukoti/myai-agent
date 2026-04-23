@@ -142,7 +142,7 @@ The `agent.system_prompt` is appended **after** Hermes's own system prompt — i
 Or set via environment variable:
 
 ```bash
-export HERMES_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
+export MYAI_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
 ```
 
 ### Prefill Messages (`prefill.json`)

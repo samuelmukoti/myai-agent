@@ -11,7 +11,7 @@ Hermetic-test invariants enforced here (see AGENTS.md for rationale):
    CI. Code using ``Path.home() / ".hermes"`` instead of the canonical
    ``get_hermes_home()`` is a bug to fix at the callsite.)
 3. **Deterministic runtime.** TZ=UTC, LANG=C.UTF-8, PYTHONHASHSEED=0.
-4. **No HERMES_SESSION_* inheritance** — the agent's current gateway
+4. **No MYAI_SESSION_* inheritance** — the agent's current gateway
    session must not leak into tests.
 
 These invariants make the local test run match CI closely. Gaps that
@@ -160,30 +160,30 @@ def _looks_like_credential(name: str) -> bool:
 # HERMES_* vars that change test behavior by being set. Unset all of these
 # unconditionally — individual tests that need them set do so explicitly.
 _HERMES_BEHAVIORAL_VARS = frozenset({
-    "HERMES_YOLO_MODE",
-    "HERMES_INTERACTIVE",
-    "HERMES_QUIET",
-    "HERMES_TOOL_PROGRESS",
-    "HERMES_TOOL_PROGRESS_MODE",
-    "HERMES_MAX_ITERATIONS",
-    "HERMES_SESSION_PLATFORM",
-    "HERMES_SESSION_CHAT_ID",
-    "HERMES_SESSION_CHAT_NAME",
-    "HERMES_SESSION_THREAD_ID",
-    "HERMES_SESSION_SOURCE",
-    "HERMES_SESSION_KEY",
-    "HERMES_GATEWAY_SESSION",
-    "HERMES_PLATFORM",
-    "HERMES_INFERENCE_PROVIDER",
+    "MYAI_YOLO_MODE",
+    "MYAI_INTERACTIVE",
+    "MYAI_QUIET",
+    "MYAI_TOOL_PROGRESS",
+    "MYAI_TOOL_PROGRESS_MODE",
+    "MYAI_MAX_ITERATIONS",
+    "MYAI_SESSION_PLATFORM",
+    "MYAI_SESSION_CHAT_ID",
+    "MYAI_SESSION_CHAT_NAME",
+    "MYAI_SESSION_THREAD_ID",
+    "MYAI_SESSION_SOURCE",
+    "MYAI_SESSION_KEY",
+    "MYAI_GATEWAY_SESSION",
+    "MYAI_PLATFORM",
+    "MYAI_INFERENCE_PROVIDER",
     "MYAI_AGENT_MANAGED",
     "MYAI_DEV",
-    "HERMES_CONTAINER",
-    "HERMES_EPHEMERAL_SYSTEM_PROMPT",
-    "HERMES_TIMEZONE",
-    "HERMES_REDACT_SECRETS",
-    "HERMES_BACKGROUND_NOTIFICATIONS",
-    "HERMES_EXEC_ASK",
-    "HERMES_HOME_MODE",
+    "MYAI_CONTAINER",
+    "MYAI_EPHEMERAL_SYSTEM_PROMPT",
+    "MYAI_TIMEZONE",
+    "MYAI_REDACT_SECRETS",
+    "MYAI_BACKGROUND_NOTIFICATIONS",
+    "MYAI_EXEC_ASK",
+    "MYAI_HOME_MODE",
     "BROWSER_CDP_URL",
     "CAMOFOX_URL",
 })

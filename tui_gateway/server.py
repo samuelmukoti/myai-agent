@@ -34,7 +34,7 @@ _stdout_lock = threading.Lock()
 _cfg_lock = threading.Lock()
 _cfg_cache: dict | None = None
 _cfg_mtime: float | None = None
-_SLASH_WORKER_TIMEOUT_S = max(5.0, float(os.environ.get("HERMES_TUI_SLASH_TIMEOUT_S", "45") or 45))
+_SLASH_WORKER_TIMEOUT_S = max(5.0, float(os.environ.get("MYAI_TUI_SLASH_TIMEOUT_S", "45") or 45))
 
 # Reserve real stdout for JSON-RPC only; redirect Python's stdout to stderr
 # so stray print() from libraries/tools becomes harmless gateway.stderr instead
@@ -286,9 +286,9 @@ def _clear_session_context(tokens: list) -> None:
 
 def _enable_gateway_prompts() -> None:
     """Route approvals through gateway callbacks instead of CLI input()."""
-    os.environ["HERMES_GATEWAY_SESSION"] = "1"
-    os.environ["HERMES_EXEC_ASK"] = "1"
-    os.environ["HERMES_INTERACTIVE"] = "1"
+    os.environ["MYAI_GATEWAY_SESSION"] = "1"
+    os.environ["MYAI_EXEC_ASK"] = "1"
+    os.environ["MYAI_INTERACTIVE"] = "1"
 
 
 # ── Blocking prompt factory ──────────────────────────────────────────
@@ -331,7 +331,7 @@ def resolve_skin() -> dict:
 
 
 def _resolve_model() -> str:
-    env = os.environ.get("HERMES_MODEL", "")
+    env = os.environ.get("MYAI_MODEL", "")
     if env:
         return env
     m = _load_cfg().get("model", "")
@@ -478,7 +478,7 @@ def _apply_model_switch(sid: str, session: dict, raw_input: str) -> dict:
         _restart_slash_worker(session)
         _emit("session.info", sid, _session_info(agent))
 
-    os.environ["HERMES_MODEL"] = result.new_model
+    os.environ["MYAI_MODEL"] = result.new_model
     if persist_global:
         _persist_model_switch(result)
     return {"value": result.new_model, "warning": result.warning_message or ""}
@@ -1742,12 +1742,12 @@ def _(rid, params: dict) -> dict:
                     enable_session_yolo(session["session_key"])
                     nv = "1"
             else:
-                current = bool(os.environ.get("HERMES_YOLO_MODE"))
+                current = bool(os.environ.get("MYAI_YOLO_MODE"))
                 if current:
-                    os.environ.pop("HERMES_YOLO_MODE", None)
+                    os.environ.pop("MYAI_YOLO_MODE", None)
                     nv = "0"
                 else:
-                    os.environ["HERMES_YOLO_MODE"] = "1"
+                    os.environ["MYAI_YOLO_MODE"] = "1"
                     nv = "1"
             return _ok(rid, {"key": key, "value": nv})
         except Exception as e:
@@ -2491,13 +2491,13 @@ def _(rid, params: dict) -> dict:
 def _(rid, params: dict) -> dict:
     action = params.get("action", "status")
     if action == "status":
-        env = os.environ.get("HERMES_VOICE", "").strip()
+        env = os.environ.get("MYAI_VOICE", "").strip()
         if env in {"0", "1"}:
             return _ok(rid, {"enabled": env == "1"})
         return _ok(rid, {"enabled": bool(_load_cfg().get("display", {}).get("voice_enabled", False))})
     if action in ("on", "off"):
         enabled = action == "on"
-        os.environ["HERMES_VOICE"] = "1" if enabled else "0"
+        os.environ["MYAI_VOICE"] = "1" if enabled else "0"
         _write_config_key("display.voice_enabled", enabled)
         return _ok(rid, {"enabled": action == "on"})
     return _err(rid, 4013, f"unknown voice action: {action}")
@@ -2688,9 +2688,9 @@ def _(rid, params: dict) -> dict:
     try:
         cfg = _load_cfg()
         model = _resolve_model()
-        api_key = os.environ.get("HERMES_API_KEY", "") or cfg.get("api_key", "")
+        api_key = os.environ.get("MYAI_API_KEY", "") or cfg.get("api_key", "")
         masked = f"****{api_key[-4:]}" if len(api_key) > 4 else "(not set)"
-        base_url = os.environ.get("HERMES_BASE_URL", "") or cfg.get("base_url", "")
+        base_url = os.environ.get("MYAI_BASE_URL", "") or cfg.get("base_url", "")
 
         sections = [{
             "title": "Model",

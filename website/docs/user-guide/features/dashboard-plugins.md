@@ -299,7 +299,7 @@ The dashboard scans these directories for `dashboard/manifest.json`:
 
 1. **User plugins:** `~/.hermes/plugins/<name>/dashboard/manifest.json`
 2. **Bundled plugins:** `<repo>/plugins/<name>/dashboard/manifest.json`
-3. **Project plugins:** `./.hermes/plugins/<name>/dashboard/manifest.json` (only when `HERMES_ENABLE_PROJECT_PLUGINS` is set)
+3. **Project plugins:** `./.hermes/plugins/<name>/dashboard/manifest.json` (only when `MYAI_ENABLE_PROJECT_PLUGINS` is set)
 
 User plugins take precedence — if the same plugin name exists in multiple sources, the user version wins.
 

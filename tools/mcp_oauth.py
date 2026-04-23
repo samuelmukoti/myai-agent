@@ -100,7 +100,7 @@ def _get_token_dir() -> Path:
         from myai_constants import get_hermes_home
         base = Path(get_hermes_home())
     except ImportError:
-        base = Path(os.environ.get("HERMES_HOME", str(Path.home() / ".hermes")))
+        base = Path(os.environ.get("MYAI_HOME", str(Path.home() / ".myai")))
     return base / "mcp-tokens"
 
 

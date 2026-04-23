@@ -532,7 +532,7 @@ When hermes runs via the NixOS module, the following CLI commands are **blocked*
 
 This prevents drift between what Nix declares and what's on disk. Detection uses two signals:
 
-1. **`HERMES_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
+1. **`MYAI_AGENT_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
 2. **`.managed` marker file** in `HERMES_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it hermes-agent hermes config set ...` is also blocked)
 
 To change configuration, edit your Nix config and run `sudo nixos-rebuild switch`.
@@ -640,7 +640,7 @@ nix flake check
 nix build .#checks.x86_64-linux.package-contents   # binaries exist + version
 nix build .#checks.x86_64-linux.entry-points-sync  # pyproject.toml ↔ Nix package sync
 nix build .#checks.x86_64-linux.cli-commands        # gateway/config subcommands
-nix build .#checks.x86_64-linux.managed-guard       # HERMES_MANAGED blocks mutation
+nix build .#checks.x86_64-linux.managed-guard       # MYAI_AGENT_MANAGED blocks mutation
 nix build .#checks.x86_64-linux.bundled-skills      # skills present in package
 nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves user keys
 ```
@@ -653,8 +653,8 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 | `package-contents` | `hermes` and `hermes-agent` binaries exist and `hermes version` runs |
 | `entry-points-sync` | Every `[project.scripts]` entry in `pyproject.toml` has a wrapped binary in the Nix package |
 | `cli-commands` | `hermes --help` exposes `gateway` and `config` subcommands |
-| `managed-guard` | `HERMES_MANAGED=true hermes config set ...` prints the NixOS error |
-| `bundled-skills` | Skills directory exists, contains SKILL.md files, `HERMES_BUNDLED_SKILLS` is set in wrapper |
+| `managed-guard` | `MYAI_AGENT_MANAGED=true hermes config set ...` prints the NixOS error |
+| `bundled-skills` | Skills directory exists, contains SKILL.md files, `MYAI_AGENT_BUNDLED_SKILLS` is set in wrapper |
 | `config-roundtrip` | 7 merge scenarios: fresh install, Nix override, user key preservation, mixed merge, MCP additive merge, nested deep merge, idempotency |
 
 </details>

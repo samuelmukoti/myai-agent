@@ -62,7 +62,7 @@ On first launch Hermes installs the TUI's Node dependencies into `ui-tui/node_mo
 Distributions that ship a prebuilt bundle (Nix, system packages) can point Hermes at it:
 
 ```bash
-export HERMES_TUI_DIR=/path/to/prebuilt/ui-tui
+export MYAI_AGENT_TUI_DIR=/path/to/prebuilt/ui-tui
 hermes --tui
 ```
 

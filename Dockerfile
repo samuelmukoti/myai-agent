@@ -40,7 +40,7 @@ RUN npm install --prefer-offline --no-audit && \
 # .dockerignore excludes node_modules, so the installs above survive.
 COPY --chown=hermes:hermes . .
 
-# Build web dashboard (Vite outputs to hermes_cli/web_dist/)
+# Build web dashboard (Vite outputs to myai_cli/web_dist/)
 RUN cd web && npm run build
 
 # ---------- Python virtualenv ----------
@@ -50,7 +50,7 @@ RUN uv venv && \
     uv pip install --no-cache-dir -e ".[all]"
 
 # ---------- Runtime ----------
-ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
+ENV MYAI_AGENT_WEB_DIST=/opt/hermes/myai_cli/web_dist
 ENV HERMES_HOME=/opt/data
 VOLUME [ "/opt/data" ]
 ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]

@@ -54,9 +54,9 @@
           installPhase = ''
             runHook preInstall
 
-            mkdir -p $out/share/hermes-agent $out/bin
-            cp -r ${bundledSkills} $out/share/hermes-agent/skills
-            cp -r ${hermesWeb} $out/share/hermes-agent/web_dist
+            mkdir -p $out/share/myai-agent $out/bin
+            cp -r ${bundledSkills} $out/share/myai-agent/skills
+            cp -r ${hermesWeb} $out/share/myai-agent/web_dist
 
             # copy pre-built TUI (same layout as dev: ui-tui/dist/ + node_modules/)
             mkdir -p $out/ui-tui
@@ -66,11 +66,11 @@
               (name: ''
                 makeWrapper ${hermesVenv}/bin/${name} $out/bin/${name} \
                   --suffix PATH : "${runtimePath}" \
-                  --set HERMES_BUNDLED_SKILLS $out/share/hermes-agent/skills \
-                  --set HERMES_WEB_DIST $out/share/hermes-agent/web_dist \
-                  --set HERMES_TUI_DIR $out/ui-tui \
-                  --set HERMES_PYTHON ${hermesVenv}/bin/python3 \
-                  --set HERMES_NODE ${pkgs.nodejs_22}/bin/node
+                  --set MYAI_AGENT_BUNDLED_SKILLS $out/share/myai-agent/skills \
+                  --set MYAI_AGENT_WEB_DIST $out/share/myai-agent/web_dist \
+                  --set MYAI_AGENT_TUI_DIR $out/ui-tui \
+                  --set MYAI_AGENT_PYTHON ${hermesVenv}/bin/python3 \
+                  --set MYAI_AGENT_NODE ${pkgs.nodejs_22}/bin/node
               '')
               [
                 "hermes"
@@ -83,7 +83,7 @@
           '';
 
           passthru.devShellHook = ''
-            STAMP=".nix-stamps/hermes-agent"
+            STAMP=".nix-stamps/myai-agent"
             STAMP_VALUE="${pyprojectHash}:${uvLockHash}"
             if [ ! -f "$STAMP" ] || [ "$(cat "$STAMP")" != "$STAMP_VALUE" ]; then
               echo "hermes-agent: installing Python dependencies..."
@@ -96,7 +96,7 @@
               echo "$STAMP_VALUE" > "$STAMP"
             else
               source .venv/bin/activate
-              export HERMES_PYTHON=${hermesVenv}/bin/python3
+              export MYAI_AGENT_PYTHON=${hermesVenv}/bin/python3
             fi
           '';
 

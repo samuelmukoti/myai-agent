@@ -5,8 +5,8 @@ Provides a FastAPI backend serving the Vite/React frontend and REST API
 endpoints for managing configuration, environment variables, and sessions.
 
 Usage:
-    python -m myai_cli.main web          # Start on http://127.0.0.1:9119
-    python -m myai_cli.main web --port 8080
+    python -m myai_cli.main dashboard          # Start on http://127.0.0.1:9119
+    python -m myai_cli.main dashboard --port 8080
 """
 
 import asyncio
@@ -59,7 +59,7 @@ except ImportError:
         f"Install with: {sys.executable} -m pip install 'fastapi' 'uvicorn[standard]'"
     )
 
-WEB_DIST = Path(os.environ["HERMES_WEB_DIST"]) if "HERMES_WEB_DIST" in os.environ else Path(__file__).parent / "web_dist"
+WEB_DIST = Path(os.environ["MYAI_AGENT_WEB_DIST"]) if "MYAI_AGENT_WEB_DIST" in os.environ else Path(__file__).parent / "web_dist"
 _log = logging.getLogger(__name__)
 
 app = FastAPI(title="MyAIOne Agent", version=__version__)

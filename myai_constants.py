@@ -135,11 +135,11 @@ def get_optional_skills_dir(default: Path | None = None) -> Path:
 
     Packaged installs may ship ``optional-skills`` outside the Python package
     tree and expose it via ``MYAI_OPTIONAL_SKILLS`` (or the legacy
-    ``HERMES_OPTIONAL_SKILLS``).
+    ``MYAI_AGENT_OPTIONAL_SKILLS``).
     """
     override = (
         os.getenv("MYAI_OPTIONAL_SKILLS", "").strip()
-        or os.getenv("HERMES_OPTIONAL_SKILLS", "").strip()
+        or os.getenv("MYAI_AGENT_OPTIONAL_SKILLS", "").strip()
     )
     if override:
         return Path(override)

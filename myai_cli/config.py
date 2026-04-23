@@ -78,7 +78,7 @@ _MANAGED_SYSTEM_NAMES = {
 
 def get_managed_system() -> Optional[str]:
     """Return the package manager owning this install, if any."""
-    raw = os.getenv("HERMES_MANAGED", "").strip()
+    raw = os.getenv("MYAI_AGENT_MANAGED", "").strip()
     if raw:
         normalized = raw.lower()
         if normalized in _MANAGED_TRUE_VALUES:
@@ -94,7 +94,7 @@ def get_managed_system() -> Optional[str]:
 def is_managed() -> bool:
     """Check if MyAIOne is running in package-manager-managed mode.
 
-    Two signals: the HERMES_MANAGED env var (set by the systemd service),
+    Two signals: the MYAI_AGENT_MANAGED env var (set by the systemd service),
     or a .managed marker file in HERMES_HOME (set by the NixOS activation
     script, so interactive shells also see it).
     """
@@ -119,13 +119,13 @@ def recommended_update_command() -> str:
 def format_managed_message(action: str = "modify this MyAIOne installation") -> str:
     """Build a user-facing error for managed installs."""
     managed_system = get_managed_system() or "a package manager"
-    raw = os.getenv("HERMES_MANAGED", "").strip().lower()
+    raw = os.getenv("MYAI_AGENT_MANAGED", "").strip().lower()
 
     if managed_system == "NixOS":
         env_hint = "true" if raw in _MANAGED_TRUE_VALUES else raw or "true"
         return (
             f"Cannot {action}: this MyAIOne installation is managed by NixOS "
-            f"(HERMES_MANAGED={env_hint}).\n"
+            f"(MYAI_AGENT_MANAGED={env_hint}).\n"
             "Edit services.hermes-agent.settings in your configuration.nix and run:\n"
             "  sudo nixos-rebuild switch"
         )
@@ -134,7 +134,7 @@ def format_managed_message(action: str = "modify this MyAIOne installation") -> 
         env_hint = raw or "homebrew"
         return (
             f"Cannot {action}: this MyAIOne installation is managed by Homebrew "
-            f"(HERMES_MANAGED={env_hint}).\n"
+            f"(MYAI_AGENT_MANAGED={env_hint}).\n"
             "Use:\n"
             "  brew upgrade hermes-agent"
         )

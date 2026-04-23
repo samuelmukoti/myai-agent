@@ -781,8 +781,8 @@ def _tui_need_npm_install(root: Path) -> bool:
 
 
 def _find_bundled_tui(tui_dir: Path) -> Optional[Path]:
-    """Directory whose dist/entry.js we should run: HERMES_TUI_DIR first, else repo ui-tui."""
-    env = os.environ.get("HERMES_TUI_DIR")
+    """Directory whose dist/entry.js we should run: MYAI_AGENT_TUI_DIR first, else repo ui-tui."""
+    env = os.environ.get("MYAI_AGENT_TUI_DIR")
     if env:
         p = Path(env)
         if (p / "dist" / "entry.js").exists() and not _tui_need_npm_install(p):
@@ -894,12 +894,12 @@ def _ensure_tui_node() -> None:
 
 
 def _make_tui_argv(tui_dir: Path, tui_dev: bool) -> tuple[list[str], Path]:
-    """TUI: --dev → tsx src; else node dist (HERMES_TUI_DIR or ui-tui, build when stale)."""
+    """TUI: --dev → tsx src; else node dist (MYAI_AGENT_TUI_DIR or ui-tui, build when stale)."""
     _ensure_tui_node()
 
     def _node_bin(bin: str) -> str:
         if bin == "node":
-            env_node = os.environ.get("HERMES_NODE")
+            env_node = os.environ.get("MYAI_AGENT_NODE")
             if env_node and os.path.isfile(env_node) and os.access(env_node, os.X_OK):
                 return env_node
         path = shutil.which(bin)
@@ -908,9 +908,9 @@ def _make_tui_argv(tui_dir: Path, tui_dev: bool) -> tuple[list[str], Path]:
             sys.exit(1)
         return path
 
-    # pre-built dist + node_modules (nix / full HERMES_TUI_DIR) skips npm.
+    # pre-built dist + node_modules (nix / full MYAI_AGENT_TUI_DIR) skips npm.
     if not tui_dev:
-        ext_dir = os.environ.get("HERMES_TUI_DIR")
+        ext_dir = os.environ.get("MYAI_AGENT_TUI_DIR")
         if ext_dir:
             p = Path(ext_dir)
             if (p / "dist" / "entry.js").exists() and not _tui_need_npm_install(p):
@@ -986,10 +986,10 @@ def _launch_tui(resume_session_id: Optional[str] = None, tui_dev: bool = False):
     tui_dir = PROJECT_ROOT / "ui-tui"
 
     env = os.environ.copy()
-    env["HERMES_PYTHON_SRC_ROOT"] = os.environ.get(
-        "HERMES_PYTHON_SRC_ROOT", str(PROJECT_ROOT)
+    env["MYAI_AGENT_PYTHON_SRC_ROOT"] = os.environ.get(
+        "MYAI_AGENT_PYTHON_SRC_ROOT", str(PROJECT_ROOT)
     )
-    env.setdefault("HERMES_PYTHON", sys.executable)
+    env.setdefault("MYAI_AGENT_PYTHON", sys.executable)
     env.setdefault("HERMES_CWD", os.getcwd())
     if resume_session_id:
         env["HERMES_TUI_RESUME"] = resume_session_id
@@ -6230,7 +6230,7 @@ def cmd_dashboard(args):
         print(f"Install them with:  {sys.executable} -m pip install 'fastapi' 'uvicorn[standard]'")
         sys.exit(1)
 
-    if "HERMES_WEB_DIST" not in os.environ:
+    if "MYAI_AGENT_WEB_DIST" not in os.environ:
         if not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
             sys.exit(1)
 

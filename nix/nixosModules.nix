@@ -748,7 +748,7 @@ HERMES_NIX_ENV_EOF
           environment = {
             HOME = cfg.stateDir;
             HERMES_HOME = "${cfg.stateDir}/.hermes";
-            HERMES_MANAGED = "true";
+            MYAI_AGENT_MANAGED = "true";
             MESSAGING_CWD = cfg.workingDirectory;
           };
 
@@ -841,7 +841,7 @@ HERMES_NIX_ENV_EOF
                 --env HERMES_UID="$HERMES_UID" \
                 --env HERMES_GID="$HERMES_GID" \
                 --env HERMES_HOME=${containerDataDir}/.hermes \
-                --env HERMES_MANAGED=true \
+                --env MYAI_AGENT_MANAGED=true \
                 --env HOME=${containerHomeDir} \
                 --env MESSAGING_CWD=${containerWorkDir} \
                 ${lib.concatStringsSep " " cfg.container.extraOptions} \

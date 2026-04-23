@@ -81,7 +81,7 @@ src/
 
 - `hermes --tui`      → `node dist/entry.js` (auto-builds when `.ts`/`.tsx` newer than `dist/entry.js`)
 - `hermes --tui --dev` → `tsx src/entry.tsx` (skip build)
-- `HERMES_TUI_DIR=…`  → external prebuilt dist (nix, distro packaging)
+- `MYAI_AGENT_TUI_DIR=…`  → external prebuilt dist (nix, distro packaging)
 
 ## Diverged From Original Plan
 

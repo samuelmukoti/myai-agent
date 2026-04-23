@@ -11,14 +11,14 @@ from tools.skills_hub import OptionalSkillSource
 
 
 def test_get_managed_system_homebrew(monkeypatch):
-    monkeypatch.setenv("HERMES_MANAGED", "homebrew")
+    monkeypatch.setenv("MYAI_AGENT_MANAGED", "homebrew")
 
     assert get_managed_system() == "Homebrew"
     assert recommended_update_command() == "brew upgrade hermes-agent"
 
 
 def test_format_managed_message_homebrew(monkeypatch):
-    monkeypatch.setenv("HERMES_MANAGED", "homebrew")
+    monkeypatch.setenv("MYAI_AGENT_MANAGED", "homebrew")
 
     message = format_managed_message("update MyAIOne Agent")
 
@@ -26,14 +26,14 @@ def test_format_managed_message_homebrew(monkeypatch):
     assert "brew upgrade hermes-agent" in message
 
 
-def test_recommended_update_command_defaults_to_hermes_update(monkeypatch):
-    monkeypatch.delenv("HERMES_MANAGED", raising=False)
+def test_recommended_update_command_defaults_to_myai_update(monkeypatch):
+    monkeypatch.delenv("MYAI_AGENT_MANAGED", raising=False)
 
-    assert recommended_update_command() == "hermes update"
+    assert recommended_update_command() == "myai update"
 
 
 def test_cmd_update_blocks_managed_homebrew(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_MANAGED", "homebrew")
+    monkeypatch.setenv("MYAI_AGENT_MANAGED", "homebrew")
 
     with patch("myai_cli.main.subprocess.run") as mock_run:
         cmd_update(SimpleNamespace())
@@ -47,7 +47,7 @@ def test_cmd_update_blocks_managed_homebrew(monkeypatch, capsys):
 def test_optional_skill_source_honors_env_override(monkeypatch, tmp_path):
     optional_dir = tmp_path / "optional-skills"
     optional_dir.mkdir()
-    monkeypatch.setenv("HERMES_OPTIONAL_SKILLS", str(optional_dir))
+    monkeypatch.setenv("MYAI_AGENT_OPTIONAL_SKILLS", str(optional_dir))
 
     source = OptionalSkillSource()
 

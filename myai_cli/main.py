@@ -1490,7 +1490,19 @@ def select_provider_and_model(args=None):
         return
 
     # Step 2: Provider-specific setup + model selection
-    if selected_provider == "openrouter":
+    if selected_provider == "myaione":
+        from myai_cli.inference.myaione_bootstrap import run_onboarding
+        try:
+            rc = run_onboarding()
+        except KeyboardInterrupt:
+            print("\nMyAIOne Inference setup cancelled.")
+            return
+        if rc != 0:
+            print(
+                f"\nMyAIOne Inference setup did not complete (rc={rc}). "
+                "Re-run `myai model` to try again."
+            )
+    elif selected_provider == "openrouter":
         _model_flow_openrouter(config, current_model)
     elif selected_provider == "nous":
         _model_flow_nous(config, current_model, args=args)

@@ -296,8 +296,9 @@ def main(
             # Also check API keys
             missing = get_missing_keys()
             if missing:
+                from myai_constants import display_hermes_home as _dhh
                 print(f"\n⚠️  Missing API keys: {', '.join(missing)}")
-                print("   Add them to ~/.hermes/.env")
+                print(f"   Add them to {_dhh()}/.env")
             else:
                 print("✅ API keys configured")
         else:

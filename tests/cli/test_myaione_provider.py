@@ -163,3 +163,25 @@ def test_canonical_providers_put_myaione_first() -> None:
 
     assert CANONICAL_PROVIDERS[0].slug == "myaione"
     assert CANONICAL_PROVIDERS[0].label == "MyAIOne Inference"
+
+
+def test_select_provider_dispatches_myaione() -> None:
+    """Regression: `myai model` → "MyAIOne Inference" must invoke onboarding.
+
+    Previously fell through silently because `select_provider_and_model()`
+    had no branch for the `"myaione"` slug despite the provider being listed
+    first in CANONICAL_PROVIDERS. Source-level check is a cheap backstop —
+    behavioral mocking of the picker + config + resolve_provider would add
+    brittleness for marginal coverage gain here.
+    """
+    import inspect
+    from myai_cli.main import select_provider_and_model
+
+    src = inspect.getsource(select_provider_and_model)
+    assert 'selected_provider == "myaione"' in src, (
+        "myaione dispatch branch is missing — selecting MyAIOne Inference "
+        "from `myai model` will silently no-op"
+    )
+    assert "run_onboarding" in src, (
+        "myaione branch does not invoke the bootstrap onboarding flow"
+    )

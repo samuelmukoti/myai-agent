@@ -2709,7 +2709,8 @@ def _setup_weixin():
     print()
     print_info("  1. MyAIOne will open Tencent iLink QR login in this terminal.")
     print_info("  2. Use WeChat to scan and confirm the QR code.")
-    print_info("  3. MyAIOne will store the returned account_id/token in ~/.hermes/.env.")
+    from myai_constants import display_hermes_home as _dhh
+    print_info(f"  3. MyAIOne will store the returned account_id/token in {_dhh()}/.env.")
     print_info("  4. This adapter supports native text, image, video, and document delivery.")
 
     existing_account = get_env_value("WEIXIN_ACCOUNT_ID")

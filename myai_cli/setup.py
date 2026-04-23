@@ -955,8 +955,9 @@ def _setup_tts_provider(config: dict):
         selected = "openai"
         print_info("OpenAI TTS will use the managed Nous gateway and bill to your subscription.")
         if get_env_value("VOICE_TOOLS_OPENAI_KEY") or get_env_value("OPENAI_API_KEY"):
+            from myai_constants import display_hermes_home as _dhh
             print_warning(
-                "Direct OpenAI credentials are still configured and may take precedence until removed from ~/.hermes/.env."
+                f"Direct OpenAI credentials are still configured and may take precedence until removed from {_dhh()}/.env."
             )
 
     if selected == "neutts":

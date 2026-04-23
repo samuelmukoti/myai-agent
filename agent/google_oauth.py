@@ -358,12 +358,13 @@ def _get_client_secret() -> str:
 def _require_client_id() -> str:
     cid = _get_client_id()
     if not cid:
+        from myai_constants import display_hermes_home as _dhh
         raise GoogleOAuthError(
             "Google OAuth client ID is not available.\n"
             "MyAIOne looks for a locally installed gemini-cli to source the OAuth client. "
             "Either:\n"
             "  1. Install it: npm install -g @google/gemini-cli  (or brew install gemini-cli)\n"
-            "  2. Set HERMES_GEMINI_CLIENT_ID and HERMES_GEMINI_CLIENT_SECRET in ~/.hermes/.env\n"
+            f"  2. Set HERMES_GEMINI_CLIENT_ID and HERMES_GEMINI_CLIENT_SECRET in {_dhh()}/.env\n"
             "\n"
             "Register a Desktop OAuth client at:\n"
             "  https://console.cloud.google.com/apis/credentials\n"

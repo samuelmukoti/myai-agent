@@ -289,7 +289,7 @@ export function useMainApp(gw: GatewayClient) {
   // Show model name + status so users can identify the MyAIOne tab.
   const shortModel = ui.info?.model?.replace(/^.*\//, '') ?? ''
   const titleStatus = ui.busy ? '⏳' : '✓'
-  const terminalTitle = shortModel ? `${titleStatus} ${shortModel} — MyAIOne` : 'MyAIOne'
+  const terminalTitle = shortModel ? `${titleStatus} ${shortModel} — MyAIOne` : 'MyAIOne's
   useTerminalTitle(terminalTitle)
 
   useEffect(() => {

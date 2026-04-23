@@ -4,7 +4,7 @@ from __future__ import annotations
 
 
 def hermes_xai_user_agent() -> str:
-    """Return a stable Hermes-specific User-Agent for xAI HTTP calls."""
+    """Return a stable MyAIOne-specific User-Agent for xAI HTTP calls."""
     try:
         from myai_cli import __version__
     except Exception:

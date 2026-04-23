@@ -1,4 +1,4 @@
-"""Shared curses-based UI components for Hermes CLI.
+"""Shared curses-based UI components for MyAIOne CLI.
 
 Used by `myai tools` and `myai skills` for interactive checklists.
 Provides a curses multi-select with keyboard navigation, plus a

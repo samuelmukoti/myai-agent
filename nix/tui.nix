@@ -1,4 +1,4 @@
-# nix/tui.nix — Hermes TUI (Ink/React) compiled with tsc and bundled
+# nix/tui.nix — MyAIOne TUI (Ink/React) compiled with tsc and bundled
 { pkgs, npm-lockfile-fix, ... }:
 let
   src = ../ui-tui;

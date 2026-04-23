@@ -10,13 +10,13 @@ Semantic long-term memory with profile recall, semantic search, explicit memory 
 ## Setup
 
 ```bash
-hermes memory setup    # select "supermemory"
+myai memory setup    # select "supermemory"
 ```
 
 Or manually:
 
 ```bash
-hermes config set memory.provider supermemory
+myai config set memory.provider supermemory
 echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 ```
 
@@ -54,7 +54,7 @@ Config file: `$HERMES_HOME/supermemory.json`
 
 ## Behavior
 
-When enabled, Hermes can:
+When enabled, MyAIOne can:
 
 - prefetch relevant memory context before each turn
 - store cleaned conversation turns after each completed response
@@ -63,7 +63,7 @@ When enabled, Hermes can:
 
 ## Profile-Scoped Containers
 
-Use `{identity}` in the `container_tag` to scope memories per Hermes profile:
+Use `{identity}` in the `container_tag` to scope memories per MyAIOne profile:
 
 ```json
 {

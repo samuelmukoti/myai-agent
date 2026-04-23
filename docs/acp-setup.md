@@ -1,16 +1,16 @@
-# Hermes Agent — ACP (Agent Client Protocol) Setup Guide
+# MyAIOne Agent — ACP (Agent Client Protocol) Setup Guide
 
-Hermes Agent supports the **Agent Client Protocol (ACP)**, allowing it to run as
-a coding agent inside your editor. ACP lets your IDE send tasks to Hermes, and
-Hermes responds with file edits, terminal commands, and explanations — all shown
+MyAIOne Agent supports the **Agent Client Protocol (ACP)**, allowing it to run as
+a coding agent inside your editor. ACP lets your IDE send tasks to MyAIOne, and
+MyAIOne responds with file edits, terminal commands, and explanations — all shown
 natively in the editor UI.
 
 ---
 
 ## Prerequisites
 
-- Hermes Agent installed and configured (`hermes setup` completed)
-- An API key / provider set up in `~/.hermes/.env` or via `hermes login`
+- MyAIOne Agent installed and configured (`myai setup` completed)
+- An API key / provider set up in `~/.hermes/.env` or via `myai login`
 - Python 3.11+
 
 Install the ACP extra:
@@ -52,15 +52,15 @@ Open your VS Code settings (`Ctrl+,` → click the `{}` icon for JSON) and add:
 }
 ```
 
-Replace `/path/to/hermes-agent` with the actual path to your Hermes Agent
+Replace `/path/to/hermes-agent` with the actual path to your MyAIOne Agent
 installation (e.g. `~/.hermes/hermes-agent`).
 
-Alternatively, if `hermes` is on your PATH, the ACP Client can discover it
+Alternatively, if `myai` is on your PATH, the ACP Client can discover it
 automatically via the registry directory.
 
 ### 3. Restart VS Code
 
-After configuring, restart VS Code. You should see **Hermes Agent** appear in
+After configuring, restart VS Code. You should see **MyAIOne Agent** appear in
 the ACP agent picker in the chat/agent panel.
 
 ---
@@ -79,7 +79,7 @@ Open Zed settings (`Cmd+,` on macOS or `Ctrl+,` on Linux) and add to your
   "agent_servers": {
     "hermes-agent": {
       "type": "custom",
-      "command": "hermes",
+      "command": "myai",
       "args": ["acp"],
     },
   },
@@ -88,7 +88,7 @@ Open Zed settings (`Cmd+,` on macOS or `Ctrl+,` on Linux) and add to your
 
 ### 2. Restart Zed
 
-Hermes Agent will appear in the agent panel. Select it and start a conversation.
+MyAIOne Agent will appear in the agent panel. Select it and start a conversation.
 
 ---
 
@@ -110,33 +110,33 @@ Hermes Agent will appear in the agent panel. Select it and start a conversation.
 
 ### 3. Use the agent
 
-Open the ACP panel (usually in the right sidebar) and select **Hermes Agent**.
+Open the ACP panel (usually in the right sidebar) and select **MyAIOne Agent**.
 
 ---
 
 ## What You Will See
 
-Once connected, your editor provides a native interface to Hermes Agent:
+Once connected, your editor provides a native interface to MyAIOne Agent:
 
 ### Chat Panel
 A conversational interface where you can describe tasks, ask questions, and
-give instructions. Hermes responds with explanations and actions.
+give instructions. MyAIOne responds with explanations and actions.
 
 ### File Diffs
-When Hermes edits files, you see standard diffs in the editor. You can:
+When MyAIOne edits files, you see standard diffs in the editor. You can:
 - **Accept** individual changes
 - **Reject** changes you don't want
 - **Review** the full diff before applying
 
 ### Terminal Commands
-When Hermes needs to run shell commands (builds, tests, installs), the editor
+When MyAIOne needs to run shell commands (builds, tests, installs), the editor
 shows them in an integrated terminal. Depending on your settings:
 - Commands may run automatically
 - Or you may be prompted to **approve** each command
 
 ### Approval Flow
 For potentially destructive operations, the editor will prompt you for
-approval before Hermes proceeds. This includes:
+approval before MyAIOne proceeds. This includes:
 - File deletions
 - Shell commands
 - Git operations
@@ -145,14 +145,14 @@ approval before Hermes proceeds. This includes:
 
 ## Configuration
 
-Hermes Agent under ACP uses the **same configuration** as the CLI:
+MyAIOne Agent under ACP uses the **same configuration** as the CLI:
 
 - **API keys / providers**: `~/.hermes/.env`
 - **Agent config**: `~/.hermes/config.yaml`
 - **Skills**: `~/.hermes/skills/`
 - **Sessions**: `~/.hermes/state.db`
 
-You can run `hermes setup` to configure providers, or edit `~/.hermes/.env`
+You can run `myai setup` to configure providers, or edit `~/.hermes/.env`
 directly.
 
 ### Changing the model
@@ -177,15 +177,15 @@ ACP sessions use the curated `hermes-acp` toolset by default. It is designed for
 
 1. **Check the registry path** — make sure the `acp_registry/` directory path
    in your editor settings is correct and contains `agent.json`.
-2. **Check `hermes` is on PATH** — run `which hermes` in a terminal. If not
+2. **Check `myai` is on PATH** — run `which myai` in a terminal. If not
    found, you may need to activate your virtualenv or add it to PATH.
 3. **Restart the editor** after changing settings.
 
 ### Agent starts but errors immediately
 
-1. Run `hermes doctor` to check your configuration.
-2. Check that you have a valid API key: `hermes status`
-3. Try running `hermes acp` directly in a terminal to see error output.
+1. Run `myai doctor` to check your configuration.
+2. Check that you have a valid API key: `myai status`
+3. Try running `myai acp` directly in a terminal to see error output.
 
 ### "Module not found" errors
 
@@ -208,15 +208,15 @@ settings for auto-approval or manual-approval preferences.
 
 ### Logs
 
-Hermes logs are written to stderr when running in ACP mode. Check:
-- VS Code: **Output** panel → select **ACP Client** or **Hermes Agent**
+MyAIOne logs are written to stderr when running in ACP mode. Check:
+- VS Code: **Output** panel → select **ACP Client** or **MyAIOne Agent**
 - Zed: **View** → **Toggle Terminal** and check the process output
 - JetBrains: **Event Log** or the ACP tool window
 
 You can also enable verbose logging:
 
 ```bash
-HERMES_LOG_LEVEL=DEBUG hermes acp
+HERMES_LOG_LEVEL=DEBUG myai acp
 ```
 
 ---
@@ -224,5 +224,5 @@ HERMES_LOG_LEVEL=DEBUG hermes acp
 ## Further Reading
 
 - [ACP Specification](https://github.com/anysphere/acp)
-- [Hermes Agent Documentation](https://github.com/NousResearch/hermes-agent)
-- Run `hermes --help` for all CLI options
+- [MyAIOne Agent Documentation](https://github.com/NousResearch/hermes-agent)
+- Run `myai --help` for all CLI options

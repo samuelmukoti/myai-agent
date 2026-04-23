@@ -6,7 +6,7 @@ import type { SlashCommand } from '../types.js'
 
 export const setupCommands: SlashCommand[] = [
   {
-    help: 'configure LLM provider + model (launches `hermes model`)',
+    help: 'configure LLM provider + model (launches `myai model`)',
     name: 'provider',
     run: (_arg, ctx) =>
       void runExternalSetup({
@@ -18,7 +18,7 @@ export const setupCommands: SlashCommand[] = [
       })
   },
   {
-    help: 'run full setup wizard (launches `hermes setup`)',
+    help: 'run full setup wizard (launches `myai setup`)',
     name: 'setup',
     run: (arg, ctx) =>
       void runExternalSetup({

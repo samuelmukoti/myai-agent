@@ -1,4 +1,4 @@
-# nix/web.nix — Hermes Web Dashboard (Vite/React) frontend build
+# nix/web.nix — MyAIOne Web Dashboard (Vite/React) frontend build
 { pkgs, npm-lockfile-fix, ... }:
 let
   src = ../web;

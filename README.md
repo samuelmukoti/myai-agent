@@ -8,8 +8,6 @@
 
 **The self-improving AI agent at the core of the MyAIOne Rig.** It creates skills from experience, improves them during use, searches its own past conversations, and builds a deepening model of who you are across sessions. Runs inside your dedicated MyAIOne container alongside DevStation, or standalone on a $5 VPS, a GPU cluster, or serverless infrastructure.
 
-Forked from [Nous Research's Hermes Agent](https://github.com/NousResearch/hermes-agent) — upstream is tracked so agent improvements flow through.
-
 Use any model you want — OpenAI, Anthropic, [OpenRouter](https://openrouter.ai) (200+ models), [NVIDIA NIM](https://build.nvidia.com), Google Gemini, [Hugging Face](https://huggingface.co), or your own endpoint. Switch with `myai model` — no code changes, no lock-in.
 
 <table>
@@ -173,7 +171,18 @@ python -m pytest tests/ -q
 - 📚 [Skills Hub](https://agentskills.io)
 - 🐛 [Issues](https://github.com/samuelmukoti/myai-agent/issues)
 - 💡 [Discussions](https://github.com/samuelmukoti/myai-agent/discussions)
-- ⬆ Upstream: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) — the agent core this is forked from.
+
+---
+
+## Inspiration & Credits
+
+MyAIOne Agent draws on the ideas and lineage of several projects that came before it:
+
+- **[Hermes Agent](https://github.com/NousResearch/hermes-agent)** by [Nous Research](https://nousresearch.com) — the agent core this project was originally forked from, and where much of the tool-calling and skills architecture was first explored.
+- **[OpenClaw](https://github.com/openclaw/openclaw)** — an inspiration for the messaging-gateway, personality, and migration model. MyAIOne Agent ships a `claw migrate` command to import OpenClaw installations.
+- **[Pi Agent Harness](https://github.com/badlogic/pi-mono)** (`pi-mono`) — a minimalist agent-harness reference that informed the shape of the runtime loop and harness boundaries.
+
+Thanks to the authors and communities behind each of these for the prior art.
 
 ---
 
@@ -181,4 +190,4 @@ python -m pytest tests/ -q
 
 MIT — see [LICENSE](LICENSE).
 
-Part of the **MyAIOne Rig**. Agent core forked from [Hermes Agent](https://github.com/NousResearch/hermes-agent) by [Nous Research](https://nousresearch.com).
+Part of the **MyAIOne Rig**.

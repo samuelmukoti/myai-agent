@@ -195,7 +195,7 @@
 
   in {
     options.services.hermes-agent = with lib; {
-      enable = mkEnableOption "Hermes Agent gateway service";
+      enable = mkEnableOption "MyAIOne Agent gateway service";
 
       # ── Package ──────────────────────────────────────────────────────────
       package = mkOption {
@@ -740,7 +740,7 @@ HERMES_NIX_ENV_EOF
       # ══════════════════════════════════════════════════════════════════
       (lib.mkIf (!cfg.container.enable) {
         systemd.services.hermes-agent = {
-          description = "Hermes Agent Gateway";
+          description = "MyAIOne Agent Gateway";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ];
           wants = [ "network-online.target" ];
@@ -798,7 +798,7 @@ HERMES_NIX_ENV_EOF
         virtualisation.docker.enable = lib.mkDefault (cfg.container.backend == "docker");
 
         systemd.services.hermes-agent = {
-          description = "Hermes Agent Gateway (container)";
+          description = "MyAIOne Agent Gateway (container)";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ]
             ++ lib.optional (cfg.container.backend == "docker") "docker.service";

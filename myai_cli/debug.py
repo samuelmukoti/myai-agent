@@ -1,4 +1,4 @@
-"""``myai debug`` — debug tools for Hermes Agent.
+"""``myai debug`` — debug tools for MyAIOne Agent.
 
 Currently supports:
     myai debug share    Upload debug report (system info + logs) to a
@@ -153,7 +153,7 @@ def _sweep_expired_pastes(now: Optional[float] = None) -> tuple[int, int]:
 
 _PRIVACY_NOTICE = """\
 ⚠️  This will upload the following to a public paste service:
-  • System info (OS, Python version, Hermes version, provider, which API keys
+  • System info (OS, Python version, MyAIOne version, provider, which API keys
     are configured — NOT the actual keys)
   • Recent log lines (agent.log, errors.log, gateway.log — may contain
     conversation fragments and file paths)
@@ -527,7 +527,7 @@ def run_debug_share(args):
     # Manual delete fallback
     print(f"To delete now:  myai debug delete <url>")
 
-    print(f"\nShare these links with the Hermes team for support.")
+    print(f"\nShare these links with the MyAIOne team for support.")
 
 
 def run_debug_delete(args):

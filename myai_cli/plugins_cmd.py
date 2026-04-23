@@ -377,7 +377,7 @@ def cmd_install(identifier: str, force: bool = False) -> None:
     if not (target / "plugin.yaml").exists() and not (target / "__init__.py").exists():
         console.print(
             f"[yellow]Warning:[/yellow] {plugin_name} doesn't contain plugin.yaml "
-            f"or __init__.py. It may not be a valid Hermes plugin."
+            f"or __init__.py. It may not be a valid MyAIOne plugin."
         )
 
     # Copy .example files to their real names (e.g. config.yaml.example → config.yaml)

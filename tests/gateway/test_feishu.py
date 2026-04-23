@@ -423,7 +423,7 @@ class TestFeishuAdapterMessaging(unittest.TestCase):
                 self.request = request
                 return SimpleNamespace(
                     success=lambda: True,
-                    data=SimpleNamespace(name="Hermes Group", chat_type="group"),
+                    data=SimpleNamespace(name="MyAIOne Group", chat_type="group"),
                 )
 
         chat_api = _ChatAPI()
@@ -443,7 +443,7 @@ class TestFeishuAdapterMessaging(unittest.TestCase):
 
         self.assertEqual(chat_api.request.chat_id, "oc_chat")
         self.assertEqual(info["chat_id"], "oc_chat")
-        self.assertEqual(info["name"], "Hermes Group")
+        self.assertEqual(info["name"], "MyAIOne Group")
         self.assertEqual(info["type"], "group")
 
 class TestAdapterModule(unittest.TestCase):
@@ -748,7 +748,7 @@ class TestAdapterBehavior(unittest.TestCase):
         {
             "FEISHU_GROUP_POLICY": "allowlist",
             "FEISHU_ALLOWED_USERS": "ou_allowed",
-            "FEISHU_BOT_NAME": "Hermes Bot",
+            "FEISHU_BOT_NAME": "MyAIOne Bot",
         },
         clear=True,
     )
@@ -760,7 +760,7 @@ class TestAdapterBehavior(unittest.TestCase):
         mentioned = SimpleNamespace(
             mentions=[
                 SimpleNamespace(
-                    name="Hermes Bot",
+                    name="MyAIOne Bot",
                     id=SimpleNamespace(open_id="ou_other", user_id="u_other"),
                 )
             ]
@@ -989,7 +989,7 @@ class TestAdapterBehavior(unittest.TestCase):
         sender_id = SimpleNamespace(open_id="ou_any", user_id=None)
 
         bot_mention = SimpleNamespace(
-            name="Hermes",
+            name="MyAIOne",
             id=SimpleNamespace(open_id="ou_bot", user_id="u_bot"),
         )
         other_mention = SimpleNamespace(
@@ -1006,11 +1006,11 @@ class TestAdapterBehavior(unittest.TestCase):
         from gateway.platforms.feishu import FeishuAdapter
 
         adapter = FeishuAdapter(PlatformConfig())
-        adapter._bot_name = "Hermes Bot"
+        adapter._bot_name = "MyAIOne Bot"
         sender_id = SimpleNamespace(open_id="ou_any", user_id=None)
 
         named_mention = SimpleNamespace(
-            name="Hermes Bot",
+            name="MyAIOne Bot",
             id=SimpleNamespace(open_id="ou_other", user_id="u_other"),
         )
         different_mention = SimpleNamespace(
@@ -1032,7 +1032,7 @@ class TestAdapterBehavior(unittest.TestCase):
         message = SimpleNamespace(
             message_type="post",
             mentions=[],
-            content='{"en_us":{"content":[[{"tag":"at","user_name":"Hermes","open_id":"ou_bot"}]]}}',
+            content='{"en_us":{"content":[[{"tag":"at","user_name":"MyAIOne","open_id":"ou_bot"}]]}}',
         )
 
         self.assertTrue(adapter._should_accept_group_message(message, sender_id, ""))

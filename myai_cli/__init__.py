@@ -1,5 +1,5 @@
 """
-Hermes CLI - Unified command-line interface for Hermes Agent.
+MyAIOne CLI - Unified command-line interface for MyAIOne Agent.
 
 Provides subcommands for:
 - myai chat          - Interactive chat (same as ./hermes)

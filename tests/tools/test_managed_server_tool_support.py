@@ -2,8 +2,8 @@
 Tests for ManagedServer / tool-parser integration.
 
 Validates that:
-1. The installed atroposlib API still matches Hermes's expectations
-2. Hermes's parser registry remains compatible with ManagedServer parsing
+1. The installed atroposlib API still matches MyAIOne's expectations
+2. MyAIOne's parser registry remains compatible with ManagedServer parsing
 3. HermesAgentBaseEnv wires the selected parser into ServerManager correctly
 
 These tests verify the contract between hermes-agent's environments/ code
@@ -144,7 +144,7 @@ class TestBaseEnvCompatibility:
     """Test that hermes_base_env.py's tool-parser wiring matches the current API."""
 
     def test_hermes_base_env_sets_server_manager_tool_parser(self):
-        """Hermes wires parser selection through ServerManager.tool_parser."""
+        """MyAIOne wires parser selection through ServerManager.tool_parser."""
         import ast
 
         base_env_path = Path(__file__).parent.parent.parent / "environments" / "hermes_base_env.py"

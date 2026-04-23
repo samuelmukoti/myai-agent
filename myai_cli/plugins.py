@@ -1,5 +1,5 @@
 """
-Hermes Plugin System
+MyAIOne Plugin System
 ====================
 
 Discovers, loads, and manages plugins from three sources:

@@ -1,4 +1,4 @@
-"""Tests for the Hermes plugin system (myai_cli.plugins)."""
+"""Tests for the MyAIOne plugin system (myai_cli.plugins)."""
 
 import logging
 import os

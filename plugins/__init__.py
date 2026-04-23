@@ -1,1 +1,1 @@
-# Hermes plugins package
+# MyAIOne plugins package

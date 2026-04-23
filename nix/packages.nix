@@ -1,4 +1,4 @@
-# nix/packages.nix — Hermes Agent package built with uv2nix
+# nix/packages.nix — MyAIOne Agent package built with uv2nix
 { inputs, ... }:
 {
   perSystem =

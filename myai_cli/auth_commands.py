@@ -354,10 +354,10 @@ def auth_remove_command(args) -> None:
     elif provider == "openai-codex" and (
         removed.source == "device_code" or removed.source.endswith(":device_code")
     ):
-        # Codex tokens live in TWO places: the Hermes auth store and
+        # Codex tokens live in TWO places: the MyAIOne auth store and
         # ~/.codex/auth.json (the Codex CLI shared file).  On every refresh,
         # refresh_codex_oauth_pure() writes to both.  So clearing only the
-        # Hermes auth store is not enough — _seed_from_singletons() will
+        # MyAIOne auth store is not enough — _seed_from_singletons() will
         # auto-import from ~/.codex/auth.json on the next load_pool() and
         # the removal is instantly undone.  Mark the source as suppressed
         # so auto-import is skipped; leave ~/.codex/auth.json untouched so
@@ -395,7 +395,7 @@ def auth_remove_command(args) -> None:
         oauth_file = get_hermes_home() / ".anthropic_oauth.json"
         if oauth_file.exists():
             oauth_file.unlink()
-            print("Cleared Hermes Anthropic OAuth credentials")
+            print("Cleared MyAIOne Anthropic OAuth credentials")
 
     elif removed.source == "claude_code" and provider == "anthropic":
         from myai_cli.auth import suppress_credential_source

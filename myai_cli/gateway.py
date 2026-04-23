@@ -1172,13 +1172,16 @@ def _hermes_home_for_target_user(target_home_dir: str) -> str:
     if current_hermes in default_candidates:
         return str(target_default)
 
-    # Profile or subdir of ~/.hermes → preserve the relative structure
-    try:
-        relative = current_hermes.relative_to(current_default)
-        return str(target_default / relative)
-    except ValueError:
-        # Completely custom path (not under ~/.hermes) — keep as-is
-        return str(current_hermes)
+    # Profile or subdir of the default home → preserve the relative structure
+    for candidate in default_candidates:
+        try:
+            relative = current_hermes.relative_to(candidate)
+            return str(target_default / relative)
+        except ValueError:
+            continue
+
+    # Completely custom path (not under ~/.myai or ~/.hermes) — keep as-is
+    return str(current_hermes)
 
 
 def generate_systemd_unit(system: bool = False, run_as_user: str | None = None) -> str:

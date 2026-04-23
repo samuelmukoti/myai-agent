@@ -534,7 +534,7 @@ def run_doctor(args):
     _check_gateway_service_linger(issues)
 
     # =========================================================================
-    # Check: Command installation (hermes bin symlink)
+    # Check: Command installation (myai bin symlink)
     # =========================================================================
     if sys.platform != "win32":
         print()
@@ -543,7 +543,7 @@ def run_doctor(args):
         # Determine the venv entry point location
         _venv_bin = None
         for _venv_name in ("venv", ".venv"):
-            _candidate = PROJECT_ROOT / _venv_name / "bin" / "hermes"
+            _candidate = PROJECT_ROOT / _venv_name / "bin" / "myai"
             if _candidate.exists():
                 _venv_bin = _candidate
                 break
@@ -557,12 +557,12 @@ def run_doctor(args):
         else:
             _cmd_link_dir = Path.home() / ".local" / "bin"
             _cmd_link_display = "~/.local/bin"
-        _cmd_link = _cmd_link_dir / "hermes"
+        _cmd_link = _cmd_link_dir / "myai"
 
         if _venv_bin is None:
             check_warn(
                 "Venv entry point not found",
-                "(hermes not in venv/bin/ or .venv/bin/ — reinstall with pip install -e '.[all]')"
+                "(myai not in venv/bin/ or .venv/bin/ — reinstall with pip install -e '.[all]')"
             )
             manual_issues.append(
                 f"Reinstall entry point: cd {PROJECT_ROOT} && source venv/bin/activate && pip install -e '.[all]'"
@@ -575,31 +575,31 @@ def run_doctor(args):
                 _target = _cmd_link.resolve()
                 _expected = _venv_bin.resolve()
                 if _target == _expected:
-                    check_ok(f"{_cmd_link_display}/hermes → correct target")
+                    check_ok(f"{_cmd_link_display}/myai → correct target")
                 else:
                     check_warn(
-                        f"{_cmd_link_display}/hermes points to wrong target",
+                        f"{_cmd_link_display}/myai points to wrong target",
                         f"(→ {_target}, expected → {_expected})"
                     )
                     if should_fix:
                         _cmd_link.unlink()
                         _cmd_link.symlink_to(_venv_bin)
-                        check_ok(f"Fixed symlink: {_cmd_link_display}/hermes → {_venv_bin}")
+                        check_ok(f"Fixed symlink: {_cmd_link_display}/myai → {_venv_bin}")
                         fixed_count += 1
                     else:
-                        issues.append(f"Broken symlink at {_cmd_link_display}/hermes — run 'myai doctor --fix'")
+                        issues.append(f"Broken symlink at {_cmd_link_display}/myai — run 'myai doctor --fix'")
             elif _cmd_link.exists():
                 # It's a regular file, not a symlink — possibly a wrapper script
-                check_ok(f"{_cmd_link_display}/hermes exists (non-symlink)")
+                check_ok(f"{_cmd_link_display}/myai exists (non-symlink)")
             else:
                 check_fail(
-                    f"{_cmd_link_display}/hermes not found",
-                    "(hermes command may not work outside the venv)"
+                    f"{_cmd_link_display}/myai not found",
+                    "(myai command may not work outside the venv)"
                 )
                 if should_fix:
                     _cmd_link_dir.mkdir(parents=True, exist_ok=True)
                     _cmd_link.symlink_to(_venv_bin)
-                    check_ok(f"Created symlink: {_cmd_link_display}/hermes → {_venv_bin}")
+                    check_ok(f"Created symlink: {_cmd_link_display}/myai → {_venv_bin}")
                     fixed_count += 1
 
                     # Check if the link dir is on PATH
@@ -611,7 +611,7 @@ def run_doctor(args):
                         )
                         manual_issues.append(f"Add {_cmd_link_display} to your PATH")
                 else:
-                    issues.append(f"Missing {_cmd_link_display}/hermes symlink — run 'myai doctor --fix'")
+                    issues.append(f"Missing {_cmd_link_display}/myai symlink — run 'myai doctor --fix'")
 
     # =========================================================================
     # Check: External tools

@@ -133,7 +133,7 @@ def _write_default_config(model_id: str) -> Path:
     model_section.update(
         {
             "provider": "myaione",
-            "id": model_id,
+            "default": model_id,
             "base_url": myaione_base_url(),
         }
     )

@@ -73,9 +73,9 @@
                   --set MYAI_AGENT_NODE ${pkgs.nodejs_22}/bin/node
               '')
               [
-                "hermes"
-                "hermes-agent"
-                "hermes-acp"
+                "myai"
+                "myai-agent"
+                "myai-acp"
               ]
             }
 
@@ -103,7 +103,7 @@
           meta = with pkgs.lib; {
             description = "AI agent with advanced tool-calling capabilities";
             homepage = "https://github.com/NousResearch/hermes-agent";
-            mainProgram = "hermes";
+            mainProgram = "myai";
             license = licenses.mit;
             platforms = platforms.unix;
           };

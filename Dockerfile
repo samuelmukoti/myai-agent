@@ -44,10 +44,20 @@ COPY --chown=hermes:hermes . .
 RUN cd web && npm run build
 
 # ---------- Python virtualenv ----------
+# `.[all]` pulls in every optional extra — including [messaging] and [slack],
+# which install slack-bolt + slack-sdk for the Slack Socket Mode adapter
+# (gateway/platforms/slack.py). Don't narrow this to a subset without
+# adding the messaging extras back explicitly; the image is meant to
+# boot any platform the user configures via `myai setup`.
 RUN chown hermes:hermes /opt/hermes
 USER hermes
 RUN uv venv && \
     uv pip install --no-cache-dir -e ".[all]"
+
+# Defensive check: fail the build if the Slack adapter's imports aren't
+# satisfied — catches a regression where someone removes [messaging]/[slack]
+# from the `all` extra in pyproject.toml.
+RUN .venv/bin/python -c "import slack_bolt, slack_sdk; print('slack deps OK')"
 
 # ---------- Runtime ----------
 ENV MYAI_AGENT_WEB_DIST=/opt/hermes/myai_cli/web_dist

@@ -531,7 +531,7 @@ class TestGatewaySystemServiceRouting:
 
         out = capsys.readouterr().out
         assert "not supported on Termux" in out
-        assert "Run manually: hermes gateway" in out
+        assert "Run manually: myai gateway" in out
 
     def test_gateway_status_prefers_system_service_when_only_system_unit_exists(self, monkeypatch):
         user_unit = SimpleNamespace(exists=lambda: False)
@@ -596,7 +596,7 @@ class TestGatewaySystemServiceRouting:
 
         out = capsys.readouterr().out
         assert "Gateway is not running" in out
-        assert "nohup hermes gateway" in out
+        assert "nohup myai gateway" in out
         assert "install as user service" not in out
 
     def test_gateway_restart_does_not_fallback_to_foreground_when_launchd_restart_fails(self, tmp_path, monkeypatch):
@@ -705,7 +705,7 @@ class TestSystemUnitHermesHome:
 
         unit = gateway_cli.generate_systemd_unit(system=True, run_as_user="alice")
 
-        assert 'HERMES_HOME=/home/alice/.hermes' in unit
+        assert 'HERMES_HOME=/home/alice/.myai' in unit
         assert '/root/.hermes' not in unit
 
     def test_system_unit_remaps_profile_to_target_user(self, monkeypatch):
@@ -723,7 +723,7 @@ class TestSystemUnitHermesHome:
 
         unit = gateway_cli.generate_systemd_unit(system=True, run_as_user="alice")
 
-        assert 'HERMES_HOME=/home/alice/.hermes/profiles/coder' in unit
+        assert 'HERMES_HOME=/home/alice/.myai/profiles/coder' in unit
         assert '/root/' not in unit
 
     def test_system_unit_preserves_custom_hermes_home(self, monkeypatch):
@@ -759,14 +759,14 @@ class TestHermesHomeForTargetUser:
         monkeypatch.delenv("HERMES_HOME", raising=False)
 
         result = gateway_cli._hermes_home_for_target_user("/home/alice")
-        assert result == "/home/alice/.hermes"
+        assert result == "/home/alice/.myai"
 
     def test_remaps_profile_path(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("HERMES_HOME", "/root/.hermes/profiles/coder")
 
         result = gateway_cli._hermes_home_for_target_user("/home/alice")
-        assert result == "/home/alice/.hermes/profiles/coder"
+        assert result == "/home/alice/.myai/profiles/coder"
 
     def test_keeps_custom_path(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
@@ -780,7 +780,7 @@ class TestHermesHomeForTargetUser:
         monkeypatch.delenv("HERMES_HOME", raising=False)
 
         result = gateway_cli._hermes_home_for_target_user("/home/alice")
-        assert result == "/home/alice/.hermes"
+        assert result == "/home/alice/.myai"
 
 
 class TestGeneratedUnitUsesDetectedVenv:
@@ -1176,7 +1176,7 @@ class TestDockerAwareGateway:
         assert exc_info.value.code == 0
         out = capsys.readouterr().out
         assert "docker" in out.lower()
-        assert "hermes gateway run" in out
+        assert "myai gateway run" in out
 
 
 class TestLegacyHermesUnitDetection:
@@ -1314,7 +1314,7 @@ class TestLegacyHermesUnitDetection:
         variants = [
             "ExecStart=/venv/bin/python -m myai_cli.main gateway run --replace",
             "ExecStart=/venv/bin/python /opt/hermes/myai_cli/main.py gateway run",
-            "ExecStart=/usr/local/bin/hermes gateway run --replace",
+            "ExecStart=/usr/local/bin/myai gateway run --replace",
             "ExecStart=/venv/bin/python /opt/hermes/gateway/run.py",
         ]
         for i, execstart in enumerate(variants):
@@ -1344,7 +1344,7 @@ class TestLegacyHermesUnitDetection:
 
         assert "Legacy" in out
         assert "hermes.service" in out
-        assert "hermes gateway migrate-legacy" in out
+        assert "myai gateway migrate-legacy" in out
 
     def test_handles_unreadable_unit_file_gracefully(self, tmp_path, monkeypatch):
         """A permission error reading a unit file must not crash detection."""
@@ -1448,7 +1448,7 @@ class TestRemoveLegacyHermesUnits:
         assert remaining == [legacy]
         assert legacy.exists()  # Not removed — requires sudo
         out = capsys.readouterr().out
-        assert "sudo hermes gateway migrate-legacy" in out
+        assert "sudo myai gateway migrate-legacy" in out
 
     def test_system_scope_with_root_removes(self, tmp_path, monkeypatch, capsys):
         _, system_dir, calls = self._setup(tmp_path, monkeypatch, as_root=True)

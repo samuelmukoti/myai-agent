@@ -19,7 +19,7 @@
         export HOME=$TMPDIR
         ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import DEFAULT_CONFIG
+from myai_cli.config import DEFAULT_CONFIG
 
 def leaf_paths(d, prefix=""):
     paths = []
@@ -65,12 +65,12 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         package-contents = pkgs.runCommand "hermes-package-contents" { } ''
           set -e
           echo "=== Checking binaries ==="
-          test -x ${hermes-agent}/bin/hermes || (echo "FAIL: hermes binary missing"; exit 1)
-          test -x ${hermes-agent}/bin/hermes-agent || (echo "FAIL: hermes-agent binary missing"; exit 1)
+          test -x ${hermes-agent}/bin/myai || (echo "FAIL: hermes binary missing"; exit 1)
+          test -x ${hermes-agent}/bin/myai-agent || (echo "FAIL: hermes-agent binary missing"; exit 1)
           echo "PASS: All binaries present"
 
           echo "=== Checking version ==="
-          ${hermes-agent}/bin/hermes version 2>&1 | grep -qi "hermes" || (echo "FAIL: version check"; exit 1)
+          ${hermes-agent}/bin/myai version 2>&1 | grep -qi "hermes" || (echo "FAIL: version check"; exit 1)
           echo "PASS: Version check"
 
           echo "=== All checks passed ==="
@@ -82,7 +82,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         entry-points-sync = pkgs.runCommand "hermes-entry-points-sync" { } ''
           set -e
           echo "=== Checking entry points match pyproject.toml [project.scripts] ==="
-          for bin in hermes hermes-agent hermes-acp; do
+          for bin in myai myai-agent myai-acp; do
             test -x ${hermes-agent}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
             echo "PASS: $bin present"
           done
@@ -96,9 +96,9 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           set -e
           export HOME=$(mktemp -d)
 
-          echo "=== Checking hermes --help ==="
-          ${hermes-agent}/bin/hermes --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
-          ${hermes-agent}/bin/hermes --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
+          echo "=== Checking myai --help ==="
+          ${hermes-agent}/bin/myai --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
+          ${hermes-agent}/bin/myai --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
           echo "PASS: All subcommands accessible"
 
           echo "=== All CLI checks passed ==="
@@ -110,14 +110,14 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-skills = pkgs.runCommand "hermes-bundled-skills" { } ''
           set -e
           echo "=== Checking bundled skills ==="
-          test -d ${hermes-agent}/share/hermes-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
+          test -d ${hermes-agent}/share/myai-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
           echo "PASS: skills directory exists"
 
-          SKILL_COUNT=$(find ${hermes-agent}/share/hermes-agent/skills -name "SKILL.md" | wc -l)
+          SKILL_COUNT=$(find ${hermes-agent}/share/myai-agent/skills -name "SKILL.md" | wc -l)
           test "$SKILL_COUNT" -gt 0 || (echo "FAIL: no SKILL.md files found in skills directory"; exit 1)
           echo "PASS: $SKILL_COUNT bundled skills found"
 
-          grep -q "MYAI_AGENT_BUNDLED_SKILLS" ${hermes-agent}/bin/hermes || \
+          grep -q "MYAI_AGENT_BUNDLED_SKILLS" ${hermes-agent}/bin/myai || \
             (echo "FAIL: MYAI_AGENT_BUNDLED_SKILLS not in wrapper"; exit 1)
           echo "PASS: MYAI_AGENT_BUNDLED_SKILLS set in wrapper"
 
@@ -139,7 +139,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           test -d ${hermes-agent}/ui-tui/node_modules || (echo "FAIL: node_modules missing"; exit 1)
           echo "PASS: node_modules present"
 
-          grep -q "MYAI_AGENT_TUI_DIR" ${hermes-agent}/bin/hermes || \
+          grep -q "MYAI_AGENT_TUI_DIR" ${hermes-agent}/bin/myai || \
             (echo "FAIL: MYAI_AGENT_TUI_DIR not in wrapper"; exit 1)
           echo "PASS: MYAI_AGENT_TUI_DIR set in wrapper"
 
@@ -153,11 +153,11 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         hermes-node = pkgs.runCommand "hermes-node-version" { } ''
           set -e
           echo "=== Checking MYAI_AGENT_NODE in wrapper ==="
-          grep -q "MYAI_AGENT_NODE" ${hermes-agent}/bin/hermes || \
+          grep -q "MYAI_AGENT_NODE" ${hermes-agent}/bin/myai || \
             (echo "FAIL: MYAI_AGENT_NODE not set in wrapper"; exit 1)
           echo "PASS: MYAI_AGENT_NODE present in wrapper"
 
-          MYAI_AGENT_NODE=$(sed -n "s/^export MYAI_AGENT_NODE='\(.*\)'/\1/p" ${hermes-agent}/bin/hermes)
+          MYAI_AGENT_NODE=$(sed -n "s/^export MYAI_AGENT_NODE='\(.*\)'/\1/p" ${hermes-agent}/bin/myai)
           test -x "$MYAI_AGENT_NODE" || (echo "FAIL: MYAI_AGENT_NODE=$MYAI_AGENT_NODE not executable"; exit 1)
           echo "PASS: MYAI_AGENT_NODE executable at $MYAI_AGENT_NODE"
 
@@ -185,8 +185,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           }
 
           echo "=== Checking MYAI_AGENT_MANAGED guards ==="
-          check_blocked "config set" ${hermes-agent}/bin/hermes config set model foo
-          check_blocked "config edit" ${hermes-agent}/bin/hermes config edit
+          check_blocked "config set" ${hermes-agent}/bin/myai config set model foo
+          check_blocked "config edit" ${hermes-agent}/bin/myai config edit
 
           echo "=== All guard checks passed ==="
           mkdir -p $out
@@ -269,7 +269,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             ${configMergeScript} ${nixSettings} "$hermes_home/config.yaml"
             ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import load_config
+from myai_cli.config import load_config
 json.dump(load_config(), sys.stdout, default=str)
 '
           }

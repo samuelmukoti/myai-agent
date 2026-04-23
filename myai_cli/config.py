@@ -105,7 +105,7 @@ def get_managed_update_command() -> Optional[str]:
     """Return the preferred upgrade command for a managed install."""
     managed_system = get_managed_system()
     if managed_system == "Homebrew":
-        return "brew upgrade hermes-agent"
+        return "brew upgrade myai-agent"
     if managed_system == "NixOS":
         return "sudo nixos-rebuild switch"
     return None
@@ -136,7 +136,7 @@ def format_managed_message(action: str = "modify this MyAIOne installation") -> 
             f"Cannot {action}: this MyAIOne installation is managed by Homebrew "
             f"(MYAI_AGENT_MANAGED={env_hint}).\n"
             "Use:\n"
-            "  brew upgrade hermes-agent"
+            "  brew upgrade myai-agent"
         )
 
     return (
@@ -156,7 +156,7 @@ def managed_error(action: str = "modify configuration"):
 def get_container_exec_info() -> Optional[dict]:
     """Read container mode metadata from HERMES_HOME/.container-mode.
 
-    Returns a dict with keys: backend, container_name, exec_user, hermes_bin
+    Returns a dict with keys: backend, container_name, exec_user, myai_bin
     or None if container mode is not active, we're already inside the
     container, or HERMES_DEV=1 is set.
 
@@ -186,15 +186,20 @@ def get_container_exec_info() -> Optional[dict]:
     # All other exceptions (PermissionError, malformed data, etc.) propagate
 
     backend = info.get("backend", "docker")
-    container_name = info.get("container_name", "hermes-agent")
-    exec_user = info.get("exec_user", "hermes")
-    hermes_bin = info.get("hermes_bin", "/data/current-package/bin/hermes")
+    container_name = info.get("container_name", "myai-agent")
+    exec_user = info.get("exec_user", "myai")
+    # Back-compat: read either myai_bin (new) or hermes_bin (legacy .container-mode files).
+    myai_bin = (
+        info.get("myai_bin")
+        or info.get("hermes_bin")
+        or "/data/current-package/bin/myai"
+    )
 
     return {
         "backend": backend,
         "container_name": container_name,
         "exec_user": exec_user,
-        "hermes_bin": hermes_bin,
+        "myai_bin": myai_bin,
     }
 
 

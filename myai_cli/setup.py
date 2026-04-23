@@ -2955,11 +2955,11 @@ def run_setup_wizard(args):
     _offer_launch_chat()
 
 
-def _resolve_hermes_chat_argv() -> Optional[list[str]]:
+def _resolve_myai_chat_argv() -> Optional[list[str]]:
     """Resolve argv for launching ``myai chat`` in a fresh process."""
-    hermes_bin = shutil.which("hermes")
-    if hermes_bin:
-        return [hermes_bin, "chat"]
+    myai_bin = shutil.which("myai")
+    if myai_bin:
+        return [myai_bin, "chat"]
 
     try:
         if importlib.util.find_spec("myai_cli") is not None:
@@ -2976,7 +2976,7 @@ def _offer_launch_chat():
     if not prompt_yes_no("Launch myai chat now?", True):
         return
 
-    chat_argv = _resolve_hermes_chat_argv()
+    chat_argv = _resolve_myai_chat_argv()
     if not chat_argv:
         print_info("Could not relaunch MyAIOne automatically. Run 'myai chat' manually.")
         return

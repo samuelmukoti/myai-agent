@@ -480,21 +480,21 @@ def _resolve_gateway_model(config: dict | None = None) -> str:
     return ""
 
 
-def _resolve_hermes_bin() -> Optional[list[str]]:
+def _resolve_myai_bin() -> Optional[list[str]]:
     """Resolve the MyAIOne update command as argv parts.
 
     Tries in order:
-    1. ``shutil.which("hermes")`` — standard PATH lookup
+    1. ``shutil.which("myai")`` — standard PATH lookup
     2. ``sys.executable -m myai_cli.main`` — fallback when MyAIOne is running
-       from a venv/module invocation and the ``hermes`` shim is not on PATH
+       from a venv/module invocation and the ``myai`` shim is not on PATH
 
     Returns argv parts ready for quoting/joining, or ``None`` if neither works.
     """
     import shutil
 
-    hermes_bin = shutil.which("hermes")
-    if hermes_bin:
-        return [hermes_bin]
+    myai_bin = shutil.which("myai")
+    if myai_bin:
+        return [myai_bin]
 
     try:
         import importlib.util
@@ -1718,13 +1718,13 @@ class GatewayRunner:
         import shutil
         import subprocess
 
-        hermes_cmd = _resolve_hermes_bin()
-        if not hermes_cmd:
+        myai_cmd = _resolve_myai_bin()
+        if not myai_cmd:
             logger.error("Could not locate hermes binary for detached /restart")
             return
 
         current_pid = os.getpid()
-        cmd = " ".join(shlex.quote(part) for part in hermes_cmd)
+        cmd = " ".join(shlex.quote(part) for part in myai_cmd)
         shell_cmd = (
             f"while kill -0 {current_pid} 2>/dev/null; do sleep 0.2; done; "
             f"{cmd} gateway restart"
@@ -7306,8 +7306,8 @@ class GatewayRunner:
         if not git_dir.exists():
             return "✗ Not a git repository — cannot update."
 
-        hermes_cmd = _resolve_hermes_bin()
-        if not hermes_cmd:
+        myai_cmd = _resolve_myai_bin()
+        if not myai_cmd:
             return (
                 "✗ Could not locate the `hermes` command. "
                 "MyAIOne is running, but the update command could not find the "
@@ -7339,9 +7339,9 @@ class GatewayRunner:
         # where systemd-run --user fails due to missing D-Bus session).
         # PYTHONUNBUFFERED ensures output is flushed line-by-line so the
         # gateway can stream it to the messenger in near-real-time.
-        hermes_cmd_str = " ".join(shlex.quote(part) for part in hermes_cmd)
+        myai_cmd_str = " ".join(shlex.quote(part) for part in myai_cmd)
         update_cmd = (
-            f"PYTHONUNBUFFERED=1 {hermes_cmd_str} update --gateway"
+            f"PYTHONUNBUFFERED=1 {myai_cmd_str} update --gateway"
             f" > {shlex.quote(str(output_path))} 2>&1; "
             f"status=$?; printf '%s' \"$status\" > {shlex.quote(str(exit_code_path))}"
         )

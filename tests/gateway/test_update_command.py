@@ -54,7 +54,7 @@ class TestHandleUpdateCommand:
         result = await runner._handle_update_command(event)
 
         assert "managed by Homebrew" in result
-        assert "brew upgrade hermes-agent" in result
+        assert "brew upgrade myai-agent" in result
 
     @pytest.mark.asyncio
     async def test_no_git_directory(self, tmp_path):
@@ -98,8 +98,8 @@ class TestHandleUpdateCommand:
         assert "Not a git repository" in result
 
     @pytest.mark.asyncio
-    async def test_no_hermes_binary(self, tmp_path):
-        """Returns error when hermes is not on PATH and myai_cli is not importable."""
+    async def test_no_myai_binary(self, tmp_path):
+        """Returns error when myai is not on PATH and myai_cli is not importable."""
         runner = _make_runner()
         event = _make_event()
 
@@ -152,36 +152,36 @@ class TestHandleUpdateCommand:
         assert "myai_cli.main" in joined or "bash" in call_args[0]
 
     @pytest.mark.asyncio
-    async def test_resolve_hermes_bin_prefers_which(self, tmp_path):
-        """_resolve_hermes_bin returns argv parts from shutil.which when available."""
-        from gateway.run import _resolve_hermes_bin
+    async def test_resolve_myai_bin_prefers_which(self, tmp_path):
+        """_resolve_myai_bin returns argv parts from shutil.which when available."""
+        from gateway.run import _resolve_myai_bin
 
         with patch("shutil.which", return_value="/custom/path/hermes"):
-            result = _resolve_hermes_bin()
+            result = _resolve_myai_bin()
 
         assert result == ["/custom/path/hermes"]
 
     @pytest.mark.asyncio
-    async def test_resolve_hermes_bin_fallback(self):
-        """_resolve_hermes_bin falls back to sys.executable argv when which fails."""
+    async def test_resolve_myai_bin_fallback(self):
+        """_resolve_myai_bin falls back to sys.executable argv when which fails."""
         import sys
-        from gateway.run import _resolve_hermes_bin
+        from gateway.run import _resolve_myai_bin
 
         fake_spec = MagicMock()
         with patch("shutil.which", return_value=None), \
              patch("importlib.util.find_spec", return_value=fake_spec):
-            result = _resolve_hermes_bin()
+            result = _resolve_myai_bin()
 
         assert result == [sys.executable, "-m", "myai_cli.main"]
 
     @pytest.mark.asyncio
-    async def test_resolve_hermes_bin_returns_none_when_both_fail(self):
-        """_resolve_hermes_bin returns None when both strategies fail."""
-        from gateway.run import _resolve_hermes_bin
+    async def test_resolve_myai_bin_returns_none_when_both_fail(self):
+        """_resolve_myai_bin returns None when both strategies fail."""
+        from gateway.run import _resolve_myai_bin
 
         with patch("shutil.which", return_value=None), \
              patch("importlib.util.find_spec", return_value=None):
-            result = _resolve_hermes_bin()
+            result = _resolve_myai_bin()
 
         assert result is None
 
@@ -202,7 +202,7 @@ class TestHandleUpdateCommand:
 
         with patch("gateway.run._hermes_home", hermes_home), \
              patch("gateway.run.__file__", fake_file), \
-             patch("shutil.which", side_effect=lambda x: "/usr/bin/hermes" if x == "hermes" else "/usr/bin/setsid"), \
+             patch("shutil.which", side_effect=lambda x: "/usr/bin/myai" if x == "myai" else "/usr/bin/setsid"), \
              patch("subprocess.Popen"):
             result = await runner._handle_update_command(event)
 
@@ -262,7 +262,7 @@ class TestHandleUpdateCommand:
 
         def which_no_setsid(x):
             if x == "hermes":
-                return "/usr/bin/hermes"
+                return "/usr/bin/myai"
             if x == "setsid":
                 return None
             return None

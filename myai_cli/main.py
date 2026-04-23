@@ -602,15 +602,15 @@ def _exec_in_container(container_info: dict, cli_args: list):
     On failure, OSError propagates naturally.
 
     Args:
-        container_info: dict with backend, container_name, exec_user, hermes_bin
-        cli_args: the original CLI arguments (everything after 'hermes')
+        container_info: dict with backend, container_name, exec_user, myai_bin
+        cli_args: the original CLI arguments (everything after 'myai')
     """
     import shutil
 
     backend = container_info["backend"]
     container_name = container_info["container_name"]
     exec_user = container_info["exec_user"]
-    hermes_bin = container_info["hermes_bin"]
+    myai_bin = container_info["myai_bin"]
 
     runtime = shutil.which(backend)
     if not runtime:
@@ -652,14 +652,14 @@ def _exec_in_container(container_info: dict, cli_args: list):
                     f'    commands = [{{ command = "{runtime}"; options = [ "NOPASSWD" ]; }}];\n'
                     f"  }}];\n"
                     f"\n"
-                    f"Or run: sudo hermes {' '.join(cli_args)}",
+                    f"Or run: sudo myai {' '.join(cli_args)}",
                     file=sys.stderr,
                 )
                 sys.exit(1)
         else:
             print(
                 f"Error: container '{container_name}' not found via {backend}.\n"
-                f"The container may be running under root. Try: sudo hermes {' '.join(cli_args)}",
+                f"The container may be running under root. Try: sudo myai {' '.join(cli_args)}",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -680,7 +680,7 @@ def _exec_in_container(container_info: dict, cli_args: list):
         + tty_flags
         + ["-u", exec_user]
         + env_flags
-        + [container_name, hermes_bin]
+        + [container_name, myai_bin]
         + cli_args
     )
 
@@ -7966,9 +7966,9 @@ Examples:
             print(f"Resuming session: {selected_id}")
             import shutil
 
-            hermes_bin = shutil.which("hermes")
-            if hermes_bin:
-                os.execvp(hermes_bin, ["hermes", "--resume", selected_id])
+            myai_bin = shutil.which("myai")
+            if myai_bin:
+                os.execvp(myai_bin, ["myai", "--resume", selected_id])
             else:
                 # Fallback: re-invoke via python -m
                 os.execvp(

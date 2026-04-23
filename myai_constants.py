@@ -55,6 +55,21 @@ def _maybe_migrate_legacy_home(new_home: Path, legacy_home: Path) -> None:
         pass
 
 
+def _safe_exists(p: Path) -> bool:
+    """Return ``p.exists()`` but swallow PermissionError.
+
+    In sudo / cross-user contexts (e.g. a service-install helper resolving
+    a target user's home while running as a different user), ``stat()`` on
+    the candidate path can fail with EACCES.  Treat "can't tell" as "doesn't
+    exist" so resolution keeps going with the remaining candidates instead
+    of crashing.
+    """
+    try:
+        return p.exists()
+    except OSError:
+        return False
+
+
 def get_myai_home() -> Path:
     """Return the MyAIOne home directory (default: ``~/.myai``).
 
@@ -76,13 +91,13 @@ def get_myai_home() -> Path:
     new_home = home / ".myai"
     legacy_home = home / ".hermes"
 
-    if new_home.exists():
+    if _safe_exists(new_home):
         return new_home
-    if legacy_home.exists():
+    if _safe_exists(legacy_home):
         _maybe_migrate_legacy_home(new_home, legacy_home)
         # After migration ``new_home`` is the dir; before it, fall back to
         # legacy so a failed migration still lets the agent find existing state.
-        return new_home if new_home.exists() else legacy_home
+        return new_home if _safe_exists(new_home) else legacy_home
     return new_home
 
 
@@ -105,28 +120,43 @@ def get_default_hermes_root() -> Path:
 
     Import-safe — no dependencies beyond stdlib.
     """
-    # Resolve via get_myai_home so the ~/.hermes migration (if applicable)
-    # has already happened and we see the post-migration layout.
-    native_home = get_myai_home()
     env_home = os.environ.get("MYAI_HOME", "") or os.environ.get("HERMES_HOME", "")
-    if not env_home:
-        return native_home
-    env_path = Path(env_home)
-    try:
-        env_path.resolve().relative_to(native_home.resolve())
-        # env var points inside native home (normal or profile mode)
-        return native_home
-    except ValueError:
-        pass
+    home = Path.home()
+    # The "plausible defaults" are the per-user standard paths, independent of
+    # the env var. Only these count as "the root already" — if env_home points
+    # to one of them, that's the root; if it points below profiles/, the root
+    # is the parent of profiles/. We must compute these before consulting
+    # get_myai_home() because that function short-circuits on env_home and
+    # therefore can't distinguish "env var IS the root" from "env var is a
+    # profile under the root".
+    plausible_defaults = [home / ".myai", home / ".hermes"]
 
-    # Docker / custom deployment.
-    # Check if this is a profile path: <root>/profiles/<name>
-    # If the immediate parent dir is named "profiles", the root is
-    # the grandparent — this covers Docker profiles correctly.
+    if not env_home:
+        # No env override — pick the first plausible default that exists, or
+        # fall back to ~/.myai for fresh installs.
+        for cand in plausible_defaults:
+            if _safe_exists(cand):
+                return cand
+        return plausible_defaults[0]
+
+    env_path = Path(env_home)
+
+    # Profile pattern takes precedence: ``<root>/profiles/<name>`` → ``<root>``.
+    # This is the common profile-mode layout used by ``myai profile create``
+    # and the Docker entrypoint.
     if env_path.parent.name == "profiles":
         return env_path.parent.parent
 
-    # Not a profile path — the env-var path itself is the root
+    # Env var points to one of the plausible default homes → that IS the root.
+    for cand in plausible_defaults:
+        try:
+            if env_path.resolve() == cand.resolve():
+                return cand
+        except OSError:
+            continue
+
+    # Env var points somewhere else entirely (Docker custom mount,
+    # /opt/shared, etc.) — treat it as the root.
     return env_path
 
 

@@ -178,7 +178,7 @@ def test_setup_gateway_skips_service_install_when_systemctl_missing(monkeypatch,
     out = capsys.readouterr().out
     assert "Messaging platforms configured!" in out
     assert "Start the gateway to bring your bots online:" in out
-    assert "hermes gateway" in out
+    assert "myai gateway" in out
 
 
 def test_setup_gateway_in_container_shows_docker_guidance(monkeypatch, capsys):
@@ -445,28 +445,28 @@ def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tm
     assert config["terminal"]["modal_mode"] == "direct"
 
 
-def test_resolve_hermes_chat_argv_prefers_which(monkeypatch):
+def test_resolve_myai_chat_argv_prefers_which(monkeypatch):
     from myai_cli import setup as setup_mod
 
-    monkeypatch.setattr(setup_mod.shutil, "which", lambda name: "/usr/local/bin/hermes" if name == "hermes" else None)
+    monkeypatch.setattr(setup_mod.shutil, "which", lambda name: "/usr/local/bin/myai" if name == "myai" else None)
 
-    assert setup_mod._resolve_hermes_chat_argv() == ["/usr/local/bin/hermes", "chat"]
+    assert setup_mod._resolve_myai_chat_argv() == ["/usr/local/bin/myai", "chat"]
 
 
-def test_resolve_hermes_chat_argv_falls_back_to_module(monkeypatch):
+def test_resolve_myai_chat_argv_falls_back_to_module(monkeypatch):
     from myai_cli import setup as setup_mod
 
     monkeypatch.setattr(setup_mod.shutil, "which", lambda _name: None)
     monkeypatch.setattr(setup_mod.importlib.util, "find_spec", lambda name: object() if name == "myai_cli" else None)
 
-    assert setup_mod._resolve_hermes_chat_argv() == [sys.executable, "-m", "myai_cli.main", "chat"]
+    assert setup_mod._resolve_myai_chat_argv() == [sys.executable, "-m", "myai_cli.main", "chat"]
 
 
 def test_offer_launch_chat_execs_fresh_process(monkeypatch):
     from myai_cli import setup as setup_mod
 
     monkeypatch.setattr(setup_mod, "prompt_yes_no", lambda *_args, **_kwargs: True)
-    monkeypatch.setattr(setup_mod, "_resolve_hermes_chat_argv", lambda: ["/usr/local/bin/hermes", "chat"])
+    monkeypatch.setattr(setup_mod, "_resolve_myai_chat_argv", lambda: ["/usr/local/bin/myai", "chat"])
 
     exec_calls = []
 
@@ -479,16 +479,16 @@ def test_offer_launch_chat_execs_fresh_process(monkeypatch):
     with pytest.raises(SystemExit):
         setup_mod._offer_launch_chat()
 
-    assert exec_calls == [("/usr/local/bin/hermes", ["/usr/local/bin/hermes", "chat"])]
+    assert exec_calls == [("/usr/local/bin/myai", ["/usr/local/bin/myai", "chat"])]
 
 
 def test_offer_launch_chat_manual_fallback_when_unresolvable(monkeypatch, capsys):
     from myai_cli import setup as setup_mod
 
     monkeypatch.setattr(setup_mod, "prompt_yes_no", lambda *_args, **_kwargs: True)
-    monkeypatch.setattr(setup_mod, "_resolve_hermes_chat_argv", lambda: None)
+    monkeypatch.setattr(setup_mod, "_resolve_myai_chat_argv", lambda: None)
 
     setup_mod._offer_launch_chat()
 
     captured = capsys.readouterr()
-    assert "Run 'hermes chat' manually" in captured.out
+    assert "Run 'myai chat' manually" in captured.out

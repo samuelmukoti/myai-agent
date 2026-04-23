@@ -185,3 +185,33 @@ def test_select_provider_dispatches_myaione() -> None:
     assert "run_onboarding" in src, (
         "myaione branch does not invoke the bootstrap onboarding flow"
     )
+
+
+def test_write_default_config_uses_default_key(tmp_path, monkeypatch) -> None:
+    """Regression: onboarding must write `model.default`, not `model.id`.
+
+    The runtime provider-resolution layer (runtime_provider.py, web_server.py,
+    setup.py) all read `config["model"]["default"]`. Writing under any other
+    key leaves the picked model invisible — selecting MyAIOne Inference would
+    appear successful but the agent would still report "no model set".
+    """
+    monkeypatch.setenv("MYAI_HOME", str(tmp_path))
+
+    from myai_cli.inference.myaione_bootstrap import _write_default_config
+
+    _write_default_config("Qwen3-Coder-480B")
+
+    import yaml
+
+    config_path = tmp_path / "config.yaml"
+    data = yaml.safe_load(config_path.read_text())
+
+    assert data["model"]["provider"] == "myaione"
+    assert data["model"]["default"] == "Qwen3-Coder-480B", (
+        "model id must be written under 'default' key — the runtime reads "
+        "model.default, writing to any other key makes the selection invisible"
+    )
+    assert "id" not in data["model"], (
+        "legacy 'id' key must not be present — rest of codebase reads 'default'"
+    )
+    assert data["model"]["base_url"], "base_url must be set for the provider"

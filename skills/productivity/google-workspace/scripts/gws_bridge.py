@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def get_hermes_home() -> Path:
-    return Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes"))
+    return Path(os.environ.get("MYAI_HOME", Path.home() / ".myai"))
 
 
 def get_token_path() -> Path:

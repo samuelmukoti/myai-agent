@@ -61,6 +61,6 @@ RUN .venv/bin/python -c "import slack_bolt, slack_sdk; print('slack deps OK')"
 
 # ---------- Runtime ----------
 ENV MYAI_AGENT_WEB_DIST=/opt/hermes/myai_cli/web_dist
-ENV HERMES_HOME=/opt/data
+ENV MYAI_HOME=/opt/data
 VOLUME [ "/opt/data" ]
 ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]

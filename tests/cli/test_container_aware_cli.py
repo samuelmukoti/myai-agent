@@ -26,16 +26,16 @@ def container_env(tmp_path, monkeypatch):
     """Set up a fake HERMES_HOME with .container-mode file."""
     hermes_home = tmp_path / ".hermes"
     hermes_home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.delenv("MYAI_DEV", raising=False)
 
     container_mode = hermes_home / ".container-mode"
     container_mode.write_text(
         "# Written by NixOS activation script. Do not edit manually.\n"
         "backend=podman\n"
-        "container_name=hermes-agent\n"
-        "exec_user=hermes\n"
-        "hermes_bin=/data/current-package/bin/hermes\n"
+        "container_name=myai-agent\n"
+        "exec_user=myai\n"
+        "myai_bin=/data/current-package/bin/myai\n"
     )
     return hermes_home
 
@@ -47,9 +47,9 @@ def test_get_container_exec_info_returns_metadata(container_env):
 
     assert info is not None
     assert info["backend"] == "podman"
-    assert info["container_name"] == "hermes-agent"
-    assert info["exec_user"] == "hermes"
-    assert info["hermes_bin"] == "/data/current-package/bin/hermes"
+    assert info["container_name"] == "myai-agent"
+    assert info["exec_user"] == "myai"
+    assert info["myai_bin"] == "/data/current-package/bin/myai"
 
 
 def test_get_container_exec_info_none_inside_container(container_env):
@@ -64,8 +64,8 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     """Returns None when .container-mode doesn't exist (native mode)."""
     hermes_home = tmp_path / ".hermes"
     hermes_home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.delenv("MYAI_DEV", raising=False)
 
     with patch("myai_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -74,8 +74,8 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
 
 
 def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypatch):
-    """Returns None when HERMES_DEV=1 is set (dev mode bypass)."""
-    monkeypatch.setenv("HERMES_DEV", "1")
+    """Returns None when MYAI_DEV=1 is set (dev mode bypass)."""
+    monkeypatch.setenv("MYAI_DEV", "1")
 
     with patch("myai_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -84,8 +84,8 @@ def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypa
 
 
 def test_get_container_exec_info_not_skipped_when_hermes_dev_zero(container_env, monkeypatch):
-    """HERMES_DEV=0 does NOT trigger bypass — only '1' does."""
-    monkeypatch.setenv("HERMES_DEV", "0")
+    """MYAI_DEV=0 does NOT trigger bypass — only '1' does."""
+    monkeypatch.setenv("MYAI_DEV", "0")
 
     with patch("myai_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -107,14 +107,14 @@ def test_get_container_exec_info_defaults():
         with patch("myai_constants.is_container", return_value=False), \
              patch("myai_cli.config.get_hermes_home", return_value=hermes_home), \
              patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("HERMES_DEV", None)
+            os.environ.pop("MYAI_DEV", None)
             info = get_container_exec_info()
 
         assert info is not None
         assert info["backend"] == "docker"
-        assert info["container_name"] == "hermes-agent"
-        assert info["exec_user"] == "hermes"
-        assert info["hermes_bin"] == "/data/current-package/bin/hermes"
+        assert info["container_name"] == "myai-agent"
+        assert info["exec_user"] == "myai"
+        assert info["myai_bin"] == "/data/current-package/bin/myai"
 
 
 def test_get_container_exec_info_docker_backend(container_env):
@@ -123,7 +123,7 @@ def test_get_container_exec_info_docker_backend(container_env):
         "backend=docker\n"
         "container_name=hermes-custom\n"
         "exec_user=myuser\n"
-        "hermes_bin=/opt/hermes/bin/hermes\n"
+        "myai_bin=/opt/myai/bin/myai\n"
     )
 
     with patch("myai_constants.is_container", return_value=False):
@@ -132,7 +132,7 @@ def test_get_container_exec_info_docker_backend(container_env):
     assert info["backend"] == "docker"
     assert info["container_name"] == "hermes-custom"
     assert info["exec_user"] == "myuser"
-    assert info["hermes_bin"] == "/opt/hermes/bin/hermes"
+    assert info["myai_bin"] == "/opt/myai/bin/myai"
 
 
 def test_get_container_exec_info_crashes_on_permission_error(container_env):
@@ -152,9 +152,9 @@ def test_get_container_exec_info_crashes_on_permission_error(container_env):
 def docker_container_info():
     return {
         "backend": "docker",
-        "container_name": "hermes-agent",
-        "exec_user": "hermes",
-        "hermes_bin": "/data/current-package/bin/hermes",
+        "container_name": "myai-agent",
+        "exec_user": "myai",
+        "myai_bin": "/data/current-package/bin/myai",
     }
 
 
@@ -162,9 +162,9 @@ def docker_container_info():
 def podman_container_info():
     return {
         "backend": "podman",
-        "container_name": "hermes-agent",
-        "exec_user": "hermes",
-        "hermes_bin": "/data/current-package/bin/hermes",
+        "container_name": "myai-agent",
+        "exec_user": "myai",
+        "myai_bin": "/data/current-package/bin/myai",
     }
 
 
@@ -190,13 +190,13 @@ def test_exec_in_container_calls_execvp(docker_container_info):
     assert cmd[1] == "exec"
     assert "-it" in cmd
     idx_u = cmd.index("-u")
-    assert cmd[idx_u + 1] == "hermes"
+    assert cmd[idx_u + 1] == "myai"
     e_indices = [i for i, v in enumerate(cmd) if v == "-e"]
     e_values = [cmd[i + 1] for i in e_indices]
     assert "TERM=xterm-256color" in e_values
     assert "LANG=en_US.UTF-8" in e_values
-    assert "hermes-agent" in cmd
-    assert "/data/current-package/bin/hermes" in cmd
+    assert "myai-agent" in cmd
+    assert "/data/current-package/bin/myai" in cmd
     assert "chat" in cmd
 
 

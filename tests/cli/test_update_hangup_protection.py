@@ -184,7 +184,7 @@ class TestInstallHangupProtection:
     )
     def test_installs_sighup_ignore(self, tmp_path, monkeypatch):
         """SIGHUP should be set to SIG_IGN so SSH disconnect doesn't kill the update."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path))
         # Clear cached get_hermes_home if present
         import myai_cli.config as _cfg
         if hasattr(_cfg, "_HERMES_HOME_CACHE"):
@@ -201,7 +201,7 @@ class TestInstallHangupProtection:
             signal.signal(signal.SIGHUP, original_handler)
 
     def test_wraps_stdout_and_stderr_with_mirror(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path))
         # Nuke any cached home path
         import myai_cli.config as _cfg
         if hasattr(_cfg, "_HERMES_HOME_CACHE"):
@@ -232,7 +232,7 @@ class TestInstallHangupProtection:
             assert sys.stderr is prev_err
 
     def test_logs_dir_created_if_missing(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path))
         import myai_cli.config as _cfg
         if hasattr(_cfg, "_HERMES_HOME_CACHE"):
             _cfg._HERMES_HOME_CACHE = None  # type: ignore[attr-defined]
@@ -288,7 +288,7 @@ class TestFinalizeUpdateOutput:
         _finalize_update_output(None)  # must not raise
 
     def test_restores_streams_and_closes_log(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path))
         import myai_cli.config as _cfg
         if hasattr(_cfg, "_HERMES_HOME_CACHE"):
             _cfg._HERMES_HOME_CACHE = None  # type: ignore[attr-defined]

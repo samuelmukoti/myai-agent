@@ -154,17 +154,17 @@ def managed_error(action: str = "modify configuration"):
 # =============================================================================
 
 def get_container_exec_info() -> Optional[dict]:
-    """Read container mode metadata from HERMES_HOME/.container-mode.
+    """Read container mode metadata from `<MYAI_HOME>/.container-mode`.
 
     Returns a dict with keys: backend, container_name, exec_user, myai_bin
     or None if container mode is not active, we're already inside the
-    container, or HERMES_DEV=1 is set.
+    container, or MYAI_DEV=1 is set.
 
     The .container-mode file is written by the NixOS activation script when
     container.enable = true. It tells the host CLI to exec into the container
     instead of running locally.
     """
-    if os.environ.get("HERMES_DEV") == "1":
+    if os.environ.get("MYAI_DEV") == "1":
         return None
 
     from myai_constants import is_container
@@ -188,12 +188,7 @@ def get_container_exec_info() -> Optional[dict]:
     backend = info.get("backend", "docker")
     container_name = info.get("container_name", "myai-agent")
     exec_user = info.get("exec_user", "myai")
-    # Back-compat: read either myai_bin (new) or hermes_bin (legacy .container-mode files).
-    myai_bin = (
-        info.get("myai_bin")
-        or info.get("hermes_bin")
-        or "/data/current-package/bin/myai"
-    )
+    myai_bin = info.get("myai_bin", "/data/current-package/bin/myai")
 
     return {
         "backend": backend,
@@ -2174,7 +2169,7 @@ def warn_deprecated_cwd_env_vars(config: Optional[Dict[str, Any]] = None) -> Non
             f"this is deprecated."
         )
     if lines:
-        hint_path = os.environ.get("HERMES_HOME", "~/.hermes")
+        hint_path = os.environ.get("MYAI_HOME", "~/.hermes")
         lines.insert(0, "\033[33m⚠ Deprecated .env settings detected:\033[0m")
         lines.append(
             f"  \033[2mMove to config.yaml instead:  "

@@ -2,7 +2,7 @@
 # Docker/Podman entrypoint: bootstrap config files into the mounted volume, then run hermes.
 set -e
 
-HERMES_HOME="${HERMES_HOME:-/opt/data}"
+MYAI_HOME="${MYAI_HOME:-/opt/data}"
 INSTALL_DIR="/opt/hermes"
 
 # --- Privilege dropping via gosu ---
@@ -23,12 +23,12 @@ if [ "$(id -u)" = "0" ]; then
     fi
 
     actual_hermes_uid=$(id -u hermes)
-    if [ "$(stat -c %u "$HERMES_HOME" 2>/dev/null)" != "$actual_hermes_uid" ]; then
-        echo "$HERMES_HOME is not owned by $actual_hermes_uid, fixing"
+    if [ "$(stat -c %u "$MYAI_HOME" 2>/dev/null)" != "$actual_hermes_uid" ]; then
+        echo "$MYAI_HOME is not owned by $actual_hermes_uid, fixing"
         # In rootless Podman the container's "root" is mapped to an unprivileged
         # host UID — chown will fail.  That's fine: the volume is already owned
         # by the mapped user on the host side.
-        chown -R hermes:hermes "$HERMES_HOME" 2>/dev/null || \
+        chown -R hermes:hermes "$MYAI_HOME" 2>/dev/null || \
             echo "Warning: chown failed (rootless container?) — continuing anyway"
     fi
 
@@ -46,21 +46,21 @@ source "${INSTALL_DIR}/.venv/bin/activate"
 # The "home/" subdirectory is a per-profile HOME for subprocesses (git,
 # ssh, gh, npm …).  Without it those tools write to /root which is
 # ephemeral and shared across profiles.  See issue #4426.
-mkdir -p "$HERMES_HOME"/{cron,sessions,logs,hooks,memories,skills,skins,plans,workspace,home}
+mkdir -p "$MYAI_HOME"/{cron,sessions,logs,hooks,memories,skills,skins,plans,workspace,home}
 
 # .env
-if [ ! -f "$HERMES_HOME/.env" ]; then
-    cp "$INSTALL_DIR/.env.example" "$HERMES_HOME/.env"
+if [ ! -f "$MYAI_HOME/.env" ]; then
+    cp "$INSTALL_DIR/.env.example" "$MYAI_HOME/.env"
 fi
 
 # config.yaml
-if [ ! -f "$HERMES_HOME/config.yaml" ]; then
-    cp "$INSTALL_DIR/cli-config.yaml.example" "$HERMES_HOME/config.yaml"
+if [ ! -f "$MYAI_HOME/config.yaml" ]; then
+    cp "$INSTALL_DIR/cli-config.yaml.example" "$MYAI_HOME/config.yaml"
 fi
 
 # SOUL.md
-if [ ! -f "$HERMES_HOME/SOUL.md" ]; then
-    cp "$INSTALL_DIR/docker/SOUL.md" "$HERMES_HOME/SOUL.md"
+if [ ! -f "$MYAI_HOME/SOUL.md" ]; then
+    cp "$INSTALL_DIR/docker/SOUL.md" "$MYAI_HOME/SOUL.md"
 fi
 
 # Sync bundled skills (manifest-based so user edits are preserved)

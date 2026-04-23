@@ -54,7 +54,7 @@ def hermes_home(tmp_path, monkeypatch):
     Uses the same tmp_path as the autouse _isolate_hermes_home from conftest,
     reading it back from the env var to avoid double-mkdir conflicts.
     """
-    home = Path(os.environ["HERMES_HOME"])
+    home = Path(os.environ["MYAI_HOME"])
     return home
 
 

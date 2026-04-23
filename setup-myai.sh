@@ -337,8 +337,10 @@ fi
 # ============================================================================
 
 # Resolution matches myai_constants.get_myai_home():
-#   $MYAI_HOME > $HERMES_HOME (back-compat) > ~/.myai
-MYAI_SKILLS_DIR="${MYAI_HOME:-${HERMES_HOME:-$HOME/.myai}}/skills"
+#   $MYAI_HOME > ~/.myai
+# No $HERMES_HOME fallback — MyAIOne keeps its state separate from Hermes
+# so both agents can coexist on the same machine without clashing.
+MYAI_SKILLS_DIR="${MYAI_HOME:-$HOME/.myai}/skills"
 mkdir -p "$MYAI_SKILLS_DIR"
 
 echo ""

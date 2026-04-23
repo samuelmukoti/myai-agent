@@ -846,7 +846,7 @@ class TestGatewayModeWritesExitCodeEarly:
         # Point HERMES_HOME at a temp dir so the marker file lands there
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
-        monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
         import myai_cli.config as _cfg
         monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
         # Also patch the module-level ref used by cmd_update
@@ -876,7 +876,7 @@ class TestGatewayModeWritesExitCodeEarly:
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
-        monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
         import myai_cli.config as _cfg
         monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
         import myai_cli.main as _main_mod
@@ -904,7 +904,7 @@ class TestGatewayModeWritesExitCodeEarly:
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
-        monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
         import myai_cli.config as _cfg
         monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
         import myai_cli.main as _main_mod

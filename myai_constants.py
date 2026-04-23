@@ -5,54 +5,20 @@ without risk of circular imports.
 
 Home-directory resolution
 -------------------------
-The agent stores its state under ``~/.myai`` (new default). Legacy installs
-using ``~/.hermes`` are migrated automatically on first resolve. The env-var
-fallback chain for power users is:
+The agent stores its state under ``~/.myai``.  MyAIOne does **not** read
+``$HERMES_HOME`` or ``~/.hermes`` — those belong to the Hermes project
+and MyAIOne never touches them, so both agents can coexist on the same
+machine without clashing.  The env-var chain is just:
 
-    $MYAI_HOME → $HERMES_HOME → ~/.myai → (migrated) ~/.hermes → ~/.myai
+    $MYAI_HOME → ~/.myai
 
-``get_hermes_home()`` is kept as the public name for back-compat with the
-~240 call sites throughout the codebase; a ``get_myai_home()`` alias is
-exposed for new code.
+``get_hermes_home()`` is kept as a legacy function-name alias for the
+~240 call sites throughout the codebase; it resolves identically to
+``get_myai_home()`` and reads none of Hermes's state.
 """
 
 import os
 from pathlib import Path
-
-
-# Module-level guard so the ~/.hermes → ~/.myai migration is attempted once
-# per process.  Migration is best-effort — failures are swallowed so the
-# agent still boots with whichever dir exists.
-_migration_attempted = False
-
-
-def _maybe_migrate_legacy_home(new_home: Path, legacy_home: Path) -> None:
-    """One-shot: if ``~/.hermes`` exists and ``~/.myai`` doesn't, rename and
-    leave a symlink at the legacy path so any external tool (shell aliases,
-    cron jobs written pre-rename) keeps working.  Never destructive.
-    """
-    global _migration_attempted
-    if _migration_attempted:
-        return
-    _migration_attempted = True
-
-    try:
-        if not legacy_home.exists() or legacy_home.is_symlink():
-            return
-        if new_home.exists():
-            return
-        os.rename(str(legacy_home), str(new_home))
-        try:
-            os.symlink(str(new_home), str(legacy_home), target_is_directory=True)
-        except OSError:
-            # symlink creation can fail on some Windows/cross-fs setups —
-            # rename already succeeded, so the agent works without the
-            # back-compat symlink.
-            pass
-    except OSError:
-        # Any failure (permissions, cross-mount, concurrent rename) is
-        # non-fatal: the agent falls back to whichever dir is readable.
-        pass
 
 
 def _safe_exists(p: Path) -> bool:
@@ -75,30 +41,18 @@ def get_myai_home() -> Path:
 
     Resolution order:
         1. ``$MYAI_HOME`` env var
-        2. ``$HERMES_HOME`` env var (back-compat — old installers & users)
-        3. ``~/.myai`` if it exists on disk
-        4. ``~/.hermes`` if it exists (triggers one-time migration → ``~/.myai``)
-        5. ``~/.myai`` as the new-install default
+        2. ``~/.myai``
+
+    No ``$HERMES_HOME`` fallback and no ``~/.hermes`` detection — MyAIOne
+    keeps its state fully separate from Hermes so both can be installed
+    on the same machine without interfering with each other.
 
     This is the single source of truth — all other copies should import this.
     """
-    for env_var in ("MYAI_HOME", "HERMES_HOME"):
-        val = os.environ.get(env_var, "").strip()
-        if val:
-            return Path(val)
-
-    home = Path.home()
-    new_home = home / ".myai"
-    legacy_home = home / ".hermes"
-
-    if _safe_exists(new_home):
-        return new_home
-    if _safe_exists(legacy_home):
-        _maybe_migrate_legacy_home(new_home, legacy_home)
-        # After migration ``new_home`` is the dir; before it, fall back to
-        # legacy so a failed migration still lets the agent find existing state.
-        return new_home if _safe_exists(new_home) else legacy_home
-    return new_home
+    val = os.environ.get("MYAI_HOME", "").strip()
+    if val:
+        return Path(val)
+    return Path.home() / ".myai"
 
 
 # Back-compat alias — 200+ call sites import this by name.
@@ -108,36 +62,22 @@ get_hermes_home = get_myai_home
 def get_default_hermes_root() -> Path:
     """Return the root MyAIOne directory for profile-level operations.
 
-    In standard deployments this is ``~/.myai`` (or the legacy ``~/.hermes``
-    if that's what the system was installed with).
+    In standard deployments this is ``~/.myai``.
 
-    In Docker or custom deployments where ``MYAI_HOME`` / ``HERMES_HOME``
-    points outside the native home (e.g. ``/opt/data``), returns that path
-    directly — that IS the root.
+    In Docker or custom deployments where ``MYAI_HOME`` points outside the
+    native home (e.g. ``/opt/data``), returns that path directly — that IS
+    the root.
 
-    In profile mode where ``*_HOME`` is ``<root>/profiles/<name>``, returns
-    ``<root>`` so that ``profile list`` can see all profiles.
+    In profile mode where ``MYAI_HOME`` is ``<root>/profiles/<name>``,
+    returns ``<root>`` so that ``profile list`` can see all profiles.
 
     Import-safe — no dependencies beyond stdlib.
     """
-    env_home = os.environ.get("MYAI_HOME", "") or os.environ.get("HERMES_HOME", "")
-    home = Path.home()
-    # The "plausible defaults" are the per-user standard paths, independent of
-    # the env var. Only these count as "the root already" — if env_home points
-    # to one of them, that's the root; if it points below profiles/, the root
-    # is the parent of profiles/. We must compute these before consulting
-    # get_myai_home() because that function short-circuits on env_home and
-    # therefore can't distinguish "env var IS the root" from "env var is a
-    # profile under the root".
-    plausible_defaults = [home / ".myai", home / ".hermes"]
+    env_home = os.environ.get("MYAI_HOME", "").strip()
+    default_home = Path.home() / ".myai"
 
     if not env_home:
-        # No env override — pick the first plausible default that exists, or
-        # fall back to ~/.myai for fresh installs.
-        for cand in plausible_defaults:
-            if _safe_exists(cand):
-                return cand
-        return plausible_defaults[0]
+        return default_home
 
     env_path = Path(env_home)
 
@@ -147,13 +87,12 @@ def get_default_hermes_root() -> Path:
     if env_path.parent.name == "profiles":
         return env_path.parent.parent
 
-    # Env var points to one of the plausible default homes → that IS the root.
-    for cand in plausible_defaults:
-        try:
-            if env_path.resolve() == cand.resolve():
-                return cand
-        except OSError:
-            continue
+    # Env var points to the default home → that IS the root.
+    try:
+        if env_path.resolve() == default_home.resolve():
+            return default_home
+    except OSError:
+        pass
 
     # Env var points somewhere else entirely (Docker custom mount,
     # /opt/shared, etc.) — treat it as the root.
@@ -199,14 +138,13 @@ def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
     return home / new_subpath
 
 
-def display_hermes_home() -> str:
+def display_myai_home() -> str:
     """Return a user-friendly display string for the current home dir.
 
     Uses ``~/`` shorthand for readability::
 
         default:  ``~/.myai``
         profile:  ``~/.myai/profiles/coder``
-        legacy:   ``~/.hermes`` (symlinked to ``~/.myai`` post-migration)
         custom:   ``/opt/myai-custom``
 
     Use this in **user-facing** print/log messages instead of hardcoding
@@ -220,8 +158,9 @@ def display_hermes_home() -> str:
         return str(home)
 
 
-# Back-compat alias.
-display_myai_home = display_hermes_home
+# Legacy function-name alias — many call sites still import this by the
+# old name.  Points to the same Hermes-free implementation.
+display_hermes_home = display_myai_home
 
 
 def get_subprocess_home() -> str | None:
@@ -241,7 +180,7 @@ def get_subprocess_home() -> str | None:
     Activation is directory-based: if the ``home/`` subdirectory doesn't
     exist, returns ``None`` and behavior is unchanged.
     """
-    myai_home = os.getenv("MYAI_HOME") or os.getenv("HERMES_HOME")
+    myai_home = os.getenv("MYAI_HOME")
     if not myai_home:
         return None
     profile_home = os.path.join(myai_home, "home")

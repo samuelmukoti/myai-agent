@@ -70,7 +70,7 @@ class TestGatewayPrompt:
         thread = threading.Thread(target=write_response)
         thread.start()
 
-        with patch.dict(os.environ, {"HERMES_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}):
             from myai_cli.main import _gateway_prompt
             result = _gateway_prompt("Restore? [Y/n]", "y", timeout=5.0)
 
@@ -101,7 +101,7 @@ class TestGatewayPrompt:
         thread = threading.Thread(target=capture_and_respond)
         thread.start()
 
-        with patch.dict(os.environ, {"HERMES_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}):
             from myai_cli.main import _gateway_prompt
             _gateway_prompt("Configure now? [Y/n]", "n", timeout=5.0)
 
@@ -116,7 +116,7 @@ class TestGatewayPrompt:
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
 
-        with patch.dict(os.environ, {"HERMES_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}):
             from myai_cli.main import _gateway_prompt
             result = _gateway_prompt("test?", "default_val", timeout=0.5)
 
@@ -129,7 +129,7 @@ class TestGatewayPrompt:
         (hermes_home / ".update_response").write_text("")
 
         # Write prompt file so the function starts polling
-        with patch.dict(os.environ, {"HERMES_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}):
             from myai_cli.main import _gateway_prompt
             # Pre-create the response
             result = _gateway_prompt("test?", "default_val", timeout=2.0)

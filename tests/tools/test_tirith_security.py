@@ -978,7 +978,7 @@ class TestHermesHomeIsolation:
         from tools.tirith_security import _hermes_bin_dir
         import tempfile
         tmpdir = tempfile.mkdtemp()
-        with patch.dict(os.environ, {"HERMES_HOME": tmpdir}):
+        with patch.dict(os.environ, {"MYAI_HOME": tmpdir}):
             result = _hermes_bin_dir()
         assert result == os.path.join(tmpdir, "bin")
         assert os.path.isdir(result)
@@ -986,7 +986,7 @@ class TestHermesHomeIsolation:
     def test_failure_marker_respects_hermes_home(self):
         """_failure_marker_path must use HERMES_HOME, not hardcoded ~/.hermes."""
         from tools.tirith_security import _failure_marker_path
-        with patch.dict(os.environ, {"HERMES_HOME": "/custom/hermes"}):
+        with patch.dict(os.environ, {"MYAI_HOME": "/custom/hermes"}):
             result = _failure_marker_path()
         assert result == "/custom/hermes/.tirith-install-failed"
 
@@ -1001,6 +1001,6 @@ class TestHermesHomeIsolation:
         from tools.tirith_security import _get_hermes_home
         with patch.dict(os.environ, {}, clear=True):
             # Remove HERMES_HOME entirely
-            os.environ.pop("HERMES_HOME", None)
+            os.environ.pop("MYAI_HOME", None)
             result = _get_hermes_home()
         assert result == os.path.join(os.path.expanduser("~"), ".hermes")

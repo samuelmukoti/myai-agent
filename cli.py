@@ -383,7 +383,7 @@ def load_cli_config() -> Dict[str, Any]:
             # config root instead of inside the model: section.  These are
             # only used as a FALLBACK when model.provider / model.base_url
             # is not already set — never as an override.  The canonical
-            # location is model.provider (written by `hermes model`).
+            # location is model.provider (written by `myai model`).
             if not defaults["model"].get("provider"):
                 root_provider = file_config.get("provider")
                 if root_provider:
@@ -732,7 +732,7 @@ def _setup_worktree(repo_root: str = None) -> Optional[Dict[str, str]]:
     repo_root = repo_root or _git_repo_root()
     if not repo_root:
         print("\033[31m✗ --worktree requires being inside a git repository.\033[0m")
-        print("  cd into your project repo first, then run hermes -w")
+        print("  cd into your project repo first, then run myai -w")
         return None
 
     short_id = uuid.uuid4().hex[:8]
@@ -2788,11 +2788,11 @@ class HermesCLI:
                 )
             else:
                 print("\n⚠️  Provider resolver returned an empty API key. "
-                      "Set OPENROUTER_API_KEY or run: hermes setup")
+                      "Set OPENROUTER_API_KEY or run: myai setup")
                 return False
         if not isinstance(base_url, str) or not base_url:
             print("\n⚠️  Provider resolver returned an empty base URL. "
-                  "Check your provider config or run: hermes setup")
+                  "Check your provider config or run: myai setup")
             return False
 
         credentials_changed = api_key != self.api_key or base_url != self.base_url
@@ -2821,7 +2821,7 @@ class HermesCLI:
             self.model = runtime_model
 
         # If model is still empty (e.g. user ran `hermes auth add openai-codex`
-        # without `hermes model`), fall back to the provider's first catalog
+        # without `myai model`), fall back to the provider's first catalog
         # model so the API call doesn't fail with "model must be non-empty".
         if not self.model and resolved_provider:
             try:
@@ -2910,7 +2910,7 @@ class HermesCLI:
             session_meta = self._session_db.get_session(self.session_id)
             if not session_meta:
                 _cprint(f"\033[1;31mSession not found: {self.session_id}{_RST}")
-                _cprint(f"{_DIM}Use a session ID from a previous CLI run (hermes sessions list).{_RST}")
+                _cprint(f"{_DIM}Use a session ID from a previous CLI run (myai sessions list).{_RST}")
                 return False
             restored = self._session_db.get_messages_as_conversation(self.session_id)
             if restored:
@@ -3124,7 +3124,7 @@ class HermesCLI:
             )
             self.console.print(
                 "[dim]Use a session ID from a previous CLI run "
-                "(hermes sessions list).[/]"
+                "(myai sessions list).[/]"
             )
             return False
 
@@ -3359,7 +3359,7 @@ class HermesCLI:
         mgr = self.agent._checkpoint_mgr
         if not mgr.enabled:
             print("  Checkpoints are not enabled.")
-            print("  Enable with: hermes --checkpoints")
+            print("  Enable with: myai --checkpoints")
             print("  Or in config.yaml: checkpoints: { enabled: true }")
             return
 
@@ -3676,7 +3676,7 @@ class HermesCLI:
         if _remainder:
             _cprint(f"  {_DIM}Now type your prompt (or use --image in single-query mode): {_remainder}{_RST}")
         elif _is_termux_environment():
-            _cprint(f"  {_DIM}Tip: type your next message, or run hermes chat -q --image {_termux_example_image_path(image_path.name)} \"What do you see?\"{_RST}")
+            _cprint(f"  {_DIM}Tip: type your next message, or run myai chat -q --image {_termux_example_image_path(image_path.name)} \"What do you see?\"{_RST}")
 
     def _preprocess_images_with_vision(self, text: str, images: list, *, announce: bool = True) -> str:
         """Analyze attached images via the vision tool and return enriched text.
@@ -3763,7 +3763,7 @@ class HermesCLI:
                     if len(item["tools"]) > 2:
                         tools_str += f", +{len(item['tools'])-2} more"
                     self.console.print(f"   [dim]• {item['name']}[/] [dim italic]({', '.join(item['missing_vars'])})[/]")
-                self.console.print("[dim]   Run 'hermes setup' to configure[/]")
+                self.console.print("[dim]   Run 'myai setup' to configure[/]")
         except Exception:
             pass  # Don't crash on import errors
     
@@ -4297,7 +4297,7 @@ class HermesCLI:
             _cprint("  Usage: /resume <session_id_or_title>")
             if self._show_recent_sessions(reason="resume"):
                 return
-            _cprint("  Tip:   Use /history or `hermes sessions list` to find sessions.")
+            _cprint("  Tip:   Use /history or `myai sessions list` to find sessions.")
             return
 
         if not self._session_db:
@@ -4312,7 +4312,7 @@ class HermesCLI:
         session_meta = self._session_db.get_session(target_id)
         if not session_meta:
             _cprint(f"  Session not found: {target}")
-            _cprint("  Use /history or `hermes sessions list` to see available sessions.")
+            _cprint("  Use /history or `myai sessions list` to see available sessions.")
             return
 
         if target_id == self.session_id:
@@ -4752,7 +4752,7 @@ class HermesCLI:
                 return
             provider_data = providers[selected]
             # Use the curated model list from list_authenticated_providers()
-            # (same lists as `hermes model` and gateway pickers).
+            # (same lists as `myai model` and gateway pickers).
             # Only fall back to the live provider catalog when the curated
             # list is empty (e.g. user-defined endpoints with no curated list).
             model_list = provider_data.get("models", [])
@@ -5043,18 +5043,18 @@ class HermesCLI:
                         print(f"      endpoint: {custom_url}")
                     if is_active:
                         print(f"      model: {self.model} ← current")
-                    print("      (use hermes model to change)")
+                    print("      (use myai model to change)")
                 else:
-                    print("      (use hermes model to change)")
+                    print("      (use myai model to change)")
                 print()
 
         if unauthed:
             names = ", ".join(p["label"] for p in unauthed)
             print(f"  Not configured: {names}")
-            print("  Run: hermes setup")
+            print("  Run: myai setup")
             print()
 
-        print("  To change model or provider, use: hermes model")
+        print("  To change model or provider, use: myai model")
 
 
     
@@ -8338,9 +8338,9 @@ class HermesCLI:
                     pass
 
             print("Resume this session with:")
-            print(f"  hermes --resume {self.session_id}")
+            print(f"  myai --resume {self.session_id}")
             if session_title:
-                print(f"  hermes -c \"{session_title}\"")
+                print(f"  myai -c \"{session_title}\"")
             print()
             print(f"Session:        {self.session_id}")
             if session_title:
@@ -10167,7 +10167,7 @@ class HermesCLI:
             print(
                 "Error: stdin (fd 0) is not available.\n"
                 "This can happen with certain Python installations (e.g. uv-managed cPython on macOS).\n"
-                "Try reinstalling Python via pyenv or Homebrew, then re-run: hermes setup"
+                "Try reinstalling Python via pyenv or Homebrew, then re-run: myai setup"
             )
             _run_cleanup()
             self._print_exit_summary()
@@ -10193,7 +10193,7 @@ class HermesCLI:
                 print(
                     f"\nError: stdin is not usable ({_stdin_err}).\n"
                     "This can happen with certain Python installations (e.g. uv-managed cPython on macOS).\n"
-                    "Try reinstalling Python via pyenv or Homebrew, then re-run: hermes setup"
+                    "Try reinstalling Python via pyenv or Homebrew, then re-run: myai setup"
                 )
             else:
                 raise

@@ -1,7 +1,7 @@
 """hermes webhook — manage dynamic webhook subscriptions from the CLI.
 
 Usage:
-    hermes webhook subscribe <name> [options]
+    myai webhook subscribe <name> [options]
     hermes webhook list
     hermes webhook remove <name>
     hermes webhook test <name> [--payload '{"key": "value"}']
@@ -112,12 +112,12 @@ def _require_webhook_enabled() -> bool:
 
 
 def webhook_command(args):
-    """Entry point for 'hermes webhook' subcommand."""
+    """Entry point for 'myai webhook' subcommand."""
     sub = getattr(args, "webhook_action", None)
 
     if not sub:
-        print("Usage: hermes webhook {subscribe|list|remove|test}")
-        print("Run 'hermes webhook --help' for details.")
+        print("Usage: myai webhook {subscribe|list|remove|test}")
+        print("Run 'myai webhook --help' for details.")
         return
 
     if not _require_webhook_enabled():
@@ -184,7 +184,7 @@ def _cmd_list(args):
     subs = _load_subscriptions()
     if not subs:
         print("  No dynamic webhook subscriptions.")
-        print("  Create one with: hermes webhook subscribe <name>")
+        print("  Create one with: myai webhook subscribe <name>")
         return
 
     base_url = _get_webhook_base_url()

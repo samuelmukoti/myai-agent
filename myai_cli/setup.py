@@ -563,7 +563,7 @@ def _print_setup_summary(config: dict, hermes_home):
     print()
     print(color("🚀 Ready to go!", Colors.CYAN, Colors.BOLD))
     print()
-    print(f"   {color('hermes', Colors.GREEN)}              Start chatting")
+    print(f"   {color('myai', Colors.GREEN)}              Start chatting")
     print(f"   {color('myai gateway', Colors.GREEN)}      Start messaging gateway")
     print(f"   {color('myai doctor', Colors.GREEN)}       Check for issues")
     print()

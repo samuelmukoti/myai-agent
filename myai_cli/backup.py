@@ -435,7 +435,7 @@ def run_import(args) -> None:
         # Guidance
         print()
         if not (hermes_root / "hermes-agent").is_dir():
-            print("Note: The hermes-agent codebase was not included in the backup.")
+            print("Note: The myai-agent codebase was not included in the backup.")
             print("  If this is a fresh install, run: myai update")
 
         if restored_profiles:

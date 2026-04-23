@@ -451,7 +451,7 @@ hermes gateway start      # Detects the updated plist and reloads
 You can verify the plist has the correct PATH:
 ```bash
 /usr/libexec/PlistBuddy -c "Print :EnvironmentVariables:PATH" \
-  ~/Library/LaunchAgents/ai.hermes.gateway.plist
+  ~/Library/LaunchAgents/ai.myai.gateway.plist
 ```
 
 ---

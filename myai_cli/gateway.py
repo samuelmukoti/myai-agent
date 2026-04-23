@@ -74,7 +74,7 @@ def _get_service_pids() -> set:
         for scope_args in [["systemctl", "--user"], ["systemctl"]]:
             try:
                 result = subprocess.run(
-                    scope_args + ["list-units", "hermes-gateway*",
+                    scope_args + ["list-units", "myai-gateway*",
                                   "--plain", "--no-legend", "--no-pager"],
                     capture_output=True, text=True, timeout=5,
                 )
@@ -539,7 +539,7 @@ def is_windows() -> bool:
 # Service Configuration
 # =============================================================================
 
-_SERVICE_BASE = "hermes-gateway"
+_SERVICE_BASE = "myai-gateway"
 SERVICE_DESCRIPTION = "MyAIOne Agent Gateway - Messaging Platform Integration"
 
 
@@ -599,11 +599,11 @@ def _profile_arg(hermes_home: str | None = None) -> str:
 
 
 def get_service_name() -> str:
-    """Derive a systemd service name scoped to this HERMES_HOME.
+    """Derive a systemd service name scoped to this MYAI_HOME.
 
-    Default ``~/.hermes`` returns ``hermes-gateway`` (backward compatible).
-    Profile ``~/.hermes/profiles/coder`` returns ``hermes-gateway-coder``.
-    Any other HERMES_HOME appends a short hash for uniqueness.
+    Default ``~/.myai`` returns ``myai-gateway``.
+    Profile ``~/.myai/profiles/coder`` returns ``myai-gateway-coder``.
+    Any other MYAI_HOME appends a short hash for uniqueness.
     """
     suffix = _profile_suffix()
     if not suffix:
@@ -688,10 +688,16 @@ def has_conflicting_systemd_units() -> bool:
 
 
 # Legacy service names from older MyAIOne installs that predate the
-# hermes-gateway rename. Kept as an explicit allowlist (NOT a glob) so
-# profile units (hermes-gateway-*.service) and unrelated third-party
-# "hermes" units are never matched.
-_LEGACY_SERVICE_NAMES: tuple[str, ...] = ("hermes.service",)
+# myai-gateway rename. Kept as an explicit allowlist (NOT a glob) so
+# profile units (myai-gateway-*.service, myai-gateway-*.service) and
+# unrelated third-party "hermes" units are never matched. On upgrade,
+# users with the old default unit get a prompt to uninstall it so it
+# doesn't fight with the new myai-gateway.service over the same bot
+# token.
+_LEGACY_SERVICE_NAMES: tuple[str, ...] = (
+    "hermes.service",         # pre-gateway-rename (very old)
+    "hermes-gateway.service", # MyAIOne rc0–rc8 (pre-myai rebrand)
+)
 
 # ExecStart content markers that identify a unit as running our gateway.
 # A legacy unit is only flagged when its file contains one of these.
@@ -721,15 +727,15 @@ def _find_legacy_hermes_units() -> list[tuple[str, Path, bool]]:
 
     Detects unit files installed by older MyAIOne versions that used a
     different service name (e.g. ``hermes.service`` before the rename to
-    ``hermes-gateway.service``). When both a legacy unit and the current
-    ``hermes-gateway.service`` are active, they fight over the same bot
+    ``myai-gateway.service``). When both a legacy unit and the current
+    ``myai-gateway.service`` are active, they fight over the same bot
     token — the PR #5646 signal-recovery change turns this into a 30-second
     SIGTERM flap loop.
 
     Safety guards:
 
     * Explicit allowlist of legacy names (no globbing). Profile units such
-      as ``hermes-gateway-coder.service`` and unrelated third-party
+      as ``myai-gateway-coder.service`` and unrelated third-party
       ``hermes-*`` services are never matched.
     * ExecStart content check — only flag units that invoke our gateway
       entrypoint. A user-created ``hermes.service`` running an unrelated
@@ -772,7 +778,7 @@ def print_legacy_unit_warning() -> None:
     for name, path, is_system in legacy:
         scope = "system" if is_system else "user"
         print_info(f"    {path}  ({scope} scope)")
-    print_info("  These run alongside the current hermes-gateway service and")
+    print_info("  These run alongside the current myai-gateway service and")
     print_info("  cause SIGTERM flap loops — both try to use the same bot token.")
     print_info("  Remove them with:")
     print_info("    myai gateway migrate-legacy")
@@ -1059,11 +1065,11 @@ def _launchd_user_home() -> Path:
 def get_launchd_plist_path() -> Path:
     """Return the launchd plist path, scoped per profile.
 
-    Default ``~/.hermes`` → ``ai.hermes.gateway.plist`` (backward compatible).
-    Profile ``~/.hermes/profiles/coder`` → ``ai.hermes.gateway-coder.plist``.
+    Default ``~/.myai`` → ``ai.myai.gateway.plist`` (backward compatible).
+    Profile ``~/.myai/profiles/coder`` → ``ai.myai.gateway-coder.plist``.
     """
     suffix = _profile_suffix()
-    name = f"ai.hermes.gateway-{suffix}" if suffix else "ai.hermes.gateway"
+    name = f"ai.myai.gateway-{suffix}" if suffix else "ai.myai.gateway"
     return _launchd_user_home() / "Library" / "LaunchAgents" / f"{name}.plist"
 
 def _detect_venv_dir() -> Path | None:
@@ -1416,7 +1422,7 @@ def systemd_install(force: bool = False, system: bool = False, run_as_user: str 
         _require_root_for_system_service("install")
 
     # Offer to remove legacy units (hermes.service from pre-rename installs)
-    # before installing the new hermes-gateway.service. If both remain, they
+    # before installing the new myai-gateway.service. If both remain, they
     # flap-fight for the Telegram bot token on every gateway startup.
     # Only removes units matching _LEGACY_SERVICE_NAMES + our ExecStart
     # signature — profile units are never touched.
@@ -1658,7 +1664,7 @@ def systemd_status(deep: bool = False, system: bool = False):
 def get_launchd_label() -> str:
     """Return the launchd service label, scoped per profile."""
     suffix = _profile_suffix()
-    return f"ai.hermes.gateway-{suffix}" if suffix else "ai.hermes.gateway"
+    return f"ai.myai.gateway-{suffix}" if suffix else "ai.myai.gateway"
 
 
 def _launchd_domain() -> str:

@@ -5618,7 +5618,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # Write exit code *before* the gateway restart attempt.
         # When running as ``myai update --gateway`` (spawned by the gateway's
         # /update command), this process lives inside the gateway's systemd
-        # cgroup.  ``systemctl restart hermes-gateway`` kills everything in the
+        # cgroup.  ``systemctl restart myai-gateway`` kills everything in the
         # cgroup (KillMode=mixed → SIGKILL to remaining processes), including
         # us and the wrapping bash shell.  The shell never reaches its
         # ``printf $status > .update_exit_code`` epilogue, so the exit-code
@@ -5652,7 +5652,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
             killed_pids = set()
 
             # --- Systemd services (Linux) ---
-            # Discover all hermes-gateway* units (default + profiles)
+            # Discover all myai-gateway* units (default + profiles)
             if supports_systemd_services():
                 try:
                     _ensure_user_systemd_env()
@@ -5668,7 +5668,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
                             scope_cmd
                             + [
                                 "list-units",
-                                "hermes-gateway*",
+                                "myai-gateway*",
                                 "--plain",
                                 "--no-legend",
                                 "--no-pager",
@@ -5683,7 +5683,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
                                 continue
                             unit = parts[
                                 0
-                            ]  # e.g. hermes-gateway.service or hermes-gateway-coder.service
+                            ]  # e.g. myai-gateway.service or myai-gateway-coder.service
                             if not unit.endswith(".service"):
                                 continue
                             svc_name = unit.removesuffix(".service")
@@ -5816,7 +5816,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 
         # Warn if legacy MyAIOne gateway unit files are still installed.
         # When both hermes.service (from a pre-rename install) and the
-        # current hermes-gateway.service are enabled, they SIGTERM-fight
+        # current myai-gateway.service are enabled, they SIGTERM-fight
         # for the same bot token (see PR #11909). Flagging here means
         # every `myai update` surfaces the issue until the user migrates.
         try:
@@ -5834,7 +5834,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
                     print(f"    {path}  ({scope} scope)")
                 print()
                 print("  These pre-rename units (hermes.service) fight the current")
-                print("  hermes-gateway.service for the bot token and cause SIGTERM")
+                print("  myai-gateway.service for the bot token and cause SIGTERM")
                 print("  flap loops. Remove them with:")
                 print()
                 print("    myai gateway migrate-legacy")
@@ -6293,7 +6293,7 @@ def cmd_logs(args):
 def main():
     """Main entry point for hermes CLI."""
     parser = argparse.ArgumentParser(
-        prog="hermes",
+        prog="myai",
         description="MyAIOne Agent - AI assistant with tool-calling capabilities",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -6699,7 +6699,7 @@ For more help on a command:
         description=(
             "Stop, disable, and remove legacy MyAIOne gateway unit files "
             "(e.g. hermes.service) left over from older installs. Profile "
-            "units (hermes-gateway-<profile>.service) and unrelated "
+            "units (myai-gateway-<profile>.service) and unrelated "
             "third-party services are never touched."
         ),
     )

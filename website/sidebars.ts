@@ -26,7 +26,6 @@ const sidebars: SidebarsConfig = {
         'user-guide/sessions',
         'user-guide/profiles',
         'user-guide/git-worktrees',
-        'user-guide/docker',
         'user-guide/security',
         'user-guide/checkpoints-and-rollback',
       ],

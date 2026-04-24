@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myaione-agent"
-version = "0.10.0rc12"
+version = "0.10.0rc13"
 description = "MyAIOne Agent — the self-improving AI agent that creates skills from experience, improves them during use, and runs anywhere"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -64,7 +64,6 @@ Homepage = "https://myai1.ai"
 Documentation = "https://docs.myai1.ai"
 Repository = "https://github.com/samuelmukoti/myai-agent"
 Issues = "https://github.com/samuelmukoti/myai-agent/issues"
-"Upstream (Hermes Agent)" = "https://github.com/NousResearch/hermes-agent"
 
 [project.optional-dependencies]
 modal = ["modal>=1.0.0,<2"]

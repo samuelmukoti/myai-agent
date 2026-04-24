@@ -224,5 +224,5 @@ HERMES_LOG_LEVEL=DEBUG myai acp
 ## Further Reading
 
 - [ACP Specification](https://github.com/anysphere/acp)
-- [MyAIOne Agent Documentation](https://github.com/NousResearch/hermes-agent)
+- [MyAIOne Agent Documentation](https://github.com/samuelmukoti/myai-agent)
 - Run `myai --help` for all CLI options

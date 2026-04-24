@@ -6,13 +6,13 @@ without risk of circular imports.
 Home-directory resolution
 -------------------------
 The agent stores its state under ``~/.myai``.  MyAIOne does **not** read
-``$HERMES_HOME`` or ``~/.hermes`` — those belong to the Hermes project
+``$MYAI_HOME`` or ``~/.myai`` — those belong to the Hermes project
 and MyAIOne never touches them, so both agents can coexist on the same
 machine without clashing.  The env-var chain is just:
 
     $MYAI_HOME → ~/.myai
 
-``get_hermes_home()`` is kept as a legacy function-name alias for the
+``get_myai_home()`` is kept as a legacy function-name alias for the
 ~240 call sites throughout the codebase; it resolves identically to
 ``get_myai_home()`` and reads none of Hermes's state.
 """
@@ -43,7 +43,7 @@ def get_myai_home() -> Path:
         1. ``$MYAI_HOME`` env var
         2. ``~/.myai``
 
-    No ``$HERMES_HOME`` fallback and no ``~/.hermes`` detection — MyAIOne
+    No ``$MYAI_HOME`` fallback and no ``~/.myai`` detection — MyAIOne
     keeps its state fully separate from Hermes so both can be installed
     on the same machine without interfering with each other.
 
@@ -56,10 +56,10 @@ def get_myai_home() -> Path:
 
 
 # Back-compat alias — 200+ call sites import this by name.
-get_hermes_home = get_myai_home
+get_myai_home = get_myai_home
 
 
-def get_default_hermes_root() -> Path:
+def get_default_myai_root() -> Path:
     """Return the root MyAIOne directory for profile-level operations.
 
     In standard deployments this is ``~/.myai``.
@@ -117,7 +117,7 @@ def get_optional_skills_dir(default: Path | None = None) -> Path:
     return get_myai_home() / "optional-skills"
 
 
-def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
+def get_myai_dir(new_subpath: str, old_name: str) -> Path:
     """Resolve a MyAIOne subdirectory with backward compatibility.
 
     New installs get the consolidated layout (e.g. ``cache/images``).
@@ -160,7 +160,7 @@ def display_myai_home() -> str:
 
 # Legacy function-name alias — many call sites still import this by the
 # old name.  Points to the same Hermes-free implementation.
-display_hermes_home = display_myai_home
+display_myai_home = display_myai_home
 
 
 def get_subprocess_home() -> str | None:
@@ -315,7 +315,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
     import socket
 
     # Guard against double-patching
-    if getattr(socket.getaddrinfo, "_hermes_ipv4_patched", False):
+    if getattr(socket.getaddrinfo, "_myai_ipv4_patched", False):
         return
 
     _original_getaddrinfo = socket.getaddrinfo
@@ -331,7 +331,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
                 return _original_getaddrinfo(host, port, family, type, proto, flags)
         return _original_getaddrinfo(host, port, family, type, proto, flags)
 
-    _ipv4_getaddrinfo._hermes_ipv4_patched = True  # type: ignore[attr-defined]
+    _ipv4_getaddrinfo._myai_ipv4_patched = True  # type: ignore[attr-defined]
     socket.getaddrinfo = _ipv4_getaddrinfo  # type: ignore[assignment]
 
 

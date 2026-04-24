@@ -2668,7 +2668,7 @@ class DiscordAdapter(BasePlatformAdapter):
 
             default_hint = f" (default: {default})" if default else ""
             embed = discord.Embed(
-                title="⚕ Update Needs Your Input",
+                title="🤖 Update Needs Your Input",
                 description=f"{prompt}{default_hint}",
                 color=discord.Color.gold(),
             )
@@ -3402,8 +3402,8 @@ if DISCORD_AVAILABLE:
 
             # Write response file
             try:
-                from myai_constants import get_hermes_home
-                home = get_hermes_home()
+                from myai_constants import get_myai_home
+                home = get_myai_home()
                 response_path = home / ".update_response"
                 tmp = response_path.with_suffix(".tmp")
                 tmp.write_text(answer)

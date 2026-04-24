@@ -21,6 +21,15 @@ import pytest
 from gateway.config import Platform
 
 
+# Pin every test in this file to the same xdist worker. The helper patches
+# ``pathlib.Path.exists`` / ``subprocess.run`` / ``Popen`` etc. at module
+# scope; when xdist load-balances them across 16 workers they reliably
+# interfere (the ``mock_fh.close`` expectation fires 0 times because a
+# sibling test monkey-patched the same symbol in an overlapping window).
+# Running serially on a single worker keeps the patches isolated.
+pytestmark = pytest.mark.xdist_group(name="whatsapp_connect")
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

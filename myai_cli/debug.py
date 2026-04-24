@@ -16,7 +16,7 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
 
 # ---------------------------------------------------------------------------
@@ -39,7 +39,7 @@ _AUTO_DELETE_SECONDS = 21600
 # ---------------------------------------------------------------------------
 
 def _pending_file() -> Path:
-    """Path to ``~/.hermes/pastes/pending.json``.
+    """Path to ``~/.myai/pastes/pending.json``.
 
     Each entry: ``{"url": "...", "expire_at": <unix_ts>}``.  Scheduled
     DELETEs used to be handled by spawning a detached Python process per
@@ -47,7 +47,7 @@ def _pending_file() -> Path:
     ran ``myai debug share`` repeatedly.  We now persist the schedule
     to disk and sweep expired entries on the next debug invocation.
     """
-    return get_hermes_home() / "pastes" / "pending.json"
+    return get_myai_home() / "pastes" / "pending.json"
 
 
 def _load_pending() -> list[dict]:
@@ -213,7 +213,7 @@ def _schedule_auto_delete(urls: list[str], delay_seconds: int = _AUTO_DELETE_SEC
     every ``myai debug share`` invocation added ~20 MB of resident Python
     interpreters that never exited until the sleep completed.
 
-    The replacement is stateless: we append to ``~/.hermes/pastes/pending.json``
+    The replacement is stateless: we append to ``~/.myai/pastes/pending.json``
     and rely on opportunistic sweeps (``_sweep_expired_pastes``) called from
     every ``myai debug`` invocation.  If the user never runs ``myai debug``
     again, paste.rs's own retention policy handles cleanup.
@@ -325,7 +325,7 @@ def _resolve_log_path(log_name: str) -> Optional[Path]:
     if not filename:
         return None
 
-    log_dir = get_hermes_home() / "logs"
+    log_dir = get_myai_home() / "logs"
     primary = log_dir / filename
     if primary.exists() and primary.stat().st_size > 0:
         return primary

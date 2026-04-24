@@ -27,19 +27,19 @@ class TestGetSubprocessHome:
         assert get_subprocess_home() is None
 
     def test_returns_none_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         # No home/ subdirectory created
         from myai_constants import get_subprocess_home
         assert get_subprocess_home() is None
 
     def test_returns_path_when_home_dir_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        profile_home = hermes_home / "home"
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        profile_home = myai_home / "home"
         profile_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         from myai_constants import get_subprocess_home
         assert get_subprocess_home() == str(profile_home)
 
@@ -81,23 +81,23 @@ class TestMakeRunEnvHomeInjection:
     """Verify _make_run_env() injects HOME into subprocess envs."""
 
     def test_injects_home_when_profile_home_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        (myai_home / "home").mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         monkeypatch.setenv("HOME", "/root")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
         from tools.environments.local import _make_run_env
         result = _make_run_env({})
 
-        assert result["HOME"] == str(hermes_home / "home")
+        assert result["HOME"] == str(myai_home / "home")
 
     def test_no_injection_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
         # No home/ subdirectory
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         monkeypatch.setenv("HOME", "/root")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
@@ -125,21 +125,21 @@ class TestSanitizeSubprocessEnvHomeInjection:
     """Verify _sanitize_subprocess_env() injects HOME for background procs."""
 
     def test_injects_home_when_profile_home_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        (myai_home / "home").mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
         base_env = {"HOME": "/root", "PATH": "/usr/bin", "USER": "root"}
         from tools.environments.local import _sanitize_subprocess_env
         result = _sanitize_subprocess_env(base_env)
 
-        assert result["HOME"] == str(hermes_home / "home")
+        assert result["HOME"] == str(myai_home / "home")
 
     def test_no_injection_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
         base_env = {"HOME": "/root", "PATH": "/usr/bin"}
         from tools.environments.local import _sanitize_subprocess_env
@@ -181,10 +181,10 @@ class TestPythonProcessUnchanged:
     def test_path_home_unchanged_after_subprocess_home_resolved(
         self, tmp_path, monkeypatch
     ):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        (myai_home / "home").mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
         original_home = os.environ.get("HOME")
         original_path_home = str(Path.home())

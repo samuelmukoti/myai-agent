@@ -176,7 +176,7 @@ def get_external_skills_dirs() -> List[Path]:
 
     Each entry is expanded (``~`` and ``${VAR}``) and resolved to an absolute
     path.  Only directories that actually exist are returned.  Duplicates and
-    paths that resolve to the local ``~/.hermes/skills/`` are silently skipped.
+    paths that resolve to the local ``~/.myai/skills/`` are silently skipped.
     """
     config_path = get_config_path()
     if not config_path.exists():
@@ -225,7 +225,7 @@ def get_external_skills_dirs() -> List[Path]:
 
 
 def get_all_skills_dirs() -> List[Path]:
-    """Return all skill directories: local ``~/.hermes/skills/`` first, then external.
+    """Return all skill directories: local ``~/.myai/skills/`` first, then external.
 
     The local dir is always first (and always included even if it doesn't exist
     yet — callers handle that).  External dirs follow in config order.
@@ -244,14 +244,14 @@ def extract_skill_conditions(frontmatter: Dict[str, Any]) -> Dict[str, List]:
     # Handle cases where metadata is not a dict (e.g., a string from malformed YAML)
     if not isinstance(metadata, dict):
         metadata = {}
-    hermes = metadata.get("hermes") or {}
-    if not isinstance(hermes, dict):
-        hermes = {}
+    myai = metadata.get("myai") or metadata.get("hermes") or {}
+    if not isinstance(myai, dict):
+        myai = {}
     return {
-        "fallback_for_toolsets": hermes.get("fallback_for_toolsets", []),
-        "requires_toolsets": hermes.get("requires_toolsets", []),
-        "fallback_for_tools": hermes.get("fallback_for_tools", []),
-        "requires_tools": hermes.get("requires_tools", []),
+        "fallback_for_toolsets": myai.get("fallback_for_toolsets", []),
+        "requires_toolsets": myai.get("requires_toolsets", []),
+        "fallback_for_tools": myai.get("fallback_for_tools", []),
+        "requires_tools": myai.get("requires_tools", []),
     }
 
 
@@ -264,7 +264,7 @@ def extract_skill_config_vars(frontmatter: Dict[str, Any]) -> List[Dict[str, Any
     Skills declare config.yaml settings they need via::
 
         metadata:
-          hermes:
+          myai:
             config:
               - key: wiki.path
                 description: Path to the LLM Wiki knowledge base directory
@@ -277,10 +277,10 @@ def extract_skill_config_vars(frontmatter: Dict[str, Any]) -> List[Dict[str, Any
     metadata = frontmatter.get("metadata")
     if not isinstance(metadata, dict):
         return []
-    hermes = metadata.get("hermes")
-    if not isinstance(hermes, dict):
+    myai = metadata.get("myai") or metadata.get("hermes")
+    if not isinstance(myai, dict):
         return []
-    raw = hermes.get("config")
+    raw = myai.get("config")
     if not raw:
         return []
     if isinstance(raw, dict):

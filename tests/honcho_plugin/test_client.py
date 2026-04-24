@@ -115,7 +115,7 @@ class TestFromGlobalConfig:
                 }
             }
         }))
-        # Isolate from real ~/.hermes/honcho.json
+        # Isolate from real ~/.myai/honcho.json
         monkeypatch.setenv("MYAI_HOME", str(tmp_path / "isolated"))
 
         config = HonchoClientConfig.from_global_config(config_path=config_file)
@@ -340,24 +340,24 @@ class TestResolveSessionName:
 
 class TestResolveConfigPath:
     def test_prefers_hermes_home_when_exists(self, tmp_path):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        local_cfg = hermes_home / "honcho.json"
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        local_cfg = myai_home / "honcho.json"
         local_cfg.write_text('{"apiKey": "local"}')
 
-        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"MYAI_HOME": str(myai_home)}):
             result = resolve_config_path()
         assert result == local_cfg
 
     def test_falls_back_to_global_when_no_local(self, tmp_path):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        # No honcho.json in HERMES_HOME — also isolate ~/.hermes so
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        # No honcho.json in MYAI_HOME — also isolate ~/.hermes so
         # the default-profile fallback doesn't hit the real filesystem.
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
 
-        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}), \
+        with patch.dict(os.environ, {"MYAI_HOME": str(myai_home)}), \
              patch.object(Path, "home", return_value=fake_home):
             result = resolve_config_path()
         assert result == GLOBAL_CONFIG_PATH
@@ -373,15 +373,15 @@ class TestResolveConfigPath:
         assert result == GLOBAL_CONFIG_PATH
 
     def test_from_global_config_uses_local_path(self, tmp_path):
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir()
-        local_cfg = hermes_home / "honcho.json"
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir()
+        local_cfg = myai_home / "honcho.json"
         local_cfg.write_text(json.dumps({
             "apiKey": "***",
             "workspace": "local-ws",
         }))
 
-        with patch.dict(os.environ, {"MYAI_HOME": str(hermes_home)}), \
+        with patch.dict(os.environ, {"MYAI_HOME": str(myai_home)}), \
              patch.object(Path, "home", return_value=tmp_path):
             config = HonchoClientConfig.from_global_config()
         assert config.api_key == "***"

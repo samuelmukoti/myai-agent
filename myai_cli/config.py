@@ -1,9 +1,9 @@
 """
 Configuration management for MyAIOne Agent.
 
-Config files are stored in ~/.hermes/ for easy access:
-- ~/.hermes/config.yaml  - All settings (model, toolsets, terminal, etc.)
-- ~/.hermes/.env         - API keys and secrets
+Config files are stored in ~/.myai/ for easy access:
+- ~/.myai/config.yaml  - All settings (model, toolsets, terminal, etc.)
+- ~/.myai/.env         - API keys and secrets
 
 This module provides:
 - myai config          - Show current configuration
@@ -85,7 +85,7 @@ def get_managed_system() -> Optional[str]:
             return "NixOS"
         return _MANAGED_SYSTEM_NAMES.get(normalized, raw)
 
-    managed_marker = get_hermes_home() / ".managed"
+    managed_marker = get_myai_home() / ".managed"
     if managed_marker.exists():
         return "NixOS"
     return None
@@ -95,7 +95,7 @@ def is_managed() -> bool:
     """Check if MyAIOne is running in package-manager-managed mode.
 
     Two signals: the MYAI_AGENT_MANAGED env var (set by the systemd service),
-    or a .managed marker file in HERMES_HOME (set by the NixOS activation
+    or a .managed marker file in MYAI_HOME (set by the NixOS activation
     script, so interactive shells also see it).
     """
     return get_managed_system() is not None
@@ -171,7 +171,7 @@ def get_container_exec_info() -> Optional[dict]:
     if is_container():
         return None
 
-    container_mode_file = get_hermes_home() / ".container-mode"
+    container_mode_file = get_myai_home() / ".container-mode"
 
     try:
         info = {}
@@ -203,15 +203,15 @@ def get_container_exec_info() -> Optional[dict]:
 # =============================================================================
 
 # Re-export from myai_constants — canonical definition lives there.
-from myai_constants import get_hermes_home  # noqa: F811,E402
+from myai_constants import get_myai_home  # noqa: F811,E402
 
 def get_config_path() -> Path:
     """Get the main config file path."""
-    return get_hermes_home() / "config.yaml"
+    return get_myai_home() / "config.yaml"
 
 def get_env_path() -> Path:
     """Get the .env file path (for API keys)."""
-    return get_hermes_home() / ".env"
+    return get_myai_home() / ".env"
 
 def get_project_root() -> Path:
     """Get the project installation directory."""
@@ -226,7 +226,7 @@ def _secure_dir(path):
 
     The mode can be overridden via the MYAI_HOME_MODE environment variable
     (e.g. MYAI_HOME_MODE=0701) for deployments where a web server (nginx,
-    caddy, etc.) needs to traverse HERMES_HOME to reach a served subdirectory.
+    caddy, etc.) needs to traverse MYAI_HOME to reach a served subdirectory.
     The execute-only bit on a directory permits cd-through without exposing
     directory listings.
     """
@@ -287,7 +287,7 @@ def _secure_file(path):
 
 
 def _ensure_default_soul_md(home: Path) -> None:
-    """Seed a default SOUL.md into HERMES_HOME if the user doesn't have one yet."""
+    """Seed a default SOUL.md into MYAI_HOME if the user doesn't have one yet."""
     soul_path = home / "SOUL.md"
     if soul_path.exists():
         return
@@ -295,18 +295,18 @@ def _ensure_default_soul_md(home: Path) -> None:
     _secure_file(soul_path)
 
 
-def ensure_hermes_home():
-    """Ensure ~/.hermes directory structure exists with secure permissions.
+def ensure_myai_home():
+    """Ensure ~/.myai directory structure exists with secure permissions.
 
     In managed mode (NixOS), dirs are created by the activation script with
     setgid + group-writable (2770). We skip mkdir and set umask(0o007) so
     any files created (e.g. SOUL.md) are group-writable (0660).
     """
-    home = get_hermes_home()
+    home = get_myai_home()
     if is_managed():
         old_umask = os.umask(0o007)
         try:
-            _ensure_hermes_home_managed(home)
+            _ensure_myai_home_managed(home)
         finally:
             os.umask(old_umask)
     else:
@@ -319,11 +319,11 @@ def ensure_hermes_home():
         _ensure_default_soul_md(home)
 
 
-def _ensure_hermes_home_managed(home: Path):
+def _ensure_myai_home_managed(home: Path):
     """Managed-mode variant: verify dirs exist (activation creates them), seed SOUL.md."""
     if not home.is_dir():
         raise RuntimeError(
-            f"HERMES_HOME {home} does not exist. "
+            f"MYAI_HOME {home} does not exist. "
             "Run 'sudo nixos-rebuild switch' first."
         )
     for subdir in ("cron", "sessions", "logs", "memories"):
@@ -346,7 +346,7 @@ DEFAULT_CONFIG = {
     "providers": {},
     "fallback_providers": [],
     "credential_pool_strategies": {},
-    "toolsets": ["hermes-cli"],
+    "toolsets": ["myai-cli"],
     "agent": {
         "max_turns": 90,
         # Inactivity timeout for gateway agent execution (seconds).
@@ -646,7 +646,7 @@ DEFAULT_CONFIG = {
     # "compressor" = built-in lossy summarization (default).
     # Set to a plugin name to activate an alternative engine (e.g. "lcm"
     # for Lossless Context Management).  The engine must be installed as
-    # a plugin in plugins/context_engine/<name>/ or ~/.hermes/plugins/.
+    # a plugin in plugins/context_engine/<name>/ or ~/.myai/plugins/.
     "context": {
         "engine": "compressor",
     },
@@ -686,7 +686,7 @@ DEFAULT_CONFIG = {
     
     # Skills — external skill directories for sharing skills across tools/agents.
     # Each path is expanded (~, ${VAR}) and resolved.  Read-only — skill creation
-    # always goes to ~/.hermes/skills/.
+    # always goes to ~/.myai/skills/.
     "skills": {
         "external_dirs": [],   # e.g. ["~/.agents/skills", "/shared/team-skills"]
     },
@@ -713,7 +713,7 @@ DEFAULT_CONFIG = {
     # WhatsApp platform settings (gateway mode)
     "whatsapp": {
         # Reply prefix prepended to every outgoing WhatsApp message.
-        # Default (None) uses the built-in "⚕ *MyAIOne Agent*" header.
+        # Default (None) uses the built-in "🤖 *MyAIOne Agent*" header.
         # Set to "" (empty string) to disable the header entirely.
         # Supports \n for newlines, e.g. "🤖 *My Bot*\n──────\n"
     },
@@ -785,7 +785,7 @@ DEFAULT_CONFIG = {
         "mode": "project",
     },
 
-    # Logging — controls file logging to ~/.hermes/logs/.
+    # Logging — controls file logging to ~/.myai/logs/.
     # agent.log captures INFO+ (all agent activity); errors.log captures WARNING+.
     "logging": {
         "level": "INFO",       # Minimum level for agent.log: DEBUG, INFO, WARNING
@@ -2169,7 +2169,7 @@ def warn_deprecated_cwd_env_vars(config: Optional[Dict[str, Any]] = None) -> Non
             f"this is deprecated."
         )
     if lines:
-        hint_path = os.environ.get("MYAI_HOME", "~/.hermes")
+        hint_path = os.environ.get("MYAI_HOME", "~/.myai")
         lines.insert(0, "\033[33m⚠ Deprecated .env settings detected:\033[0m")
         lines.append(
             f"  \033[2mMove to config.yaml instead:  "
@@ -2778,7 +2778,7 @@ def _normalize_max_turns_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def read_raw_config() -> Dict[str, Any]:
-    """Read ~/.hermes/config.yaml as-is, without merging defaults or migrating.
+    """Read ~/.myai/config.yaml as-is, without merging defaults or migrating.
 
     Returns the raw YAML dict, or ``{}`` if the file doesn't exist or can't
     be parsed.  Use this for lightweight config reads where you just need a
@@ -2795,13 +2795,35 @@ def read_raw_config() -> Dict[str, Any]:
     return {}
 
 
+_HERMES_TOOLSET_RENAMES = {
+    f"hermes-{p}": f"myai-{p}"
+    for p in (
+        "acp", "api-server", "cli", "telegram", "discord", "whatsapp",
+        "slack", "signal", "bluebubbles", "homeassistant", "email",
+        "mattermost", "matrix", "dingtalk", "feishu", "weixin", "qqbot",
+        "wecom", "wecom-callback", "sms", "webhook", "gateway",
+    )
+}
+
+
+def _migrate_legacy_toolset_names(toolsets):
+    """Rewrite ``hermes-*`` toolset keys to ``myai-*`` in-place.
+
+    Accepts a list (the canonical config shape) or any iterable of strings.
+    Returns the migrated list. Unknown values are passed through untouched.
+    """
+    if not isinstance(toolsets, list):
+        return toolsets
+    return [_HERMES_TOOLSET_RENAMES.get(t, t) for t in toolsets]
+
+
 def load_config() -> Dict[str, Any]:
-    """Load configuration from ~/.hermes/config.yaml."""
-    ensure_hermes_home()
+    """Load configuration from ~/.myai/config.yaml."""
+    ensure_myai_home()
     config_path = get_config_path()
-    
+
     config = copy.deepcopy(DEFAULT_CONFIG)
-    
+
     if config_path.exists():
         try:
             with open(config_path, encoding="utf-8") as f:
@@ -2813,6 +2835,9 @@ def load_config() -> Dict[str, Any]:
                     agent_user_config["max_turns"] = user_config["max_turns"]
                 user_config["agent"] = agent_user_config
                 user_config.pop("max_turns", None)
+
+            if "toolsets" in user_config:
+                user_config["toolsets"] = _migrate_legacy_toolset_names(user_config["toolsets"])
 
             config = _deep_merge(config, user_config)
         except Exception as e:
@@ -2922,13 +2947,13 @@ _COMMENTED_SECTIONS = """
 
 
 def save_config(config: Dict[str, Any]):
-    """Save configuration to ~/.hermes/config.yaml."""
+    """Save configuration to ~/.myai/config.yaml."""
     if is_managed():
         managed_error("save configuration")
         return
     from utils import atomic_yaml_write
 
-    ensure_hermes_home()
+    ensure_myai_home()
     config_path = get_config_path()
     current_normalized = _normalize_root_model_keys(_normalize_max_turns_config(config))
     normalized = current_normalized
@@ -2960,7 +2985,7 @@ def save_config(config: Dict[str, Any]):
 
 
 def load_env() -> Dict[str, str]:
-    """Load environment variables from ~/.hermes/.env.
+    """Load environment variables from ~/.myai/.env.
 
     Sanitizes lines before parsing so that corrupted files (e.g.
     concatenated KEY=VALUE pairs on a single line) are handled
@@ -3040,7 +3065,7 @@ def _sanitize_env_lines(lines: list) -> list:
 
 
 def sanitize_env_file() -> int:
-    """Read, sanitize, and rewrite ~/.hermes/.env in place.
+    """Read, sanitize, and rewrite ~/.myai/.env in place.
 
     Returns the number of lines that were fixed (concatenation splits +
     placeholder removals).  Returns 0 when no changes are needed.
@@ -3126,7 +3151,7 @@ def _check_non_ascii_credential(key: str, value: str) -> str:
 
 
 def save_env_value(key: str, value: str):
-    """Save or update a value in ~/.hermes/.env."""
+    """Save or update a value in ~/.myai/.env."""
     if is_managed():
         managed_error(f"set {key}")
         return
@@ -3135,7 +3160,7 @@ def save_env_value(key: str, value: str):
     value = value.replace("\n", "").replace("\r", "")
     # API keys / tokens must be ASCII — strip non-ASCII with a warning.
     value = _check_non_ascii_credential(key, value)
-    ensure_hermes_home()
+    ensure_myai_home()
     env_path = get_env_path()
     
     # On Windows, open() defaults to the system locale (cp1252) which can
@@ -3196,7 +3221,7 @@ def save_env_value(key: str, value: str):
 
 
 def remove_env_value(key: str) -> bool:
-    """Remove a key from ~/.hermes/.env and os.environ.
+    """Remove a key from ~/.myai/.env and os.environ.
 
     Returns True if the key was found and removed, False otherwise.
     """
@@ -3283,7 +3308,7 @@ def save_env_value_secure(key: str, value: str) -> Dict[str, Any]:
 
 
 def reload_env() -> int:
-    """Re-read ~/.hermes/.env into os.environ. Returns count of vars updated.
+    """Re-read ~/.myai/.env into os.environ. Returns count of vars updated.
 
     Adds/updates vars that changed and removes vars that were deleted from
     the .env file (but only vars known to MyAIOne — OPTIONAL_ENV_VARS and
@@ -3305,7 +3330,7 @@ def reload_env() -> int:
 
 
 def get_env_value(key: str) -> Optional[str]:
-    """Get a value from ~/.hermes/.env or environment."""
+    """Get a value from ~/.myai/.env or environment."""
     # Check environment first
     if key in os.environ:
         return os.environ[key]
@@ -3334,7 +3359,7 @@ def show_config():
     
     print()
     print(color("┌─────────────────────────────────────────────────────────┐", Colors.CYAN))
-    print(color("│              ⚕ MyAIOne Configuration                    │", Colors.CYAN))
+    print(color("│              🤖 MyAIOne Configuration                    │", Colors.CYAN))
     print(color("└─────────────────────────────────────────────────────────┘", Colors.CYAN))
     
     # Paths
@@ -3580,7 +3605,7 @@ def set_config_value(key: str, value: str):
     current[parts[-1]] = value
     
     # Write only user config back (not the full merged defaults)
-    ensure_hermes_home()
+    ensure_myai_home()
     from utils import atomic_yaml_write
     atomic_yaml_write(config_path, user_config, sort_keys=False)
     

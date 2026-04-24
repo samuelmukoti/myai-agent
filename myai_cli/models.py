@@ -1855,8 +1855,8 @@ _OLLAMA_CLOUD_CACHE_TTL = 3600  # 1 hour
 
 def _ollama_cloud_cache_path() -> Path:
     """Return the path for the Ollama Cloud model cache."""
-    from myai_constants import get_hermes_home
-    return get_hermes_home() / "ollama_cloud_models_cache.json"
+    from myai_constants import get_myai_home
+    return get_myai_home() / "ollama_cloud_models_cache.json"
 
 
 def _load_ollama_cloud_cache(*, ignore_ttl: bool = False) -> Optional[dict]:

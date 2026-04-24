@@ -155,7 +155,7 @@ Add a named toolset for your platform:
 And add it to the `hermes-gateway` composite:
 
 ```python
-"hermes-gateway": {
+"myai-gateway": {
     "includes": [..., "hermes-your-platform"]
 }
 ```

@@ -117,7 +117,7 @@ class TestWebServerEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert "version" in data
-        assert "hermes_home" in data
+        assert "myai_home" in data
         assert "active_sessions" in data
 
     def test_get_status_filters_unconfigured_gateway_platforms(self, monkeypatch):

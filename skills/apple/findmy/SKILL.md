@@ -6,7 +6,7 @@ author: MyAIOne Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  myai:
     tags: [FindMy, AirTag, location, tracking, macOS, Apple]
 ---
 

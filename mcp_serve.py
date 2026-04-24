@@ -13,14 +13,14 @@ Matches OpenClaw's 9-tool MCP channel bridge surface:
 Plus: channels_list (MyAIOne-specific extra)
 
 Usage:
-    hermes mcp serve
-    hermes mcp serve --verbose
+    myai mcp serve
+    myai mcp serve --verbose
 
 MCP client config (e.g. claude_desktop_config.json):
     {
         "mcpServers": {
-            "hermes": {
-                "command": "hermes",
+            "myai": {
+                "command": "myai",
                 "args": ["mcp", "serve"]
             }
         }
@@ -40,7 +40,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
-logger = logging.getLogger("hermes.mcp_serve")
+logger = logging.getLogger("myai.mcp_serve")
 
 # ---------------------------------------------------------------------------
 # Lazy MCP SDK import
@@ -60,10 +60,10 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 def _get_sessions_dir() -> Path:
-    """Return the sessions directory using HERMES_HOME."""
+    """Return the sessions directory using MYAI_HOME."""
     try:
-        from myai_constants import get_hermes_home
-        return get_hermes_home() / "sessions"
+        from myai_constants import get_myai_home
+        return get_myai_home() / "sessions"
     except ImportError:
         return Path(os.environ.get("MYAI_HOME", Path.home() / ".myai")) / "sessions"
 
@@ -98,8 +98,8 @@ def _load_sessions_index() -> dict:
 def _load_channel_directory() -> dict:
     """Load the cached channel directory for available targets."""
     try:
-        from myai_constants import get_hermes_home
-        directory_file = get_hermes_home() / "channel_directory.json"
+        from myai_constants import get_myai_home
+        directory_file = get_myai_home() / "channel_directory.json"
     except ImportError:
         directory_file = Path(
             os.environ.get("MYAI_HOME", Path.home() / ".myai")
@@ -343,8 +343,8 @@ class EventBridge:
 
         # Check if state.db has changed
         try:
-            from myai_constants import get_hermes_home
-            db_file = get_hermes_home() / "state.db"
+            from myai_constants import get_myai_home
+            db_file = get_myai_home() / "state.db"
         except ImportError:
             db_file = Path(os.environ.get("MYAI_HOME", Path.home() / ".myai")) / "state.db"
 
@@ -437,7 +437,7 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
         )
 
     mcp = FastMCP(
-        "hermes",
+        "myai",
         instructions=(
             "MyAIOne Agent messaging bridge. Use these tools to interact with "
             "conversations across Telegram, Discord, Slack, WhatsApp, Signal, "

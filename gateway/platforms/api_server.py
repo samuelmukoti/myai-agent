@@ -138,8 +138,8 @@ class ResponseStore:
         self._max_size = max_size
         if db_path is None:
             try:
-                from myai_cli.config import get_hermes_home
-                db_path = str(get_hermes_home() / "response_store.db")
+                from myai_cli.config import get_myai_home
+                db_path = str(get_myai_home() / "response_store.db")
             except Exception:
                 db_path = ":memory:"
         try:

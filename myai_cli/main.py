@@ -77,14 +77,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # ---------------------------------------------------------------------------
 # Profile override — MUST happen before any hermes module import.
 #
-# Many modules cache HERMES_HOME at import time (module-level constants).
+# Many modules cache MYAI_HOME at import time (module-level constants).
 # We intercept --profile/-p from sys.argv here and set the env var so that
 # every subsequent ``os.getenv("MYAI_HOME", ...)`` resolves correctly.
 # The flag is stripped from sys.argv so argparse never sees it.
-# Falls back to ~/.hermes/active_profile for sticky default.
+# Falls back to ~/.myai/active_profile for sticky default.
 # ---------------------------------------------------------------------------
 def _apply_profile_override() -> None:
-    """Pre-parse --profile/-p and set HERMES_HOME before module imports."""
+    """Pre-parse --profile/-p and set MYAI_HOME before module imports."""
     argv = sys.argv[1:]
     profile_name = None
     consume = 0
@@ -103,9 +103,9 @@ def _apply_profile_override() -> None:
     # 2. If no flag, check active_profile in the hermes root
     if profile_name is None:
         try:
-            from myai_constants import get_default_hermes_root
+            from myai_constants import get_default_myai_root
 
-            active_path = get_default_hermes_root() / "active_profile"
+            active_path = get_default_myai_root() / "active_profile"
             if active_path.exists():
                 name = active_path.read_text().strip()
                 if name and name != "default":
@@ -114,12 +114,12 @@ def _apply_profile_override() -> None:
         except (UnicodeDecodeError, OSError):
             pass  # corrupted file, skip
 
-    # 3. If we found a profile, resolve and set HERMES_HOME
+    # 3. If we found a profile, resolve and set MYAI_HOME
     if profile_name is not None:
         try:
             from myai_cli.profiles import resolve_profile_env
 
-            hermes_home = resolve_profile_env(profile_name)
+            myai_home = resolve_profile_env(profile_name)
         except (ValueError, FileNotFoundError) as exc:
             print(f"Error: {exc}", file=sys.stderr)
             sys.exit(1)
@@ -130,7 +130,7 @@ def _apply_profile_override() -> None:
                 file=sys.stderr,
             )
             return
-        os.environ["MYAI_HOME"] = hermes_home
+        os.environ["MYAI_HOME"] = myai_home
         # Strip the flag from argv so argparse doesn't choke
         if consume > 0:
             for i, arg in enumerate(argv):
@@ -146,12 +146,12 @@ def _apply_profile_override() -> None:
 
 _apply_profile_override()
 
-# Load .env from ~/.hermes/.env first, then project root as dev fallback.
+# Load .env from ~/.myai/.env first, then project root as dev fallback.
 # User-managed env files should override stale shell exports on restart.
-from myai_cli.config import get_hermes_home
-from myai_cli.env_loader import load_hermes_dotenv
+from myai_cli.config import get_myai_home
+from myai_cli.env_loader import load_myai_dotenv
 
-load_hermes_dotenv(project_env=PROJECT_ROOT / ".env")
+load_myai_dotenv(project_env=PROJECT_ROOT / ".env")
 
 # Initialize centralized file logging early — all `hermes` subcommands
 # (chat, setup, gateway, config, etc.) write to agent.log + errors.log.
@@ -205,7 +205,7 @@ def _relative_time(ts) -> str:
 
 def _has_any_provider_configured() -> bool:
     """Check if at least one inference provider is usable."""
-    from myai_cli.config import get_env_path, get_hermes_home, load_config
+    from myai_cli.config import get_env_path, get_myai_home, load_config
     from myai_cli.auth import get_auth_status
 
     # Determine whether MyAIOne itself has been explicitly configured (model
@@ -271,7 +271,7 @@ def _has_any_provider_configured() -> bool:
         pass
 
     # Check for Nous Portal OAuth credentials
-    auth_file = get_hermes_home() / "auth.json"
+    auth_file = get_myai_home() / "auth.json"
     if auth_file.exists():
         try:
             import json
@@ -858,7 +858,7 @@ def _ensure_tui_node() -> None:
         return
 
     from myai_constants import get_myai_home
-    hermes_home = str(get_myai_home())
+    myai_home = str(get_myai_home())
     try:
         # Helper writes logs to stderr; we ask bash to print `command -v node`
         # on stdout once ensure_node succeeds. Subshell PATH edits don't leak
@@ -869,7 +869,7 @@ def _ensure_tui_node() -> None:
                 "-c",
                 f'source "{helper}" >&2 && ensure_node >&2 && command -v node',
             ],
-            env={**os.environ, "MYAI_HOME": hermes_home},
+            env={**os.environ, "MYAI_HOME": myai_home},
             capture_output=True,
             text=True,
             check=False,
@@ -884,7 +884,7 @@ def _ensure_tui_node() -> None:
     if resolved:
         extras.append(Path(resolved).resolve().parent)
 
-    extras.extend([Path(hermes_home) / "node" / "bin", Path.home() / ".local" / "bin"])
+    extras.extend([Path(myai_home) / "node" / "bin", Path.home() / ".local" / "bin"])
 
     for extra in extras:
         s = str(extra)
@@ -1150,7 +1150,7 @@ def cmd_whatsapp(args):
     from myai_cli.config import get_env_value, save_env_value
 
     print()
-    print("⚕ WhatsApp Setup")
+    print("🤖 WhatsApp Setup")
     print("=" * 50)
 
     # ── Step 1: Choose mode ──────────────────────────────────────────────
@@ -1271,7 +1271,7 @@ def cmd_whatsapp(args):
         print("✓ Bridge dependencies already installed")
 
     # ── Step 5: Check for existing session ───────────────────────────────
-    session_dir = get_hermes_home() / "whatsapp" / "session"
+    session_dir = get_myai_home() / "whatsapp" / "session"
     session_dir.mkdir(parents=True, exist_ok=True)
 
     if (session_dir / "creds.json").exists():
@@ -1325,14 +1325,14 @@ def cmd_whatsapp(args):
             print("    2. Send a message to the bot's WhatsApp number")
             print("    3. The agent will reply automatically")
             print()
-            print("  Tip: Agent responses are prefixed with '⚕ MyAIOne Agent'")
+            print("  Tip: Agent responses are prefixed with '🤖 MyAIOne Agent'")
         else:
             print("  Next steps:")
             print("    1. Start the gateway:  myai gateway")
             print("    2. Open WhatsApp → Message Yourself")
             print("    3. Type a message — the agent will reply")
             print()
-            print("  Tip: Agent responses are prefixed with '⚕ MyAIOne Agent'")
+            print("  Tip: Agent responses are prefixed with '🤖 MyAIOne Agent'")
             print("  so you can tell them apart from your own messages.")
         print()
         print("  Or install as a service: myai gateway install")
@@ -1561,7 +1561,7 @@ def select_provider_and_model(args=None):
 
     # ── Post-switch cleanup: clear stale OPENAI_BASE_URL ──────────────
     # When the user switches to a named provider (anything except "custom"),
-    # a leftover OPENAI_BASE_URL in ~/.hermes/.env can poison auxiliary
+    # a leftover OPENAI_BASE_URL in ~/.myai/.env can poison auxiliary
     # clients that use provider:auto. Clear it proactively.  (#5161)
     if selected_provider not in (
         "custom",
@@ -1572,7 +1572,7 @@ def select_provider_and_model(args=None):
 
 
 def _clear_stale_openai_base_url():
-    """Remove OPENAI_BASE_URL from ~/.hermes/.env if the active provider is not 'custom'.
+    """Remove OPENAI_BASE_URL from ~/.myai/.env if the active provider is not 'custom'.
 
     After a provider switch, a leftover OPENAI_BASE_URL causes auxiliary
     clients (compression, vision, delegation) with provider:auto to route
@@ -2311,7 +2311,7 @@ def _model_flow_google_gemini_cli(_config, current_model=""):
       2. If creds missing, run PKCE browser OAuth via agent.google_oauth.
       3. Resolve project context (env -> config -> auto-discover -> free tier).
       4. Prompt user to pick a model.
-      5. Save to ~/.hermes/config.yaml.
+      5. Save to ~/.myai/config.yaml.
     """
     from myai_cli.auth import (
         DEFAULT_GEMINI_CLOUDCODE_BASE_URL,
@@ -3837,7 +3837,7 @@ def _run_anthropic_oauth_flow(save_env_value):
         ):
             use_anthropic_claude_code_credentials(save_fn=save_env_value)
             print("  ✓ Claude Code credentials linked.")
-            from myai_constants import display_hermes_home as _dhh_fn
+            from myai_constants import display_myai_home as _dhh_fn
 
             print(
                 f"    MyAIOne will use Claude's credential store directly instead of copying a setup-token into {_dhh_fn()}/.env."
@@ -4211,9 +4211,9 @@ def _gateway_prompt(prompt_text: str, default: str = "", timeout: float = 300.0)
     """
     import json as _json
     import uuid as _uuid
-    from myai_constants import get_hermes_home
+    from myai_constants import get_myai_home
 
-    home = get_hermes_home()
+    home = get_myai_home()
     prompt_path = home / ".update_prompt.json"
     response_path = home / ".update_response"
 
@@ -4711,17 +4711,17 @@ def _count_commits_between(git_cmd: list[str], cwd: Path, base: str, head: str) 
 
 def _should_skip_upstream_prompt() -> bool:
     """Check if user previously declined to add upstream."""
-    from myai_constants import get_hermes_home
+    from myai_constants import get_myai_home
 
-    return (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).exists()
+    return (get_myai_home() / SKIP_UPSTREAM_PROMPT_FILE).exists()
 
 
 def _mark_skip_upstream_prompt():
     """Create marker file to skip future upstream prompts."""
     try:
-        from myai_constants import get_hermes_home
+        from myai_constants import get_myai_home
 
-        (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).touch()
+        (get_myai_home() / SKIP_UPSTREAM_PROMPT_FILE).touch()
     except Exception:
         pass
 
@@ -4866,9 +4866,9 @@ def _invalidate_update_cache():
     """
     homes = []
     # Default profile home (Docker-aware — uses /opt/data in Docker)
-    from myai_constants import get_default_hermes_root
+    from myai_constants import get_default_myai_root
 
-    default_home = get_default_hermes_root()
+    default_home = get_default_myai_root()
     homes.append(default_home)
     # Named profiles under <root>/profiles/
     profiles_root = default_home / "profiles"
@@ -5008,7 +5008,7 @@ class _UpdateOutputStream:
     Wraps the process's original stdout/stderr so that:
 
     * Every write is also mirrored to an append-only log file
-      (``~/.hermes/logs/update.log``) that users can inspect after the
+      (``~/.myai/logs/update.log``) that users can inspect after the
       terminal disconnects.
     * Writes to the original stream that fail with ``BrokenPipeError`` /
       ``OSError`` / ``ValueError`` (closed file) no longer cascade into
@@ -5090,7 +5090,7 @@ def _install_hangup_protection(gateway_mode: bool = False):
        across ``exec()``, so pip and git subprocesses also stop dying on
        hangup.
     2. ``sys.stdout`` / ``sys.stderr`` are wrapped to mirror output to
-       ``~/.hermes/logs/update.log`` and to silently absorb
+       ``~/.myai/logs/update.log`` and to silently absorb
        ``BrokenPipeError`` when the terminal vanishes.
 
     ``SIGINT`` (Ctrl-C) and ``SIGTERM`` (systemd shutdown) are
@@ -5128,9 +5128,9 @@ def _install_hangup_protection(gateway_mode: bool = False):
     # (2) Mirror output to update.log and wrap stdio for broken-pipe
     # tolerance.  Any failure here is non-fatal; we just skip the wrap.
     try:
-        from myai_cli.config import get_hermes_home
+        from myai_cli.config import get_myai_home
 
-        logs_dir = get_hermes_home() / "logs"
+        logs_dir = get_myai_home() / "logs"
         logs_dir.mkdir(parents=True, exist_ok=True)
         log_path = logs_dir / "update.log"
         log_file = open(log_path, "a", buffering=1, encoding="utf-8")
@@ -5211,7 +5211,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         else None
     )
 
-    print("⚕ Updating MyAIOne Agent...")
+    print("🤖 Updating MyAIOne Agent...")
     print()
 
     # Try git-based update first, fall back to ZIP download on Windows
@@ -5416,7 +5416,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 
         # Clear stale .pyc bytecode cache — prevents ImportError on gateway
         # restart when updated source references names that didn't exist in
-        # the old bytecode (e.g. get_hermes_home added to myai_constants).
+        # the old bytecode (e.g. get_myai_home added to myai_constants).
         removed = _clear_bytecode_cache(PROJECT_ROOT)
         if removed:
             print(
@@ -5467,7 +5467,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # After git pull, source files on disk are newer than cached Python
         # modules in this process.  Reload myai_constants so that any lazy
         # import executed below (skills sync, gateway restart) sees new
-        # attributes like display_hermes_home() added since the last release.
+        # attributes like display_myai_home() added since the last release.
         try:
             import importlib
             import myai_constants as _hc
@@ -5629,7 +5629,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # before we attempt the restart — ensures the new gateway sees it
         # regardless of how we die.
         if gateway_mode:
-            _exit_code_path = get_hermes_home() / ".update_exit_code"
+            _exit_code_path = get_myai_home() / ".update_exit_code"
             try:
                 _exit_code_path.write_text("0")
             except OSError:
@@ -5947,14 +5947,14 @@ def cmd_profile(args):
         _is_wrapper_dir_in_path,
         _get_wrapper_dir,
     )
-    from myai_constants import display_hermes_home
+    from myai_constants import display_myai_home
 
     action = getattr(args, "profile_action", None)
 
     if action is None:
         # Bare `myai profile` — show current profile status
         profile_name = get_active_profile_name()
-        dhh = display_hermes_home()
+        dhh = display_myai_home()
         print(f"\nActive profile: {profile_name}")
         print(f"Path:           {dhh}")
 
@@ -6008,7 +6008,7 @@ def cmd_profile(args):
         try:
             set_active_profile(name)
             if name == "default":
-                print(f"Switched to: default (~/.hermes)")
+                print(f"Switched to: default (~/.myai)")
             else:
                 print(f"Switched to: {name}")
         except (ValueError, FileNotFoundError) as e:
@@ -6314,7 +6314,7 @@ Examples:
     myai config edit            Edit config in $EDITOR
     myai config set model gpt-4 Set a config value
     myai gateway                Run messaging gateway
-    myai -s hermes-agent-dev,github-auth
+    myai -s myaione-agent,github-auth
     myai -w                     Start in isolated git worktree
     myai gateway install        Install gateway background service
     myai sessions list          List past sessions
@@ -6555,7 +6555,7 @@ For more help on a command:
     model_parser.add_argument(
         "--client-id",
         default=None,
-        help="OAuth client id to use for Nous login (default: hermes-cli)",
+        help="OAuth client id to use for Nous login (default: myai-cli)",
     )
     model_parser.add_argument(
         "--scope", default=None, help="OAuth scope to request for Nous login"
@@ -6777,7 +6777,7 @@ For more help on a command:
         help="Inference API base URL (default: production inference API)",
     )
     login_parser.add_argument(
-        "--client-id", default=None, help="OAuth client id to use (default: hermes-cli)"
+        "--client-id", default=None, help="OAuth client id to use (default: myai-cli)"
     )
     login_parser.add_argument("--scope", default=None, help="OAuth scope to request")
     login_parser.add_argument(
@@ -7354,7 +7354,7 @@ Examples:
         "reset",
         help="Reset a bundled skill — clears 'user-modified' tracking so updates work again",
         description=(
-            "Clear a bundled skill's entry from the sync manifest (~/.hermes/skills/.bundled_manifest) "
+            "Clear a bundled skill's entry from the sync manifest (~/.myai/skills/.bundled_manifest) "
             "so future 'myai update' runs stop marking it as user-modified. Pass --restore to also "
             "replace the current copy with the bundled version."
         ),
@@ -7553,9 +7553,9 @@ Examples:
             print("\n  ✓ Memory provider: built-in only")
             print("  Saved to config.yaml\n")
         elif sub == "reset":
-            from myai_constants import get_hermes_home, display_hermes_home
+            from myai_constants import get_myai_home, display_myai_home
 
-            mem_dir = get_hermes_home() / "memories"
+            mem_dir = get_myai_home() / "memories"
             target = getattr(args, "target", "all")
             files_to_reset = []
             if target in ("all", "memory"):
@@ -7569,7 +7569,7 @@ Examples:
             ]
             if not existing:
                 print(
-                    f"\n  Nothing to reset — no memory files found in {display_hermes_home()}/memories/\n"
+                    f"\n  Nothing to reset — no memory files found in {display_myai_home()}/memories/\n"
                 )
                 return
 
@@ -7596,7 +7596,7 @@ Examples:
             print(
                 f"\n  Memory reset complete. New sessions will start with a blank slate."
             )
-            print(f"  Files were in: {display_hermes_home()}/memories/\n")
+            print(f"  Files were in: {display_myai_home()}/memories/\n")
         else:
             from myai_cli.memory_setup import memory_command
 

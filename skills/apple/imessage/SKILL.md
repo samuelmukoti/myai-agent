@@ -6,7 +6,7 @@ author: MyAIOne Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  myai:
     tags: [iMessage, SMS, messaging, macOS, Apple]
 prerequisites:
   commands: [imsg]

@@ -20,7 +20,7 @@ from tools.tool_backend_helpers import (
 
 
 _DEFAULT_PLATFORM_TOOLSETS = {
-    "cli": "hermes-cli",
+    "cli": "myai-cli",
 }
 
 

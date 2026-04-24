@@ -11,7 +11,7 @@ from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from tools.tool_backend_helpers import managed_nous_tools_enabled
 
 _DEFAULT_TOOL_GATEWAY_DOMAIN = "nousresearch.com"
@@ -28,8 +28,8 @@ class ManagedToolGatewayConfig:
 
 
 def auth_json_path():
-    """Return the MyAIOne auth store path, respecting HERMES_HOME overrides."""
-    return get_hermes_home() / "auth.json"
+    """Return the MyAIOne auth store path, respecting MYAI_HOME overrides."""
+    return get_myai_home() / "auth.json"
 
 
 def _read_nous_provider_state() -> Optional[dict]:

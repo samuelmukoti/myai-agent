@@ -8,7 +8,7 @@ Features ASCII art branding, interactive REPL, toolset selection, and rich forma
 Usage:
     python cli.py                          # Start interactive mode with all tools
     python cli.py --toolsets web,terminal  # Start with specific toolsets
-    python cli.py --skills hermes-agent-dev,github-auth
+    python cli.py --skills myaione-agent,github-auth
     python cli.py -q "your question"       # Single query mode
     python cli.py --list-tools             # List available tools and exit
 """
@@ -70,14 +70,14 @@ from myai_cli.banner import _format_context_length, format_banner_version_label
 _COMMAND_SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
 
 
-# Load .env from ~/.hermes/.env first, then project root as dev fallback.
+# Load .env from ~/.myai/.env first, then project root as dev fallback.
 # User-managed env files should override stale shell exports on restart.
-from myai_constants import get_hermes_home, display_hermes_home
-from myai_cli.env_loader import load_hermes_dotenv
+from myai_constants import get_myai_home, display_myai_home
+from myai_cli.env_loader import load_myai_dotenv
 
-_hermes_home = get_hermes_home()
+_myai_home = get_myai_home()
 _project_env = Path(__file__).parent / '.env'
-load_hermes_dotenv(hermes_home=_hermes_home, project_env=_project_env)
+load_myai_dotenv(myai_home=_myai_home, project_env=_project_env)
 
 
 _REASONING_TAGS = (
@@ -126,14 +126,14 @@ def _load_prefill_messages(file_path: str) -> List[Dict[str, Any]]:
     The file should contain a JSON array of {role, content} dicts, e.g.:
         [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello!"}]
     
-    Relative paths are resolved from ~/.hermes/.
+    Relative paths are resolved from ~/.myai/.
     Returns an empty list if the path is empty or the file doesn't exist.
     """
     if not file_path:
         return []
     path = Path(file_path).expanduser()
     if not path.is_absolute():
-        path = _hermes_home / path
+        path = _myai_home / path
     if not path.exists():
         logger.warning("Prefill messages file not found: %s", path)
         return []
@@ -232,14 +232,14 @@ def load_cli_config() -> Dict[str, Any]:
     Load CLI configuration from config files.
     
     Config lookup order:
-    1. ~/.hermes/config.yaml (user config - preferred)
+    1. ~/.myai/config.yaml (user config - preferred)
     2. ./cli-config.yaml (project config - fallback)
     
     Environment variables take precedence over config file values.
     Returns default values if no config file exists.
     """
-    # Check user config first ({HERMES_HOME}/config.yaml)
-    user_config_path = _hermes_home / 'config.yaml'
+    # Check user config first ({MYAI_HOME}/config.yaml)
+    user_config_path = _myai_home / 'config.yaml'
     project_config_path = Path(__file__).parent / 'cli-config.yaml'
 
     # Use user config if it exists, otherwise project config
@@ -374,7 +374,7 @@ def load_cli_config() -> Dict[str, Any]:
                     # choice isn't shadowed by the hardcoded default.  Without this,
                     # profile configs that only set "model:" (not "default:") silently
                     # fall back to claude-opus because the merge preserves the
-                    # hardcoded default and HermesCLI.__init__ checks "default" first.
+                    # hardcoded default and MyAIOneCLI.__init__ checks "default" first.
                     if "model" in file_config["model"] and "default" not in file_config["model"]:
                         defaults["model"]["default"] = file_config["model"]["model"]
 
@@ -573,7 +573,7 @@ def load_cli_config() -> Dict[str, Any]:
 # Load configuration at module startup
 CLI_CONFIG = load_cli_config()
 
-# Initialize centralized logging early — agent.log + errors.log in ~/.hermes/logs/.
+# Initialize centralized logging early — agent.log + errors.log in ~/.myai/logs/.
 # This ensures CLI sessions produce a log trail even before AIAgent is instantiated.
 try:
     from myai_logging import setup_logging
@@ -736,8 +736,8 @@ def _setup_worktree(repo_root: str = None) -> Optional[Dict[str, str]]:
         return None
 
     short_id = uuid.uuid4().hex[:8]
-    wt_name = f"hermes-{short_id}"
-    branch_name = f"hermes/{wt_name}"
+    wt_name = f"myai-{short_id}"
+    branch_name = f"myai/{wt_name}"
 
     worktrees_dir = Path(repo_root) / ".worktrees"
     worktrees_dir.mkdir(parents=True, exist_ok=True)
@@ -892,7 +892,7 @@ def _prune_stale_worktrees(repo_root: str, max_age_hours: int = 24) -> None:
     - 24h–72h: remove if no unpushed commits.
     - Over 72h: force remove regardless (nothing should sit this long).
 
-    Also prunes orphaned ``hermes/*`` and ``pr-*`` local branches that
+    Also prunes orphaned ``myai/*`` (and legacy ``hermes/*``) and ``pr-*`` local branches that
     have no corresponding worktree.
     """
     import subprocess
@@ -908,7 +908,7 @@ def _prune_stale_worktrees(repo_root: str, max_age_hours: int = 24) -> None:
     hard_cutoff = now - (max_age_hours * 3 * 3600)   # 72h default
 
     for entry in worktrees_dir.iterdir():
-        if not entry.is_dir() or not entry.name.startswith("hermes-"):
+        if not entry.is_dir() or not (entry.name.startswith("myai-") or entry.name.startswith("hermes-")):
             continue
 
         # Check age
@@ -958,9 +958,9 @@ def _prune_stale_worktrees(repo_root: str, max_age_hours: int = 24) -> None:
 
 
 def _prune_orphaned_branches(repo_root: str) -> None:
-    """Delete local ``hermes/hermes-*`` and ``pr-*`` branches with no worktree.
+    """Delete local ``myai/myai-*`` (and legacy ``hermes/hermes-*``) and ``pr-*`` branches with no worktree.
 
-    These are auto-generated by ``hermes -w`` sessions and PR review
+    These are auto-generated by ``myai -w`` sessions and PR review
     workflows respectively.  Once their worktree is gone they serve no
     purpose and just accumulate.
     """
@@ -1006,7 +1006,7 @@ def _prune_orphaned_branches(repo_root: str) -> None:
     orphaned = [
         b for b in all_branches
         if b not in active_branches
-        and (b.startswith("hermes/hermes-") or b.startswith("pr-"))
+        and ((b.startswith("myai/myai-") or b.startswith("hermes/hermes-")) or b.startswith("pr-"))
     ]
 
     if not orphaned:
@@ -1424,20 +1424,20 @@ class ChatConsole:
         ``ChatConsole()``, which historically only implemented ``print()``.
         Returning a silent context manager keeps slash commands compatible
         without duplicating the higher-level busy indicator already shown by
-        ``HermesCLI._busy_command()``.
+        ``MyAIOneCLI._busy_command()``.
         """
         yield self
 
-# ASCII Art - HERMES-AGENT logo (full width, single line - requires ~95 char terminal)
-HERMES_AGENT_LOGO = """[bold #FFD700]██╗  ██╗███████╗██████╗ ███╗   ███╗███████╗███████╗       █████╗  ██████╗ ███████╗███╗   ██╗████████╗[/]
-[bold #FFD700]██║  ██║██╔════╝██╔══██╗████╗ ████║██╔════╝██╔════╝      ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝[/]
-[#FFBF00]███████║█████╗  ██████╔╝██╔████╔██║█████╗  ███████╗█████╗███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║[/]
-[#FFBF00]██╔══██║██╔══╝  ██╔══██╗██║╚██╔╝██║██╔══╝  ╚════██║╚════╝██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║[/]
-[#CD7F32]██║  ██║███████╗██║  ██║██║ ╚═╝ ██║███████╗███████║      ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║[/]
-[#CD7F32]╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝      ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝[/]"""
+# ASCII Art - MYAIONE AGENT logo (fits in ~80 char terminal)
+MYAIONE_AGENT_LOGO = """[bold #FFD700]███╗   ███╗██╗   ██╗ █████╗ ██╗     █████╗  ██████╗ ███████╗███╗   ██╗████████╗[/]
+[bold #FFD700]████╗ ████║╚██╗ ██╔╝██╔══██╗██║    ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝[/]
+[#FFBF00]██╔████╔██║ ╚████╔╝ ███████║██║    ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║[/]
+[#FFBF00]██║╚██╔╝██║  ╚██╔╝  ██╔══██║██║    ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║[/]
+[#CD7F32]██║ ╚═╝ ██║   ██║   ██║  ██║██║    ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║[/]
+[#CD7F32]╚═╝     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝[/]"""
 
-# ASCII Art - caduceus (legacy MyAIOne-era hero art; kept for skins that opt in via banner_hero)
-HERMES_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
+# ASCII Art - caduceus (legacy hero art; kept for skins that opt in via banner_hero)
+MYAIONE_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
 [#CD7F32]⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀[/]
 [#FFBF00]⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀[/]
 [#FFBF00]⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀[/]
@@ -1469,8 +1469,8 @@ def _build_compact_banner() -> str:
     dim_color = _skin.get_color("banner_dim", "#B8860B") if _skin else "#B8860B"
 
     if skin_name == "default":
-        line1 = "⚕ NOUS HERMES - AI Agent Framework"
-        tiny_line = "⚕ NOUS HERMES"
+        line1 = "🤖 MyAIOne Agent"
+        tiny_line = "🤖 MyAIOne"
     else:
         agent_name = _skin.get_branding("agent_name", "MyAIOne Agent") if _skin else "MyAIOne Agent"
         line1 = f"{agent_name} - AI Agent Framework"
@@ -1573,7 +1573,7 @@ def save_config_value(key_path: str, value: any) -> bool:
     Save a value to the active config file at the specified key path.
     
     Respects the same lookup order as load_cli_config():
-    1. ~/.hermes/config.yaml (user config - preferred, used if it exists)
+    1. ~/.myai/config.yaml (user config - preferred, used if it exists)
     2. ./cli-config.yaml (project config - fallback)
     
     Args:
@@ -1584,12 +1584,12 @@ def save_config_value(key_path: str, value: any) -> bool:
         True if successful, False otherwise
     """
     # Use the same precedence as load_cli_config: user config first, then project config
-    user_config_path = _hermes_home / 'config.yaml'
+    user_config_path = _myai_home / 'config.yaml'
     project_config_path = Path(__file__).parent / 'cli-config.yaml'
     config_path = user_config_path if user_config_path.exists() else project_config_path
     
     try:
-        # Ensure parent directory exists (for ~/.hermes/config.yaml on first use)
+        # Ensure parent directory exists (for ~/.myai/config.yaml on first use)
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Load existing config
@@ -1628,10 +1628,10 @@ def save_config_value(key_path: str, value: any) -> bool:
 
 
 # ============================================================================
-# HermesCLI Class
+# MyAIOneCLI Class
 # ============================================================================
 
-class HermesCLI:
+class MyAIOneCLI:
     """
     Interactive CLI for the MyAIOne Agent.
     
@@ -1856,7 +1856,7 @@ class HermesCLI:
             self.session_id = f"{timestamp_str}_{short_uuid}"
         
         # History file for persistent input recall across sessions
-        self._history_file = _hermes_home / ".hermes_history"
+        self._history_file = _myai_home / ".myai_history"
         self._last_invalidate: float = 0.0  # throttle UI repaints
         self._app = None
 
@@ -2126,10 +2126,10 @@ class HermesCLI:
             duration_label = snapshot["duration"]
 
             if width < 52:
-                text = f"⚕ {snapshot['model_short']} · {duration_label}"
+                text = f"🤖 {snapshot['model_short']} · {duration_label}"
                 return self._trim_status_bar_text(text, width)
             if width < 76:
-                parts = [f"⚕ {snapshot['model_short']}", percent_label]
+                parts = [f"🤖 {snapshot['model_short']}", percent_label]
                 parts.append(duration_label)
                 return self._trim_status_bar_text(" · ".join(parts), width)
 
@@ -2140,11 +2140,11 @@ class HermesCLI:
             else:
                 context_label = "ctx --"
 
-            parts = [f"⚕ {snapshot['model_short']}", context_label, percent_label]
+            parts = [f"🤖 {snapshot['model_short']}", context_label, percent_label]
             parts.append(duration_label)
             return self._trim_status_bar_text(" │ ".join(parts), width)
         except Exception:
-            return f"⚕ {self.model if getattr(self, 'model', None) else 'MyAIOne'}"
+            return f"🤖 {self.model if getattr(self, 'model', None) else 'MyAIOne'}"
 
     def _get_status_bar_fragments(self):
         if not self._status_bar_visible or getattr(self, '_model_picker_state', None):
@@ -2161,7 +2161,7 @@ class HermesCLI:
 
             if width < 52:
                 frags = [
-                    ("class:status-bar", " ⚕ "),
+                    ("class:status-bar", " 🤖 "),
                     ("class:status-bar-strong", snapshot["model_short"]),
                     ("class:status-bar-dim", " · "),
                     ("class:status-bar-dim", duration_label),
@@ -2172,7 +2172,7 @@ class HermesCLI:
                 percent_label = f"{percent}%" if percent is not None else "--"
                 if width < 76:
                     frags = [
-                        ("class:status-bar", " ⚕ "),
+                        ("class:status-bar", " 🤖 "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " · "),
                         (self._status_bar_context_style(percent), percent_label),
@@ -2190,7 +2190,7 @@ class HermesCLI:
 
                     bar_style = self._status_bar_context_style(percent)
                     frags = [
-                        ("class:status-bar", " ⚕ "),
+                        ("class:status-bar", " 🤖 "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " │ "),
                         ("class:status-bar-dim", context_label),
@@ -2639,10 +2639,10 @@ class HermesCLI:
             try:
                 from myai_cli.skin_engine import get_active_skin
                 _skin = get_active_skin()
-                label = _skin.get_branding("response_label", "⚕ MyAIOne")
+                label = _skin.get_branding("response_label", "🤖 MyAIOne")
                 _text_hex = _skin.get_color("banner_text", "#FFF8DC")
             except Exception:
-                label = "⚕ MyAIOne"
+                label = "🤖 MyAIOne"
                 _text_hex = "#FFF8DC"
             # Build a true-color ANSI escape for the response text color
             # so streamed content matches the Rich Panel appearance.
@@ -2813,14 +2813,14 @@ class HermesCLI:
 
         # When a custom_provider entry carries an explicit `model` field,
         # use it as the effective model name.  Without this, running
-        # `hermes chat --model <provider-name>` sends the provider name
+        # `myai chat --model <provider-name>` sends the provider name
         # (e.g. "my-provider") as the model string to the API instead of
         # the configured model (e.g. "qwen3.6-plus"), causing 400 errors.
         runtime_model = runtime.get("model")
         if runtime_model and isinstance(runtime_model, str):
             self.model = runtime_model
 
-        # If model is still empty (e.g. user ran `hermes auth add openai-codex`
+        # If model is still empty (e.g. user ran `myai auth add openai-codex`
         # without `myai model`), fall back to the provider's first catalog
         # model so the API call doesn't fail with "model must be non-empty".
         if not self.model and resolved_provider:
@@ -3325,12 +3325,12 @@ class HermesCLI:
     def _try_attach_clipboard_image(self) -> bool:
         """Check clipboard for an image and attach it if found.
 
-        Saves the image to ~/.hermes/images/ and appends the path to
+        Saves the image to ~/.myai/images/ and appends the path to
         ``_attached_images``.  Returns True if an image was attached.
         """
         from myai_cli.clipboard import save_clipboard_image
 
-        img_dir = get_hermes_home() / "images"
+        img_dir = get_myai_home() / "images"
         self._image_counter += 1
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         img_path = img_dir / f"clip_{ts}_{self._image_counter}.png"
@@ -3461,7 +3461,7 @@ class HermesCLI:
             create_quick_snapshot, list_quick_snapshots,
             restore_quick_snapshot, prune_quick_snapshots,
         )
-        from myai_constants import display_hermes_home
+        from myai_constants import display_myai_home
 
         parts = command.split()
         subcmd = parts[1].lower() if len(parts) > 1 else "list"
@@ -3472,7 +3472,7 @@ class HermesCLI:
                 print("  No state snapshots yet.")
                 print("  Create one: /snapshot create [label]")
                 return
-            print(f"  State snapshots ({display_hermes_home()}/state-snapshots/):\n")
+            print(f"  State snapshots ({display_myai_home()}/state-snapshots/):\n")
             print(f"  {'#':>3}  {'ID':<35} {'Files':>5} {'Size':>10} {'Label'}")
             print(f"  {'─'*3}  {'─'*35} {'─'*5} {'─'*10} {'─'*20}")
             for i, s in enumerate(snaps, 1):
@@ -3847,7 +3847,7 @@ class HermesCLI:
             "MyAIOne CLI Status",
             "",
             f"Session ID: {self.session_id}",
-            f"Path: {display_hermes_home()}",
+            f"Path: {display_myai_home()}",
         ]
         if title:
             lines.append(f"Title: {title}")
@@ -4039,10 +4039,10 @@ class HermesCLI:
     
     def _handle_profile_command(self):
         """Display active profile name and home directory."""
-        from myai_constants import display_hermes_home
+        from myai_constants import display_myai_home
         from myai_cli.profiles import get_active_profile_name
 
-        display = display_hermes_home()
+        display = display_myai_home()
         profile_name = get_active_profile_name()
 
         print()
@@ -4057,7 +4057,7 @@ class HermesCLI:
         terminal_cwd = os.getenv("TERMINAL_CWD", os.getcwd())
         terminal_timeout = os.getenv("TERMINAL_TIMEOUT", "60")
         
-        user_config_path = _hermes_home / 'config.yaml'
+        user_config_path = _myai_home / 'config.yaml'
         project_config_path = Path(__file__).parent / 'cli-config.yaml'
         if user_config_path.exists():
             config_path = user_config_path
@@ -4485,7 +4485,7 @@ class HermesCLI:
             return
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"hermes_conversation_{timestamp}.json"
+        filename = f"myai_conversation_{timestamp}.json"
         
         try:
             with open(filename, "w", encoding="utf-8") as f:
@@ -5455,7 +5455,7 @@ class HermesCLI:
             print("  To start the gateway:")
             print("    python cli.py --gateway")
             print()
-            print(f"  Configuration file: {display_hermes_home()}/config.yaml")
+            print(f"  Configuration file: {display_myai_home()}/config.yaml")
             print()
             
         except Exception as e:
@@ -5465,7 +5465,7 @@ class HermesCLI:
             print("    1. Set environment variables:")
             print("       TELEGRAM_BOT_TOKEN=your_token")
             print("       DISCORD_BOT_TOKEN=your_token")
-            print(f"    2. Or configure settings in {display_hermes_home()}/config.yaml")
+            print(f"    2. Or configure settings in {display_myai_home()}/config.yaml")
             print()
     
     def process_command(self, command: str) -> bool:
@@ -5696,7 +5696,7 @@ class HermesCLI:
                 plugins = mgr.list_plugins()
                 if not plugins:
                     print("No plugins installed.")
-                    print(f"Drop plugin directories into {display_hermes_home()}/plugins/ to get started.")
+                    print(f"Drop plugin directories into {display_myai_home()}/plugins/ to get started.")
                 else:
                     print(f"Plugins ({len(plugins)}):")
                     for p in plugins:
@@ -5989,11 +5989,11 @@ class HermesCLI:
                     try:
                         from myai_cli.skin_engine import get_active_skin
                         _skin = get_active_skin()
-                        label = _skin.get_branding("response_label", "⚕ MyAIOne")
+                        label = _skin.get_branding("response_label", "🤖 MyAIOne")
                         _resp_color = _skin.get_color("response_border", "#CD7F32")
                         _resp_text = _skin.get_color("banner_text", "#FFF8DC")
                     except Exception:
-                        label = "⚕ MyAIOne"
+                        label = "🤖 MyAIOne"
                         _resp_color = "#CD7F32"
                         _resp_text = "#FFF8DC"
 
@@ -6125,7 +6125,7 @@ class HermesCLI:
 
                     ChatConsole().print(Panel(
                         _rich_text_from_ansi(response),
-                        title=f"[{_resp_color} bold]⚕ /btw[/]",
+                        title=f"[{_resp_color} bold]🤖 /btw[/]",
                         title_align="left",
                         border_style=_resp_color,
                         box=rich_box.HORIZONTALS,
@@ -6168,7 +6168,7 @@ class HermesCLI:
             return False
 
         # Dedicated profile dir so debug Chrome won't collide with normal Chrome
-        data_dir = str(_hermes_home / "chrome-debug")
+        data_dir = str(_myai_home / "chrome-debug")
         os.makedirs(data_dir, exist_ok=True)
 
         chrome = candidates[0]
@@ -6259,7 +6259,7 @@ class HermesCLI:
                 else:
                     print("   ⚠ Could not auto-launch Chrome")
                     # Show manual instructions as fallback
-                    _data_dir = str(_hermes_home / "chrome-debug")
+                    _data_dir = str(_myai_home / "chrome-debug")
                     sys_name = _plat.system()
                     if sys_name == "Darwin":
                         chrome_cmd = (
@@ -6391,7 +6391,7 @@ class HermesCLI:
                 source = f" ({s['source']})" if s["source"] == "user" else ""
                 print(f"   {marker} {s['name']}{source} — {s['description']}")
             print("\n  Usage: /skin <name>")
-            print(f"  Custom skins: drop a YAML file in {display_hermes_home()}/skins/\n")
+            print(f"  Custom skins: drop a YAML file in {display_myai_home()}/skins/\n")
             return
 
         new_skin = parts[1].strip().lower()
@@ -7257,9 +7257,9 @@ class HermesCLI:
 
             # Use MP3 output for CLI playback (afplay doesn't handle OGG well).
             # The TTS tool may auto-convert MP3->OGG, but the original MP3 remains.
-            os.makedirs(os.path.join(tempfile.gettempdir(), "hermes_voice"), exist_ok=True)
+            os.makedirs(os.path.join(tempfile.gettempdir(), "myai_voice"), exist_ok=True)
             mp3_path = os.path.join(
-                tempfile.gettempdir(), "hermes_voice",
+                tempfile.gettempdir(), "myai_voice",
                 f"tts_{time.strftime('%Y%m%d_%H%M%S')}.mp3",
             )
 
@@ -7970,7 +7970,7 @@ class HermesCLI:
                     if not _streaming_box_opened:
                         _streaming_box_opened = True
                         w = self.console.width
-                        label = " ⚕ MyAIOne "
+                        label = " 🤖 MyAIOne "
                         fill = w - 2 - len(label)
                         _cprint(f"\n{_ACCENT}╭─{label}{'─' * max(fill - 1, 0)}╮{_RST}")
                     _cprint(f"{_STREAM_PAD}{sentence.rstrip()}")
@@ -8055,7 +8055,7 @@ class HermesCLI:
                             self.agent.interrupt(interrupt_msg)
                             # Debug: log to file (stdout may be devnull from redirect_stdout)
                             try:
-                                _dbg = _hermes_home / "interrupt_debug.log"
+                                _dbg = _myai_home / "interrupt_debug.log"
                                 with open(_dbg, "a") as _f:
                                     import time as _t
                                     _f.write(f"{_t.strftime('%H:%M:%S')} interrupt fired: msg={str(interrupt_msg)[:60]!r}, "
@@ -8203,11 +8203,11 @@ class HermesCLI:
                 try:
                     from myai_cli.skin_engine import get_active_skin
                     _skin = get_active_skin()
-                    label = _skin.get_branding("response_label", "⚕ MyAIOne")
+                    label = _skin.get_branding("response_label", "🤖 MyAIOne")
                     _resp_color = _skin.get_color("response_border", "#CD7F32")
                     _resp_text = _skin.get_color("banner_text", "#FFF8DC")
                 except Exception:
-                    label = "⚕ MyAIOne"
+                    label = "🤖 MyAIOne"
                     _resp_color = "#CD7F32"
                     _resp_text = "#FFF8DC"
 
@@ -8350,9 +8350,9 @@ class HermesCLI:
         else:
             try:
                 from myai_cli.skin_engine import get_active_goodbye
-                goodbye = get_active_goodbye("Goodbye! ⚕")
+                goodbye = get_active_goodbye("Goodbye! 🤖")
             except Exception:
-                goodbye = "Goodbye! ⚕"
+                goodbye = "Goodbye! 🤖"
             print(goodbye)
 
     def _get_tui_prompt_symbols(self) -> tuple[str, str]:
@@ -8439,7 +8439,7 @@ class HermesCLI:
         if self._command_running:
             return _state_fragment("class:prompt-working", self._command_spinner_frame())
         if self._agent_running:
-            return _state_fragment("class:prompt-working", "⚕")
+            return _state_fragment("class:prompt-working", "🤖")
         if self._voice_mode:
             return _state_fragment("class:voice-prompt", "🎤")
         return [("class:prompt", symbol)]
@@ -8769,7 +8769,7 @@ class HermesCLI:
                         self._interrupt_queue.put(payload)
                         # Debug: log to file when message enters interrupt queue
                         try:
-                            _dbg = _hermes_home / "interrupt_debug.log"
+                            _dbg = _myai_home / "interrupt_debug.log"
                             with open(_dbg, "a") as _f:
                                 import time as _t
                                 _f.write(f"{_t.strftime('%H:%M:%S')} ENTER: queued interrupt msg={str(payload)[:60]!r}, "
@@ -9132,7 +9132,7 @@ class HermesCLI:
                 buf = event.current_buffer
                 if line_count >= 5 and not buf.text.strip().startswith('/'):
                     _paste_counter[0] += 1
-                    paste_dir = _hermes_home / "pastes"
+                    paste_dir = _myai_home / "pastes"
                     paste_dir.mkdir(parents=True, exist_ok=True)
                     paste_file = paste_dir / f"paste_{_paste_counter[0]}_{datetime.now().strftime('%H%M%S')}.txt"
                     paste_file.write_text(pasted_text, encoding="utf-8")
@@ -9271,7 +9271,7 @@ class HermesCLI:
             if line_count >= 5 and is_paste and not text.startswith('/'):
                 _paste_counter[0] += 1
                 # Save to temp file
-                paste_dir = _hermes_home / "pastes"
+                paste_dir = _myai_home / "pastes"
                 paste_dir.mkdir(parents=True, exist_ok=True)
                 paste_file = paste_dir / f"paste_{_paste_counter[0]}_{datetime.now().strftime('%H%M%S')}.txt"
                 paste_file.write_text(text, encoding="utf-8")
@@ -9683,7 +9683,7 @@ class HermesCLI:
                 term_rows = get_app().output.get_size().rows
             except Exception:
                 term_rows = shutil.get_terminal_size((100, 24)).lines
-            scroll_offset, visible = HermesCLI._compute_model_picker_viewport(
+            scroll_offset, visible = MyAIOneCLI._compute_model_picker_viewport(
                 selected, state.get("_scroll_offset", 0), len(choices), term_rows,
             )
             state["_scroll_offset"] = scroll_offset
@@ -10310,7 +10310,7 @@ def main(
     Examples:
         python cli.py                            # Start interactive mode
         python cli.py --toolsets web,terminal    # Use specific toolsets
-        python cli.py --skills hermes-agent-dev,github-auth
+        python cli.py --skills myaione-agent,github-auth
         python cli.py -q "What is Python?"       # Single query mode
         python cli.py -q "Describe this" --image ~/storage/shared/Pictures/cat.png
         python cli.py --list-tools               # List tools and exit
@@ -10360,7 +10360,7 @@ def main(
     query = query or q
     
     # Parse toolsets - handle both string and tuple/list inputs
-    # Default to hermes-cli toolset which includes cronjob management tools
+    # Default to myai-cli toolset which includes cronjob management tools
     toolsets_list = None
     if toolsets:
         if isinstance(toolsets, str):
@@ -10381,7 +10381,7 @@ def main(
     parsed_skills = _parse_skills_argument(skills)
 
     # Create CLI instance
-    cli = HermesCLI(
+    cli = MyAIOneCLI(
         model=model,
         toolsets=toolsets_list,
         provider=provider,
@@ -10435,7 +10435,7 @@ def main(
     atexit.register(_run_cleanup)
 
     # Also install signal handlers in single-query / `-q` mode.  Interactive
-    # mode registers its own inside HermesCLI.run(), but `-q` runs
+    # mode registers its own inside MyAIOneCLI.run(), but `-q` runs
     # cli.agent.run_conversation() below and AIAgent spawns worker threads
     # for tools — so when SIGTERM arrives on the main thread, raising
     # KeyboardInterrupt only unwinds the main thread, not the worker

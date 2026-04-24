@@ -84,21 +84,21 @@ _ensure_ssl_certs()
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Resolve MyAIOne home directory (respects HERMES_HOME override)
-from myai_constants import get_hermes_home
+# Resolve MyAIOne home directory (respects MYAI_HOME override)
+from myai_constants import get_myai_home
 from utils import atomic_yaml_write, is_truthy_value
-_hermes_home = get_hermes_home()
+_myai_home = get_myai_home()
 
-# Load environment variables from ~/.hermes/.env first.
+# Load environment variables from ~/.myai/.env first.
 # User-managed env files should override stale shell exports on restart.
 from dotenv import load_dotenv  # backward-compat for tests that monkeypatch this symbol
-from myai_cli.env_loader import load_hermes_dotenv
-_env_path = _hermes_home / '.env'
-load_hermes_dotenv(hermes_home=_hermes_home, project_env=Path(__file__).resolve().parents[1] / '.env')
+from myai_cli.env_loader import load_myai_dotenv
+_env_path = _myai_home / '.env'
+load_myai_dotenv(myai_home=_myai_home, project_env=Path(__file__).resolve().parents[1] / '.env')
 
 # Bridge config.yaml values into the environment so os.getenv() picks them up.
 # config.yaml is authoritative for terminal settings — overrides .env.
-_config_path = _hermes_home / 'config.yaml'
+_config_path = _myai_home / 'config.yaml'
 if _config_path.exists():
     try:
         import yaml as _yaml
@@ -307,7 +307,7 @@ def _expand_whatsapp_auth_aliases(identifier: str) -> set:
     if not normalized:
         return set()
 
-    session_dir = _hermes_home / "whatsapp" / "session"
+    session_dir = _myai_home / "whatsapp" / "session"
     resolved = set()
     queue = [normalized]
 
@@ -452,15 +452,15 @@ def _platform_config_key(platform: "Platform") -> str:
 
 
 def _load_gateway_config() -> dict:
-    """Load and parse ~/.hermes/config.yaml, returning {} on any error."""
+    """Load and parse ~/.myai/config.yaml, returning {} on any error."""
     try:
-        config_path = _hermes_home / 'config.yaml'
+        config_path = _myai_home / 'config.yaml'
         if config_path.exists():
             import yaml
             with open(config_path, 'r', encoding='utf-8') as f:
                 return yaml.safe_load(f) or {}
     except Exception:
-        logger.debug("Could not load gateway config from %s", _hermes_home / 'config.yaml')
+        logger.debug("Could not load gateway config from %s", _myai_home / 'config.yaml')
     return {}
 
 
@@ -705,7 +705,7 @@ class GatewayRunner:
 
     # -- Voice mode persistence ------------------------------------------
 
-    _VOICE_MODE_PATH = _hermes_home / "gateway_voice_mode.json"
+    _VOICE_MODE_PATH = _myai_home / "gateway_voice_mode.json"
 
     def _load_voice_modes(self) -> Dict[str, str]:
         try:
@@ -1129,15 +1129,15 @@ class GatewayRunner:
         """Load ephemeral prefill messages from config or env var.
         
         Checks MYAI_PREFILL_MESSAGES_FILE env var first, then falls back to
-        the prefill_messages_file key in ~/.hermes/config.yaml.
-        Relative paths are resolved from ~/.hermes/.
+        the prefill_messages_file key in ~/.myai/config.yaml.
+        Relative paths are resolved from ~/.myai/.
         """
         import json as _json
         file_path = os.getenv("MYAI_PREFILL_MESSAGES_FILE", "")
         if not file_path:
             try:
                 import yaml as _y
-                cfg_path = _hermes_home / "config.yaml"
+                cfg_path = _myai_home / "config.yaml"
                 if cfg_path.exists():
                     with open(cfg_path, encoding="utf-8") as _f:
                         cfg = _y.safe_load(_f) or {}
@@ -1148,7 +1148,7 @@ class GatewayRunner:
             return []
         path = Path(file_path).expanduser()
         if not path.is_absolute():
-            path = _hermes_home / path
+            path = _myai_home / path
         if not path.exists():
             logger.warning("Prefill messages file not found: %s", path)
             return []
@@ -1168,14 +1168,14 @@ class GatewayRunner:
         """Load ephemeral system prompt from config or env var.
         
         Checks MYAI_EPHEMERAL_SYSTEM_PROMPT env var first, then falls back to
-        agent.system_prompt in ~/.hermes/config.yaml.
+        agent.system_prompt in ~/.myai/config.yaml.
         """
         prompt = os.getenv("MYAI_EPHEMERAL_SYSTEM_PROMPT", "")
         if prompt:
             return prompt
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1196,7 +1196,7 @@ class GatewayRunner:
         effort = ""
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1219,7 +1219,7 @@ class GatewayRunner:
         raw = ""
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1240,7 +1240,7 @@ class GatewayRunner:
         """Load show_reasoning toggle from config.yaml display section."""
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1256,7 +1256,7 @@ class GatewayRunner:
         if not mode:
             try:
                 import yaml as _y
-                cfg_path = _hermes_home / "config.yaml"
+                cfg_path = _myai_home / "config.yaml"
                 if cfg_path.exists():
                     with open(cfg_path, encoding="utf-8") as _f:
                         cfg = _y.safe_load(_f) or {}
@@ -1272,7 +1272,7 @@ class GatewayRunner:
         if not raw:
             try:
                 import yaml as _y
-                cfg_path = _hermes_home / "config.yaml"
+                cfg_path = _myai_home / "config.yaml"
                 if cfg_path.exists():
                     with open(cfg_path, encoding="utf-8") as _f:
                         cfg = _y.safe_load(_f) or {}
@@ -1305,7 +1305,7 @@ class GatewayRunner:
         if not mode:
             try:
                 import yaml as _y
-                cfg_path = _hermes_home / "config.yaml"
+                cfg_path = _myai_home / "config.yaml"
                 if cfg_path.exists():
                     with open(cfg_path, encoding="utf-8") as _f:
                         cfg = _y.safe_load(_f) or {}
@@ -1331,7 +1331,7 @@ class GatewayRunner:
         """Load OpenRouter provider routing preferences from config.yaml."""
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1350,7 +1350,7 @@ class GatewayRunner:
         """
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1366,7 +1366,7 @@ class GatewayRunner:
         """Load optional smart cheap-vs-strong model routing config."""
         try:
             import yaml as _y
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 with open(cfg_path, encoding="utf-8") as _f:
                     cfg = _y.safe_load(_f) or {}
@@ -1626,7 +1626,7 @@ class GatewayRunner:
         """
         import json
 
-        path = _hermes_home / self._STUCK_LOOP_FILE
+        path = _myai_home / self._STUCK_LOOP_FILE
         try:
             counts = json.loads(path.read_text()) if path.exists() else {}
         except Exception:
@@ -1653,7 +1653,7 @@ class GatewayRunner:
         """
         import json
 
-        path = _hermes_home / self._STUCK_LOOP_FILE
+        path = _myai_home / self._STUCK_LOOP_FILE
         if not path.exists():
             return 0
 
@@ -1700,7 +1700,7 @@ class GatewayRunner:
         """
         import json
 
-        path = _hermes_home / self._STUCK_LOOP_FILE
+        path = _myai_home / self._STUCK_LOOP_FILE
         if not path.exists():
             return
         try:
@@ -1817,7 +1817,7 @@ class GatewayRunner:
         if not _any_allowlist and not _allow_all:
             logger.warning(
                 "No user allowlists configured. All unauthorized users will be denied. "
-                "Set GATEWAY_ALLOW_ALL_USERS=true in ~/.hermes/.env to allow open access, "
+                "Set GATEWAY_ALLOW_ALL_USERS=true in ~/.myai/.env to allow open access, "
                 "or configure platform allowlists (e.g., TELEGRAM_ALLOWED_USERS=your_id)."
             )
         
@@ -1842,7 +1842,7 @@ class GatewayRunner:
         # process already drained active agents, so sessions aren't stuck.
         # This prevents unwanted auto-resets after `myai update`,
         # `myai gateway restart`, or `/restart`.
-        _clean_marker = _hermes_home / ".clean_shutdown"
+        _clean_marker = _myai_home / ".clean_shutdown"
         if _clean_marker.exists():
             logger.info("Previous gateway exited cleanly — skipping session suspension")
             try:
@@ -2022,8 +2022,8 @@ class GatewayRunner:
         if not notified and any(
             path.exists()
             for path in (
-                _hermes_home / ".update_pending.json",
-                _hermes_home / ".update_pending.claimed.json",
+                _myai_home / ".update_pending.json",
+                _myai_home / ".update_pending.claimed.json",
             )
         ):
             self._schedule_update_notification_watch()
@@ -2460,7 +2460,7 @@ class GatewayRunner:
             # of resuming a half-finished tool loop.
             if not timed_out:
                 try:
-                    (_hermes_home / ".clean_shutdown").touch()
+                    (_myai_home / ".clean_shutdown").touch()
                 except Exception:
                     pass
             else:
@@ -2879,7 +2879,7 @@ class GatewayRunner:
             else:
                 response_text = raw
             if response_text:
-                response_path = _hermes_home / ".update_response"
+                response_path = _myai_home / ".update_response"
                 try:
                     tmp = response_path.with_suffix(".tmp")
                     tmp.write_text(response_text)
@@ -3827,7 +3827,7 @@ class GatewayRunner:
             _hyg_api_key = None
             _hyg_data = {}
             try:
-                _hyg_cfg_path = _hermes_home / "config.yaml"
+                _hyg_cfg_path = _myai_home / "config.yaml"
                 if _hyg_cfg_path.exists():
                     import yaml as _hyg_yaml
                     with open(_hyg_cfg_path, encoding="utf-8") as _hyg_f:
@@ -4459,7 +4459,7 @@ class GatewayRunner:
         api_key = None
 
         try:
-            cfg_path = _hermes_home / "config.yaml"
+            cfg_path = _myai_home / "config.yaml"
             if cfg_path.exists():
                 import yaml as _info_yaml
                 with open(cfg_path, encoding="utf-8") as f:
@@ -4630,10 +4630,10 @@ class GatewayRunner:
     
     async def _handle_profile_command(self, event: MessageEvent) -> str:
         """Handle /profile — show active profile name and home directory."""
-        from myai_constants import display_hermes_home
+        from myai_constants import display_myai_home
         from myai_cli.profiles import get_active_profile_name
 
-        display = display_hermes_home()
+        display = display_myai_home()
         profile_name = get_active_profile_name()
 
         lines = [
@@ -4837,7 +4837,7 @@ class GatewayRunner:
             }
             if event.source.thread_id:
                 notify_data["thread_id"] = event.source.thread_id
-            (_hermes_home / ".restart_notify.json").write_text(
+            (_myai_home / ".restart_notify.json").write_text(
                 _json.dumps(notify_data)
             )
         except Exception as e:
@@ -4857,7 +4857,7 @@ class GatewayRunner:
             }
             if event.platform_update_id is not None:
                 dedup_data["update_id"] = event.platform_update_id
-            (_hermes_home / ".restart_last_processed.json").write_text(
+            (_myai_home / ".restart_last_processed.json").write_text(
                 _json.dumps(dedup_data)
             )
         except Exception as e:
@@ -4908,7 +4908,7 @@ class GatewayRunner:
         try:
             import json as _json
             import time as _time
-            marker_path = _hermes_home / ".restart_last_processed.json"
+            marker_path = _myai_home / ".restart_last_processed.json"
             if not marker_path.exists():
                 return False
             data = _json.loads(marker_path.read_text())
@@ -5034,7 +5034,7 @@ class GatewayRunner:
         current_api_key = ""
         user_provs = None
         custom_provs = None
-        config_path = _hermes_home / "config.yaml"
+        config_path = _myai_home / "config.yaml"
         try:
             if config_path.exists():
                 with open(config_path, encoding="utf-8") as f:
@@ -5344,7 +5344,7 @@ class GatewayRunner:
         # Resolve current provider from config
         current_provider = "openrouter"
         model_cfg = {}
-        config_path = _hermes_home / 'config.yaml'
+        config_path = _myai_home / 'config.yaml'
         try:
             if config_path.exists():
                 with open(config_path, encoding="utf-8") as f:
@@ -5392,10 +5392,10 @@ class GatewayRunner:
     async def _handle_personality_command(self, event: MessageEvent) -> str:
         """Handle /personality command - list or set a personality."""
         import yaml
-        from myai_constants import display_hermes_home
+        from myai_constants import display_myai_home
 
         args = event.get_command_args().strip().lower()
-        config_path = _hermes_home / 'config.yaml'
+        config_path = _myai_home / 'config.yaml'
 
         try:
             if config_path.exists():
@@ -5410,7 +5410,7 @@ class GatewayRunner:
             personalities = {}
 
         if not personalities:
-            return f"No personalities configured in `{display_hermes_home()}/config.yaml`"
+            return f"No personalities configured in `{display_myai_home()}/config.yaml`"
 
         if not args:
             lines = ["🎭 **Available Personalities**\n"]
@@ -5537,7 +5537,7 @@ class GatewayRunner:
         # Save to config.yaml
         try:
             import yaml
-            config_path = _hermes_home / 'config.yaml'
+            config_path = _myai_home / 'config.yaml'
             user_config = {}
             if config_path.exists():
                 with open(config_path, encoding="utf-8") as f:
@@ -5982,7 +5982,7 @@ class GatewayRunner:
         cp_cfg = {}
         try:
             import yaml as _y
-            _cfg_path = _hermes_home / "config.yaml"
+            _cfg_path = _myai_home / "config.yaml"
             if _cfg_path.exists():
                 with open(_cfg_path, encoding="utf-8") as _f:
                     _data = _y.safe_load(_f) or {}
@@ -6378,7 +6378,7 @@ class GatewayRunner:
         import yaml
 
         args = event.get_command_args().strip().lower()
-        config_path = _hermes_home / "config.yaml"
+        config_path = _myai_home / "config.yaml"
         self._reasoning_config = self._load_reasoning_config()
         self._show_reasoning = self._load_show_reasoning()
 
@@ -6459,7 +6459,7 @@ class GatewayRunner:
         from myai_cli.models import model_supports_fast_mode
 
         args = event.get_command_args().strip().lower()
-        config_path = _hermes_home / "config.yaml"
+        config_path = _myai_home / "config.yaml"
         self._service_tier = self._load_service_tier()
 
         user_config = _load_gateway_config()
@@ -6541,7 +6541,7 @@ class GatewayRunner:
         """
         import yaml
 
-        config_path = _hermes_home / "config.yaml"
+        config_path = _myai_home / "config.yaml"
         platform_key = _platform_config_key(event.source.platform)
 
         # --- check config gate ------------------------------------------------
@@ -7315,9 +7315,9 @@ class GatewayRunner:
                 "Try running `myai update` manually in your terminal."
             )
 
-        pending_path = _hermes_home / ".update_pending.json"
-        output_path = _hermes_home / ".update_output.txt"
-        exit_code_path = _hermes_home / ".update_exit_code"
+        pending_path = _myai_home / ".update_pending.json"
+        output_path = _myai_home / ".update_output.txt"
+        exit_code_path = _myai_home / ".update_exit_code"
         session_key = self._session_key_for_source(event.source)
         pending = {
             "platform": event.source.platform.value,
@@ -7369,7 +7369,7 @@ class GatewayRunner:
             return f"✗ Failed to start update: {e}"
 
         self._schedule_update_notification_watch()
-        return "⚕ Starting MyAIOne update… I'll stream progress here."
+        return "🤖 Starting MyAIOne update… I'll stream progress here."
 
     def _schedule_update_notification_watch(self) -> None:
         """Ensure a background task is watching for update completion."""
@@ -7401,11 +7401,11 @@ class GatewayRunner:
         import json
         import re as _re
 
-        pending_path = _hermes_home / ".update_pending.json"
-        claimed_path = _hermes_home / ".update_pending.claimed.json"
-        output_path = _hermes_home / ".update_output.txt"
-        exit_code_path = _hermes_home / ".update_exit_code"
-        prompt_path = _hermes_home / ".update_prompt.json"
+        pending_path = _myai_home / ".update_pending.json"
+        claimed_path = _myai_home / ".update_pending.claimed.json"
+        output_path = _myai_home / ".update_output.txt"
+        exit_code_path = _myai_home / ".update_exit_code"
+        prompt_path = _myai_home / ".update_prompt.json"
 
         loop = asyncio.get_running_loop()
         deadline = loop.time() + timeout
@@ -7502,7 +7502,7 @@ class GatewayRunner:
                 for p in (pending_path, claimed_path, output_path,
                           exit_code_path, prompt_path):
                     p.unlink(missing_ok=True)
-                (_hermes_home / ".update_response").unlink(missing_ok=True)
+                (_myai_home / ".update_response").unlink(missing_ok=True)
                 self._update_prompt_pending.pop(session_key, None)
                 return
 
@@ -7551,7 +7551,7 @@ class GatewayRunner:
                             default_hint = f" (default: {default})" if default else ""
                             await adapter.send(
                                 chat_id,
-                                f"⚕ **Update needs your input:**\n\n"
+                                f"🤖 **Update needs your input:**\n\n"
                                 f"{prompt_text}{default_hint}\n\n"
                                 f"Reply `/approve` (yes) or `/deny` (no), "
                                 f"or type your answer directly."
@@ -7580,7 +7580,7 @@ class GatewayRunner:
             for p in (pending_path, claimed_path, output_path,
                       exit_code_path, prompt_path):
                 p.unlink(missing_ok=True)
-            (_hermes_home / ".update_response").unlink(missing_ok=True)
+            (_myai_home / ".update_response").unlink(missing_ok=True)
             self._update_prompt_pending.pop(session_key, None)
 
     async def _send_update_notification(self) -> bool:
@@ -7596,10 +7596,10 @@ class GatewayRunner:
         import json
         import re as _re
 
-        pending_path = _hermes_home / ".update_pending.json"
-        claimed_path = _hermes_home / ".update_pending.claimed.json"
-        output_path = _hermes_home / ".update_output.txt"
-        exit_code_path = _hermes_home / ".update_exit_code"
+        pending_path = _myai_home / ".update_pending.json"
+        claimed_path = _myai_home / ".update_pending.claimed.json"
+        output_path = _myai_home / ".update_output.txt"
+        exit_code_path = _myai_home / ".update_exit_code"
 
         if not pending_path.exists() and not claimed_path.exists():
             return False
@@ -7676,7 +7676,7 @@ class GatewayRunner:
         """Notify the chat that initiated /restart that the gateway is back."""
         import json as _json
 
-        notify_path = _hermes_home / ".restart_notify.json"
+        notify_path = _myai_home / ".restart_notify.json"
         if not notify_path.exists():
             return
 
@@ -10193,9 +10193,9 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
                  when the previous process hasn't fully exited yet.
     """
     # ── Duplicate-instance guard ──────────────────────────────────────
-    # Prevent two gateways from running under the same HERMES_HOME.
-    # The PID file is scoped to HERMES_HOME, so future multi-profile
-    # setups (each profile using a distinct HERMES_HOME) will naturally
+    # Prevent two gateways from running under the same MYAI_HOME.
+    # The PID file is scoped to MYAI_HOME, so future multi-profile
+    # setups (each profile using a distinct MYAI_HOME) will naturally
     # allow concurrent instances without tripping this guard.
     import time as _time
     from gateway.status import get_running_pid, remove_pid_file, terminate_pid
@@ -10270,11 +10270,11 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
             except Exception:
                 pass
         else:
-            hermes_home = str(get_hermes_home())
+            myai_home = str(get_myai_home())
             logger.error(
-                "Another gateway instance is already running (PID %d, HERMES_HOME=%s). "
+                "Another gateway instance is already running (PID %d, MYAI_HOME=%s). "
                 "Use 'myai gateway restart' to replace it, or 'myai gateway stop' first.",
-                existing_pid, hermes_home,
+                existing_pid, myai_home,
             )
             print(
                 f"\n❌ Gateway already running (PID {existing_pid}).\n"
@@ -10295,7 +10295,7 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
     # and gateway.log (INFO+, gateway-component records only).
     # Idempotent, so repeated calls from AIAgent.__init__ won't duplicate.
     from myai_logging import setup_logging
-    setup_logging(hermes_home=_hermes_home, mode="gateway")
+    setup_logging(myai_home=_myai_home, mode="gateway")
 
     # Optional stderr handler — level driven by -v/-q flags on the CLI.
     # verbosity=None (-q/--quiet): no stderr output

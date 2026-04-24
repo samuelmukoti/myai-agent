@@ -798,7 +798,7 @@ class TestFindGatewayPidsExclude:
         profile_dir = tmp_path / ".hermes" / "profiles" / "orcha"
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(gateway_cli, "is_windows", lambda: False)
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_myai_home", lambda: profile_dir)
 
         def fake_run(cmd, **kwargs):
             return subprocess.CompletedProcess(
@@ -813,7 +813,7 @@ class TestFindGatewayPidsExclude:
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
         monkeypatch.setattr("os.getpid", lambda: 999)
         monkeypatch.setattr(gateway_cli, "_get_service_pids", lambda: set())
-        monkeypatch.setattr(gateway_cli, "_profile_arg", lambda hermes_home=None: "--profile orcha")
+        monkeypatch.setattr(gateway_cli, "_profile_arg", lambda myai_home=None: "--profile orcha")
 
         pids = gateway_cli.find_gateway_pids()
 
@@ -843,15 +843,15 @@ class TestGatewayModeWritesExitCodeEarly:
         monkeypatch.setattr(gateway_cli, "supports_systemd_services", lambda: False)
         monkeypatch.setattr(gateway_cli, "is_termux", lambda: False)
 
-        # Point HERMES_HOME at a temp dir so the marker file lands there
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        # Point MYAI_HOME at a temp dir so the marker file lands there
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         import myai_cli.config as _cfg
-        monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_cfg, "get_myai_home", lambda: myai_home)
         # Also patch the module-level ref used by cmd_update
         import myai_cli.main as _main_mod
-        monkeypatch.setattr(_main_mod, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_main_mod, "get_myai_home", lambda: myai_home)
 
         mock_run.side_effect = _make_run_side_effect(commit_count="1")
 
@@ -860,7 +860,7 @@ class TestGatewayModeWritesExitCodeEarly:
         with patch.object(gateway_cli, "find_gateway_pids", return_value=[]):
             cmd_update(args)
 
-        exit_code_path = hermes_home / ".update_exit_code"
+        exit_code_path = myai_home / ".update_exit_code"
         assert exit_code_path.exists(), ".update_exit_code not written in gateway mode"
         assert exit_code_path.read_text() == "0"
 
@@ -874,13 +874,13 @@ class TestGatewayModeWritesExitCodeEarly:
         monkeypatch.setattr(gateway_cli, "supports_systemd_services", lambda: False)
         monkeypatch.setattr(gateway_cli, "is_termux", lambda: False)
 
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         import myai_cli.config as _cfg
-        monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_cfg, "get_myai_home", lambda: myai_home)
         import myai_cli.main as _main_mod
-        monkeypatch.setattr(_main_mod, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_main_mod, "get_myai_home", lambda: myai_home)
 
         mock_run.side_effect = _make_run_side_effect(commit_count="1")
 
@@ -889,7 +889,7 @@ class TestGatewayModeWritesExitCodeEarly:
         with patch.object(gateway_cli, "find_gateway_pids", return_value=[]):
             cmd_update(args)
 
-        exit_code_path = hermes_home / ".update_exit_code"
+        exit_code_path = myai_home / ".update_exit_code"
         assert not exit_code_path.exists(), ".update_exit_code should not be written outside gateway mode"
 
     @patch("shutil.which", return_value=None)
@@ -902,15 +902,15 @@ class TestGatewayModeWritesExitCodeEarly:
         monkeypatch.setattr(gateway_cli, "supports_systemd_services", lambda: True)
         monkeypatch.setattr(gateway_cli, "is_termux", lambda: False)
 
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
         import myai_cli.config as _cfg
-        monkeypatch.setattr(_cfg, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_cfg, "get_myai_home", lambda: myai_home)
         import myai_cli.main as _main_mod
-        monkeypatch.setattr(_main_mod, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(_main_mod, "get_myai_home", lambda: myai_home)
 
-        exit_code_path = hermes_home / ".update_exit_code"
+        exit_code_path = myai_home / ".update_exit_code"
 
         # Track whether exit code exists when systemctl restart is called
         exit_code_existed_at_restart = []

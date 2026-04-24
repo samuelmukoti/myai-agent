@@ -5,9 +5,9 @@ version: 1.0.0
 author: MyAIOne Agent
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [Coding-Agent, Codex, OpenAI, Code-Review, Refactoring]
-    related_skills: [claude-code, hermes-agent]
+    related_skills: [claude-code, myaione-agent]
 ---
 
 # Codex CLI

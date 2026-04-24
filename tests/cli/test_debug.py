@@ -13,8 +13,8 @@ import pytest
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
-def hermes_home(tmp_path, monkeypatch):
-    """Set up an isolated HERMES_HOME with minimal logs."""
+def myai_home(tmp_path, monkeypatch):
+    """Set up an isolated MYAI_HOME with minimal logs."""
     home = tmp_path / ".hermes"
     home.mkdir()
     monkeypatch.setenv("MYAI_HOME", str(home))
@@ -140,7 +140,7 @@ class TestUploadToPastebin:
 class TestReadFullLog:
     """Test _read_full_log for standalone log uploads."""
 
-    def test_reads_small_file(self, hermes_home):
+    def test_reads_small_file(self, myai_home):
         from myai_cli.debug import _read_full_log
 
         content = _read_full_log("agent")
@@ -155,34 +155,34 @@ class TestReadFullLog:
         from myai_cli.debug import _read_full_log
         assert _read_full_log("agent") is None
 
-    def test_returns_none_for_empty(self, hermes_home):
+    def test_returns_none_for_empty(self, myai_home):
         # Truncate agent.log to empty
-        (hermes_home / "logs" / "agent.log").write_text("")
+        (myai_home / "logs" / "agent.log").write_text("")
 
         from myai_cli.debug import _read_full_log
         assert _read_full_log("agent") is None
 
-    def test_truncates_large_file(self, hermes_home):
+    def test_truncates_large_file(self, myai_home):
         """Files larger than max_bytes get tail-truncated."""
         from myai_cli.debug import _read_full_log
 
         # Write a file larger than 1KB
         big_content = "x" * 100 + "\n"
-        (hermes_home / "logs" / "agent.log").write_text(big_content * 200)
+        (myai_home / "logs" / "agent.log").write_text(big_content * 200)
 
         content = _read_full_log("agent", max_bytes=1024)
         assert content is not None
         assert "truncated" in content
 
-    def test_unknown_log_returns_none(self, hermes_home):
+    def test_unknown_log_returns_none(self, myai_home):
         from myai_cli.debug import _read_full_log
         assert _read_full_log("nonexistent") is None
 
-    def test_falls_back_to_rotated_file(self, hermes_home):
+    def test_falls_back_to_rotated_file(self, myai_home):
         """When gateway.log doesn't exist, falls back to gateway.log.1."""
         from myai_cli.debug import _read_full_log
 
-        logs_dir = hermes_home / "logs"
+        logs_dir = myai_home / "logs"
         # Remove the primary (if any) and create a .1 rotation
         (logs_dir / "gateway.log").unlink(missing_ok=True)
         (logs_dir / "gateway.log.1").write_text(
@@ -193,11 +193,11 @@ class TestReadFullLog:
         assert content is not None
         assert "rotated content" in content
 
-    def test_prefers_primary_over_rotated(self, hermes_home):
+    def test_prefers_primary_over_rotated(self, myai_home):
         """Primary log is used when it exists, even if .1 also exists."""
         from myai_cli.debug import _read_full_log
 
-        logs_dir = hermes_home / "logs"
+        logs_dir = myai_home / "logs"
         (logs_dir / "gateway.log").write_text("primary content\n")
         (logs_dir / "gateway.log.1").write_text("rotated content\n")
 
@@ -205,11 +205,11 @@ class TestReadFullLog:
         assert "primary content" in content
         assert "rotated" not in content
 
-    def test_falls_back_when_primary_empty(self, hermes_home):
+    def test_falls_back_when_primary_empty(self, myai_home):
         """Empty primary log falls back to .1 rotation."""
         from myai_cli.debug import _read_full_log
 
-        logs_dir = hermes_home / "logs"
+        logs_dir = myai_home / "logs"
         (logs_dir / "agent.log").write_text("")
         (logs_dir / "agent.log.1").write_text("rotated agent data\n")
 
@@ -225,7 +225,7 @@ class TestReadFullLog:
 class TestCollectDebugReport:
     """Test the debug report builder."""
 
-    def test_report_includes_dump_output(self, hermes_home):
+    def test_report_includes_dump_output(self, myai_home):
         from myai_cli.debug import collect_debug_report
 
         with patch("myai_cli.dump.run_dump") as mock_dump:
@@ -237,7 +237,7 @@ class TestCollectDebugReport:
         assert "--- hermes dump ---" in report
         assert "version: 0.8.0" in report
 
-    def test_report_includes_agent_log(self, hermes_home):
+    def test_report_includes_agent_log(self, myai_home):
         from myai_cli.debug import collect_debug_report
 
         with patch("myai_cli.dump.run_dump"):
@@ -246,7 +246,7 @@ class TestCollectDebugReport:
         assert "--- agent.log" in report
         assert "session started" in report
 
-    def test_report_includes_errors_log(self, hermes_home):
+    def test_report_includes_errors_log(self, myai_home):
         from myai_cli.debug import collect_debug_report
 
         with patch("myai_cli.dump.run_dump"):
@@ -255,7 +255,7 @@ class TestCollectDebugReport:
         assert "--- errors.log" in report
         assert "connection lost" in report
 
-    def test_report_includes_gateway_log(self, hermes_home):
+    def test_report_includes_gateway_log(self, myai_home):
         from myai_cli.debug import collect_debug_report
 
         with patch("myai_cli.dump.run_dump"):
@@ -283,7 +283,7 @@ class TestCollectDebugReport:
 class TestRunDebugShare:
     """Test the run_debug_share CLI handler."""
 
-    def test_local_flag_prints_full_logs(self, hermes_home, capsys):
+    def test_local_flag_prints_full_logs(self, myai_home, capsys):
         """--local prints the report plus full log contents."""
         from myai_cli.debug import run_debug_share
 
@@ -300,7 +300,7 @@ class TestRunDebugShare:
         assert "FULL agent.log" in out
         assert "FULL gateway.log" in out
 
-    def test_share_uploads_three_pastes(self, hermes_home, capsys):
+    def test_share_uploads_three_pastes(self, myai_home, capsys):
         """Successful share uploads report + agent.log + gateway.log."""
         from myai_cli.debug import run_debug_share
 
@@ -368,7 +368,7 @@ class TestRunDebugShare:
         assert call_count[0] == 1
         assert "Report" in out
 
-    def test_share_continues_on_log_upload_failure(self, hermes_home, capsys):
+    def test_share_continues_on_log_upload_failure(self, myai_home, capsys):
         """Log upload failure doesn't stop the report from being shared."""
         from myai_cli.debug import run_debug_share
 
@@ -394,7 +394,7 @@ class TestRunDebugShare:
         assert "paste.rs/report" in out
         assert "failed to upload" in out
 
-    def test_share_exits_on_report_upload_failure(self, hermes_home, capsys):
+    def test_share_exits_on_report_upload_failure(self, myai_home, capsys):
         """If the main report fails to upload, exit with code 1."""
         from myai_cli.debug import run_debug_share
 
@@ -432,7 +432,7 @@ class TestRunDebug:
         assert "share" in out
         assert "delete" in out
 
-    def test_share_subcommand_routes(self, hermes_home):
+    def test_share_subcommand_routes(self, myai_home):
         from myai_cli.debug import run_debug
 
         args = MagicMock()
@@ -507,12 +507,12 @@ class TestScheduleAutoDelete:
     were observed in production.
 
     The new implementation is stateless: it records pending deletions to
-    ``~/.hermes/pastes/pending.json`` and lets ``_sweep_expired_pastes``
+    ``~/.myai/pastes/pending.json`` and lets ``_sweep_expired_pastes``
     handle the DELETE requests synchronously on the next ``myai debug``
     invocation.
     """
 
-    def test_does_not_spawn_subprocess(self, hermes_home):
+    def test_does_not_spawn_subprocess(self, myai_home):
         """Regression guard: _schedule_auto_delete must NEVER spawn subprocesses.
 
         We assert this structurally rather than by mocking Popen: the new
@@ -574,7 +574,7 @@ class TestScheduleAutoDelete:
                 except OSError:
                     pass  # process exited already
 
-    def test_records_pending_to_json(self, hermes_home):
+    def test_records_pending_to_json(self, myai_home):
         """Scheduled URLs are persisted to pending.json with expiration."""
         from myai_cli.debug import _schedule_auto_delete, _pending_file
         import json
@@ -598,7 +598,7 @@ class TestScheduleAutoDelete:
             assert e["expire_at"] > time.time()
             assert e["expire_at"] <= time.time() + 15
 
-    def test_skips_non_paste_rs_urls(self, hermes_home):
+    def test_skips_non_paste_rs_urls(self, myai_home):
         """dpaste.com URLs auto-expire — don't track them."""
         from myai_cli.debug import _schedule_auto_delete, _pending_file
 
@@ -607,7 +607,7 @@ class TestScheduleAutoDelete:
         # pending.json should not be created for non-paste.rs URLs
         assert not _pending_file().exists()
 
-    def test_merges_with_existing_pending(self, hermes_home):
+    def test_merges_with_existing_pending(self, myai_home):
         """Subsequent calls merge into existing pending.json."""
         from myai_cli.debug import _schedule_auto_delete, _load_pending
 
@@ -618,7 +618,7 @@ class TestScheduleAutoDelete:
         urls = {e["url"] for e in entries}
         assert urls == {"https://paste.rs/first", "https://paste.rs/second"}
 
-    def test_dedupes_same_url(self, hermes_home):
+    def test_dedupes_same_url(self, myai_home):
         """Same URL recorded twice → one entry with the later expire_at."""
         from myai_cli.debug import _schedule_auto_delete, _load_pending
 
@@ -633,14 +633,14 @@ class TestScheduleAutoDelete:
 class TestSweepExpiredPastes:
     """Test the opportunistic sweep that replaces the sleeping subprocess."""
 
-    def test_sweep_empty_is_noop(self, hermes_home):
+    def test_sweep_empty_is_noop(self, myai_home):
         from myai_cli.debug import _sweep_expired_pastes
 
         deleted, remaining = _sweep_expired_pastes()
         assert deleted == 0
         assert remaining == 0
 
-    def test_sweep_deletes_expired_entries(self, hermes_home):
+    def test_sweep_deletes_expired_entries(self, myai_home):
         from myai_cli.debug import (
             _sweep_expired_pastes,
             _save_pending,
@@ -671,7 +671,7 @@ class TestSweepExpiredPastes:
         urls = {e["url"] for e in entries}
         assert urls == {"https://paste.rs/future"}
 
-    def test_sweep_leaves_future_entries_alone(self, hermes_home):
+    def test_sweep_leaves_future_entries_alone(self, myai_home):
         from myai_cli.debug import _sweep_expired_pastes, _save_pending
         import time
 
@@ -687,7 +687,7 @@ class TestSweepExpiredPastes:
         assert deleted == 0
         assert remaining == 2
 
-    def test_sweep_survives_network_failure(self, hermes_home):
+    def test_sweep_survives_network_failure(self, myai_home):
         """Failed DELETEs stay in pending.json until the 24h grace window."""
         from myai_cli.debug import (
             _sweep_expired_pastes,
@@ -711,7 +711,7 @@ class TestSweepExpiredPastes:
         assert remaining == 1
         assert len(_load_pending()) == 1
 
-    def test_sweep_drops_entries_past_grace_window(self, hermes_home):
+    def test_sweep_drops_entries_past_grace_window(self, myai_home):
         """After 24h past expiration, give up even on network failures."""
         from myai_cli.debug import (
             _sweep_expired_pastes,
@@ -740,7 +740,7 @@ class TestSweepExpiredPastes:
 class TestRunDebugSweepsOnInvocation:
     """``run_debug`` must sweep expired pastes on every invocation."""
 
-    def test_run_debug_calls_sweep(self, hermes_home):
+    def test_run_debug_calls_sweep(self, myai_home):
         from myai_cli.debug import run_debug
 
         args = MagicMock()
@@ -751,7 +751,7 @@ class TestRunDebugSweepsOnInvocation:
 
         mock_sweep.assert_called_once()
 
-    def test_run_debug_survives_sweep_failure(self, hermes_home, capsys):
+    def test_run_debug_survives_sweep_failure(self, myai_home, capsys):
         """If the sweep throws, the subcommand still runs."""
         from myai_cli.debug import run_debug
 
@@ -811,7 +811,7 @@ class TestRunDebugDelete:
 class TestShareIncludesAutoDelete:
     """Verify that run_debug_share schedules auto-deletion and prints TTL."""
 
-    def test_share_schedules_auto_delete(self, hermes_home, capsys):
+    def test_share_schedules_auto_delete(self, myai_home, capsys):
         from myai_cli.debug import run_debug_share
 
         args = MagicMock()
@@ -833,7 +833,7 @@ class TestShareIncludesAutoDelete:
         out = capsys.readouterr().out
         assert "auto-delete" in out
 
-    def test_share_shows_privacy_notice(self, hermes_home, capsys):
+    def test_share_shows_privacy_notice(self, myai_home, capsys):
         from myai_cli.debug import run_debug_share
 
         args = MagicMock()
@@ -850,7 +850,7 @@ class TestShareIncludesAutoDelete:
         out = capsys.readouterr().out
         assert "public paste service" in out
 
-    def test_local_no_privacy_notice(self, hermes_home, capsys):
+    def test_local_no_privacy_notice(self, myai_home, capsys):
         from myai_cli.debug import run_debug_share
 
         args = MagicMock()

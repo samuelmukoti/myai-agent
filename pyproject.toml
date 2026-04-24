@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myaione-agent"
-version = "0.10.0rc11"
+version = "0.10.0rc12"
 description = "MyAIOne Agent — the self-improving AI agent that creates skills from experience, improves them during use, and runs anywhere"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -180,4 +180,4 @@ testpaths = ["tests"]
 markers = [
     "integration: marks tests requiring external services (API keys, Modal, etc.)",
 ]
-addopts = "-m 'not integration' -n auto"
+addopts = "-m 'not integration' -n auto --dist=loadgroup"

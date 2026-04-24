@@ -95,9 +95,9 @@ def _as_bool(value: Any, default: bool) -> bool:
     return default
 
 
-def _load_supermemory_config(hermes_home: str) -> dict:
+def _load_supermemory_config(myai_home: str) -> dict:
     config = _default_config()
-    config_path = Path(hermes_home) / "supermemory.json"
+    config_path = Path(myai_home) / "supermemory.json"
     if config_path.exists():
         try:
             raw = json.loads(config_path.read_text(encoding="utf-8"))
@@ -141,8 +141,8 @@ def _load_supermemory_config(hermes_home: str) -> dict:
     return config
 
 
-def _save_supermemory_config(values: dict, hermes_home: str) -> None:
-    config_path = Path(hermes_home) / "supermemory.json"
+def _save_supermemory_config(values: dict, myai_home: str) -> None:
+    config_path = Path(myai_home) / "supermemory.json"
     existing = {}
     if config_path.exists():
         try:
@@ -438,7 +438,7 @@ class SupermemoryMemoryProvider(MemoryProvider):
         self._search_mode = _DEFAULT_SEARCH_MODE
         self._entity_context = _DEFAULT_ENTITY_CONTEXT
         self._api_timeout = _DEFAULT_API_TIMEOUT
-        self._hermes_home = ""
+        self._myai_home = ""
         self._write_enabled = True
         self._active = False
         # Multi-container support
@@ -463,26 +463,26 @@ class SupermemoryMemoryProvider(MemoryProvider):
 
     def get_config_schema(self):
         # Only prompt for the API key during `hermes memory setup`.
-        # All other options are documented for $HERMES_HOME/supermemory.json
+        # All other options are documented for $MYAI_HOME/supermemory.json
         # or the SUPERMEMORY_CONTAINER_TAG env var.
         return [
             {"key": "api_key", "description": "Supermemory API key", "secret": True, "required": True, "env_var": "SUPERMEMORY_API_KEY", "url": "https://supermemory.ai"},
         ]
 
-    def save_config(self, values, hermes_home):
+    def save_config(self, values, myai_home):
         sanitized = dict(values or {})
         if "container_tag" in sanitized:
             sanitized["container_tag"] = _sanitize_tag(str(sanitized["container_tag"]))
         if "entity_context" in sanitized:
             sanitized["entity_context"] = _clamp_entity_context(str(sanitized["entity_context"]))
-        _save_supermemory_config(sanitized, hermes_home)
+        _save_supermemory_config(sanitized, myai_home)
 
     def initialize(self, session_id: str, **kwargs) -> None:
-        from myai_constants import get_hermes_home
-        self._hermes_home = kwargs.get("hermes_home") or str(get_hermes_home())
+        from myai_constants import get_myai_home
+        self._myai_home = kwargs.get("myai_home") or str(get_myai_home())
         self._session_id = session_id
         self._turn_count = 0
-        self._config = _load_supermemory_config(self._hermes_home)
+        self._config = _load_supermemory_config(self._myai_home)
         self._api_key = os.environ.get("SUPERMEMORY_API_KEY", "")
 
         # Resolve container tag: env var > config > default.

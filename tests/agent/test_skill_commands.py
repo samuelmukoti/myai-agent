@@ -400,7 +400,7 @@ class TestPlanSkillHelpers:
             )
 
         assert msg is not None
-        assert "Save plans under $HERMES_HOME/plans" not in msg
+        assert "Save plans under $MYAI_HOME/plans" not in msg
         assert ".hermes/plans" in msg
         assert "Add a /plan command" in msg
         assert ".hermes/plans/plan.md" in msg

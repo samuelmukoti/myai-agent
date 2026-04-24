@@ -1,7 +1,7 @@
 """Honcho client initialization and configuration.
 
 Resolution order for config file:
-  1. $HERMES_HOME/honcho.json  (instance-local, enables isolated MyAIOne instances)
+  1. $MYAI_HOME/honcho.json  (instance-local, enables isolated MyAIOne instances)
   2. ~/.honcho/config.json     (global, shared across all Honcho-enabled apps)
   3. Environment variables     (HONCHO_API_KEY, HONCHO_ENVIRONMENT)
 
@@ -19,7 +19,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -57,18 +57,18 @@ def resolve_config_path() -> Path:
     """Return the active Honcho config path.
 
     Resolution order:
-      1. $HERMES_HOME/honcho.json      (profile-local, if it exists)
-      2. ~/.hermes/honcho.json          (default profile — shared host blocks live here)
+      1. $MYAI_HOME/honcho.json      (profile-local, if it exists)
+      2. ~/.myai/honcho.json          (default profile — shared host blocks live here)
       3. ~/.honcho/config.json          (global, cross-app interop)
 
     Returns the global path if none exist (for first-time setup writes).
     """
-    local_path = get_hermes_home() / "honcho.json"
+    local_path = get_myai_home() / "honcho.json"
     if local_path.exists():
         return local_path
 
     # Default profile's config — host blocks accumulate here via setup/clone
-    default_path = Path.home() / ".hermes" / "honcho.json"
+    default_path = Path.home() / ".myai" / "honcho.json"
     if default_path != local_path and default_path.exists():
         return default_path
 
@@ -314,7 +314,7 @@ class HonchoClientConfig:
     ) -> HonchoClientConfig:
         """Create config from the resolved Honcho config path.
 
-        Resolution: $HERMES_HOME/honcho.json -> ~/.honcho/config.json -> env vars.
+        Resolution: $MYAI_HOME/honcho.json -> ~/.honcho/config.json -> env vars.
         When host is None, derives it from the active MyAIOne profile.
         """
         resolved_host = host or resolve_active_host()

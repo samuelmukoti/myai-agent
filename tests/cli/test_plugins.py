@@ -53,7 +53,7 @@ class TestPluginDiscovery:
     """Tests for plugin discovery from directories and entry points."""
 
     def test_discover_user_plugins(self, tmp_path, monkeypatch):
-        """Plugins in ~/.hermes/plugins/ are discovered."""
+        """Plugins in ~/.myai/plugins/ are discovered."""
         plugins_dir = tmp_path / "hermes_test" / "plugins"
         _make_plugin_dir(plugins_dir, "hello_plugin")
         monkeypatch.setenv("MYAI_HOME", str(tmp_path / "hermes_test"))

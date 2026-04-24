@@ -4,7 +4,7 @@ Tests cover:
 - Script field in job creation / storage / update
 - Script execution and output injection into prompts
 - Error handling (missing script, timeout, non-zero exit)
-- Path resolution (absolute, relative to HERMES_HOME/scripts/)
+- Path resolution (absolute, relative to MYAI_HOME/scripts/)
 """
 
 import json
@@ -23,22 +23,22 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 @pytest.fixture
 def cron_env(tmp_path, monkeypatch):
-    """Isolated cron environment with temp HERMES_HOME."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
-    (hermes_home / "cron").mkdir()
-    (hermes_home / "cron" / "output").mkdir()
-    (hermes_home / "scripts").mkdir()
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    """Isolated cron environment with temp MYAI_HOME."""
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
+    (myai_home / "cron").mkdir()
+    (myai_home / "cron" / "output").mkdir()
+    (myai_home / "scripts").mkdir()
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     # Clear cached module-level paths
     import cron.jobs as jobs_mod
-    monkeypatch.setattr(jobs_mod, "HERMES_DIR", hermes_home)
-    monkeypatch.setattr(jobs_mod, "CRON_DIR", hermes_home / "cron")
-    monkeypatch.setattr(jobs_mod, "JOBS_FILE", hermes_home / "cron" / "jobs.json")
-    monkeypatch.setattr(jobs_mod, "OUTPUT_DIR", hermes_home / "cron" / "output")
+    monkeypatch.setattr(jobs_mod, "HERMES_DIR", myai_home)
+    monkeypatch.setattr(jobs_mod, "CRON_DIR", myai_home / "cron")
+    monkeypatch.setattr(jobs_mod, "JOBS_FILE", myai_home / "cron" / "jobs.json")
+    monkeypatch.setattr(jobs_mod, "OUTPUT_DIR", myai_home / "cron" / "output")
 
-    return hermes_home
+    return myai_home
 
 
 class TestJobScriptField:
@@ -309,7 +309,7 @@ class TestScriptPathContainment:
     """
 
     def test_absolute_path_outside_scripts_dir_blocked(self, cron_env):
-        """Absolute paths outside ~/.hermes/scripts/ must be rejected."""
+        """Absolute paths outside ~/.myai/scripts/ must be rejected."""
         from cron.scheduler import _run_job_script
 
         # Create a script outside the scripts dir

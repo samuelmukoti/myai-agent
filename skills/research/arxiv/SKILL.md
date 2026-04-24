@@ -5,7 +5,7 @@ version: 1.0.0
 author: MyAIOne Agent
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [Research, Arxiv, Papers, Academic, Science, API]
     related_skills: [ocr-and-documents]
 ---

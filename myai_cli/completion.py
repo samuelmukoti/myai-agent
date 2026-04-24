@@ -102,7 +102,7 @@ def generate_bash(parser: argparse.ArgumentParser) -> str:
 #   eval "$(myai completion bash)"
 
 _hermes_profiles() {{
-    local profiles_dir="${{MYAI_HOME:-${{HERMES_HOME:-$HOME/.myai}}}}/profiles"
+    local profiles_dir="${{MYAI_HOME:-${{MYAI_HOME:-$HOME/.myai}}}}/profiles"
     [ ! -d "$profiles_dir" ] && profiles_dir="$HOME/.hermes/profiles"
     local profiles="default"
     if [ -d "$profiles_dir" ]; then
@@ -206,7 +206,7 @@ def generate_zsh(parser: argparse.ArgumentParser) -> str:
 _hermes_profiles() {{
     local -a profiles
     profiles=(default)
-    local dir="${{MYAI_HOME:-${{HERMES_HOME:-$HOME/.myai}}}}/profiles"
+    local dir="${{MYAI_HOME:-${{MYAI_HOME:-$HOME/.myai}}}}/profiles"
     [[ ! -d "$dir" ]] && dir="$HOME/.hermes/profiles"
     if [[ -d "$dir" ]]; then
         profiles+=("${{(@f)$(ls "$dir" 2>/dev/null)}}")
@@ -262,7 +262,7 @@ def generate_fish(parser: argparse.ArgumentParser) -> str:
         "# Helper: list available profiles",
         "function __hermes_profiles",
         "    echo default",
-        "    set -l dir (set -q MYAI_HOME; and echo $MYAI_HOME; or set -q HERMES_HOME; and echo $HERMES_HOME; or echo $HOME/.myai)/profiles",
+        "    set -l dir (set -q MYAI_HOME; and echo $MYAI_HOME; or set -q MYAI_HOME; and echo $MYAI_HOME; or echo $HOME/.myai)/profiles",
         "    if not test -d $dir",
         "        set dir $HOME/.hermes/profiles",
         "    end",

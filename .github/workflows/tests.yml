@@ -23,7 +23,10 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
+        # libolm-dev is required to build python-olm (pulled in by
+        # mautrix[encryption] via the [matrix] extra); without it the
+        # matrix tests fail with "No module named 'olm'".
+        run: sudo apt-get update && sudo apt-get install -y ripgrep libolm-dev
 
       - name: Install uv
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
@@ -53,6 +56,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ripgrep libolm-dev
 
       - name: Install uv
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5

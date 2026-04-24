@@ -36,7 +36,7 @@ from myai_cli.profiles import (
 
 
 # ---------------------------------------------------------------------------
-# Shared fixture: redirect Path.home() and HERMES_HOME for profile tests
+# Shared fixture: redirect Path.home() and MYAI_HOME for profile tests
 # ---------------------------------------------------------------------------
 
 @pytest.fixture()
@@ -44,7 +44,7 @@ def profile_env(tmp_path, monkeypatch):
     """Set up an isolated environment for profile tests.
 
     * Path.home() -> tmp_path  (so _get_profiles_root() = tmp_path/.hermes/profiles)
-    * HERMES_HOME  -> tmp_path/.hermes  (so get_hermes_home() agrees)
+    * MYAI_HOME  -> tmp_path/.hermes  (so get_myai_home() agrees)
     * Creates the bare-minimum ~/.hermes directory.
     """
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -284,7 +284,7 @@ class TestGetActiveProfileName:
     """Tests for get_active_profile_name()."""
 
     def test_default_hermes_home_returns_default(self, profile_env):
-        # HERMES_HOME points to tmp_path/.hermes which is the default
+        # MYAI_HOME points to tmp_path/.hermes which is the default
         assert get_active_profile_name() == "default"
 
     def test_profile_path_returns_profile_name(self, profile_env, monkeypatch):
@@ -295,12 +295,12 @@ class TestGetActiveProfileName:
         assert get_active_profile_name() == "coder"
 
     def test_custom_path_returns_default(self, profile_env, monkeypatch):
-        """A custom HERMES_HOME (Docker, etc.) IS the default root."""
+        """A custom MYAI_HOME (Docker, etc.) IS the default root."""
         tmp_path = profile_env
         custom = tmp_path / "some" / "other" / "path"
         custom.mkdir(parents=True)
         monkeypatch.setenv("MYAI_HOME", str(custom))
-        # With Docker-aware roots, a custom HERMES_HOME is the default —
+        # With Docker-aware roots, a custom MYAI_HOME is the default —
         # not "custom".  The user is on the default profile of their
         # custom deployment.
         assert get_active_profile_name() == "default"
@@ -712,7 +712,7 @@ class TestInternalHelpers:
         assert home == tmp_path / ".hermes"
 
     def test_profiles_root_docker_deployment(self, tmp_path, monkeypatch):
-        """In Docker (HERMES_HOME outside ~/.hermes), profiles go under HERMES_HOME."""
+        """In Docker (MYAI_HOME outside ~/.hermes), profiles go under MYAI_HOME."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -721,7 +721,7 @@ class TestInternalHelpers:
         assert root == docker_home / "profiles"
 
     def test_default_hermes_home_docker(self, tmp_path, monkeypatch):
-        """In Docker, _get_default_hermes_home() returns HERMES_HOME itself."""
+        """In Docker, _get_default_hermes_home() returns MYAI_HOME itself."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -730,7 +730,7 @@ class TestInternalHelpers:
         assert home == docker_home
 
     def test_profiles_root_profile_mode(self, tmp_path, monkeypatch):
-        """In profile mode (HERMES_HOME under ~/.hermes), profiles root is still ~/.hermes/profiles."""
+        """In profile mode (MYAI_HOME under ~/.hermes), profiles root is still ~/.myai/profiles."""
         native = tmp_path / ".hermes"
         profile_dir = native / "profiles" / "coder"
         profile_dir.mkdir(parents=True)
@@ -740,7 +740,7 @@ class TestInternalHelpers:
         assert root == native / "profiles"
 
     def test_active_profile_path_docker(self, tmp_path, monkeypatch):
-        """In Docker, active_profile file lives under HERMES_HOME."""
+        """In Docker, active_profile file lives under MYAI_HOME."""
         from myai_cli.profiles import _get_active_profile_path
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
@@ -750,7 +750,7 @@ class TestInternalHelpers:
         assert path == docker_home / "active_profile"
 
     def test_create_profile_docker(self, tmp_path, monkeypatch):
-        """Profile created in Docker lands under HERMES_HOME/profiles/."""
+        """Profile created in Docker lands under MYAI_HOME/profiles/."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)

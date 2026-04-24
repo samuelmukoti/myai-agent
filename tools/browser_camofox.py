@@ -17,7 +17,7 @@ Setup::
     # Option 2: Docker
     docker run -p 9377:9377 -e CAMOFOX_PORT=9377 jo-inc/camofox-browser
 
-Then set ``CAMOFOX_URL=http://localhost:9377`` in ``~/.hermes/.env``.
+Then set ``CAMOFOX_URL=http://localhost:9377`` in ``~/.myai/.env``.
 """
 
 from __future__ import annotations
@@ -505,8 +505,8 @@ def camofox_vision(question: str, annotate: bool = False,
         )
 
         # Save screenshot to cache
-        from myai_constants import get_hermes_home
-        screenshots_dir = get_hermes_home() / "browser_screenshots"
+        from myai_constants import get_myai_home
+        screenshots_dir = get_myai_home() / "browser_screenshots"
         screenshots_dir.mkdir(parents=True, exist_ok=True)
         screenshot_path = str(screenshots_dir / f"browser_screenshot_{uuid.uuid4().hex[:8]}.png")
 

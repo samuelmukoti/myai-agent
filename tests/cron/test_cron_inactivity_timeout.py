@@ -285,5 +285,5 @@ class TestSysPathOrdering:
 
     def test_hermes_constants_importable(self):
         """myai_constants should be importable from cron context."""
-        from myai_constants import get_hermes_home
-        assert callable(get_hermes_home)
+        from myai_constants import get_myai_home
+        assert callable(get_myai_home)

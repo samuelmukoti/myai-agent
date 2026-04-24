@@ -28,12 +28,9 @@ BOLD='\033[1m'
 # Configuration
 REPO_URL_SSH="git@github.com:samuelmukoti/myai-agent.git"
 REPO_URL_HTTPS="https://github.com/samuelmukoti/myai-agent.git"
-MYAI_HOME="${MYAI_HOME:-${HERMES_HOME:-$HOME/.myai}}"
-# Back-compat export so existing scripts / hooks that still read HERMES_HOME
-# keep working during the ~/.hermes → ~/.myai transition.
-HERMES_HOME="$MYAI_HOME"
-export MYAI_HOME HERMES_HOME
-INSTALL_DIR="${HERMES_INSTALL_DIR:-$HERMES_HOME/hermes-agent}"
+MYAI_HOME="${MYAI_HOME:-$HOME/.myai}"
+export MYAI_HOME
+INSTALL_DIR="${MYAI_INSTALL_DIR:-$MYAI_HOME/myaione-agent}"
 PYTHON_VERSION="3.11"
 NODE_VERSION="22"
 
@@ -70,10 +67,8 @@ while [[ $# -gt 0 ]]; do
             INSTALL_DIR="$2"
             shift 2
             ;;
-        --myai-home|--hermes-home)
-            # --hermes-home kept as an alias for scripts pinned to the old name.
+        --myai-home)
             MYAI_HOME="$2"
-            HERMES_HOME="$2"
             shift 2
             ;;
         -h|--help)
@@ -87,7 +82,6 @@ while [[ $# -gt 0 ]]; do
             echo "  --branch NAME  Git branch to install (default: main)"
             echo "  --dir PATH     Installation directory (default: ~/.myai/myaione-agent)"
             echo "  --myai-home PATH    Data directory (default: ~/.myai, or \$MYAI_HOME)"
-            echo "                      (--hermes-home accepted as a legacy alias)"
             echo "  -h, --help     Show this help"
             exit 0
             ;;
@@ -106,7 +100,7 @@ print_banner() {
     echo ""
     echo -e "${MAGENTA}${BOLD}"
     echo "┌─────────────────────────────────────────────────────────┐"
-    echo "│             ⚕ MyAIOne Agent Installer                    │"
+    echo "│             🤖 MyAIOne Agent Installer                    │"
     echo "├─────────────────────────────────────────────────────────┤"
     echo "│  An open source AI agent (MyAIOne Rig fork).              │"
     echo "└─────────────────────────────────────────────────────────┘"
@@ -186,13 +180,13 @@ get_command_link_display_dir() {
     fi
 }
 
-get_hermes_command_path() {
+get_myai_command_path() {
     local link_dir
     link_dir="$(get_command_link_dir)"
-    if [ -x "$link_dir/hermes" ]; then
-        echo "$link_dir/hermes"
+    if [ -x "$link_dir/myai" ]; then
+        echo "$link_dir/myai"
     else
-        echo "hermes"
+        echo "myai"
     fi
 }
 
@@ -405,9 +399,9 @@ check_node() {
     fi
 
     # Check our own managed install from a previous run
-    if [ -x "$HERMES_HOME/node/bin/node" ]; then
-        export PATH="$HERMES_HOME/node/bin:$PATH"
-        local found_ver=$("$HERMES_HOME/node/bin/node" --version)
+    if [ -x "$MYAI_HOME/node/bin/node" ]; then
+        export PATH="$MYAI_HOME/node/bin:$PATH"
+        local found_ver=$("$MYAI_HOME/node/bin/node" --version)
         log_success "Node.js $found_ver found (MyAIOne-managed)"
         HAS_NODE=true
         return 0
@@ -512,20 +506,20 @@ install_node() {
     fi
 
     # Place into ~/.myai/node/ and symlink binaries to ~/.local/bin/
-    rm -rf "$HERMES_HOME/node"
-    mkdir -p "$HERMES_HOME"
-    mv "$extracted_dir" "$HERMES_HOME/node"
+    rm -rf "$MYAI_HOME/node"
+    mkdir -p "$MYAI_HOME"
+    mv "$extracted_dir" "$MYAI_HOME/node"
     rm -rf "$tmp_dir"
 
     mkdir -p "$HOME/.local/bin"
-    ln -sf "$HERMES_HOME/node/bin/node" "$HOME/.local/bin/node"
-    ln -sf "$HERMES_HOME/node/bin/npm"  "$HOME/.local/bin/npm"
-    ln -sf "$HERMES_HOME/node/bin/npx"  "$HOME/.local/bin/npx"
+    ln -sf "$MYAI_HOME/node/bin/node" "$HOME/.local/bin/node"
+    ln -sf "$MYAI_HOME/node/bin/npm"  "$HOME/.local/bin/npm"
+    ln -sf "$MYAI_HOME/node/bin/npx"  "$HOME/.local/bin/npx"
 
-    export PATH="$HERMES_HOME/node/bin:$PATH"
+    export PATH="$MYAI_HOME/node/bin:$PATH"
 
     local installed_ver
-    installed_ver=$("$HERMES_HOME/node/bin/node" --version 2>/dev/null)
+    installed_ver=$("$MYAI_HOME/node/bin/node" --version 2>/dev/null)
     log_success "Node.js $installed_ver installed to ~/.myai/node/"
     HAS_NODE=true
 }
@@ -733,7 +727,7 @@ clone_repo() {
             local autostash_ref=""
             if [ -n "$(git status --porcelain)" ]; then
                 local stash_name
-                stash_name="hermes-install-autostash-$(date -u +%Y%m%d-%H%M%S)"
+                stash_name="myai-install-autostash-$(date -u +%Y%m%d-%H%M%S)"
                 log_info "Local changes detected, stashing before update..."
                 git stash push --include-untracked -m "$stash_name"
                 autostash_ref="$(git rev-parse --verify refs/stash)"
@@ -942,21 +936,21 @@ install_deps() {
 }
 
 setup_path() {
-    log_info "Setting up hermes command..."
+    log_info "Setting up myai command..."
 
     if [ "$USE_VENV" = true ]; then
-        HERMES_BIN="$INSTALL_DIR/venv/bin/hermes"
+        MYAI_BIN="$INSTALL_DIR/venv/bin/myai"
     else
-        HERMES_BIN="$(which hermes 2>/dev/null || echo "")"
-        if [ -z "$HERMES_BIN" ]; then
-            log_warn "hermes not found on PATH after install"
+        MYAI_BIN="$(which myai 2>/dev/null || echo "")"
+        if [ -z "$MYAI_BIN" ]; then
+            log_warn "myai not found on PATH after install"
             return 0
         fi
     fi
 
     # Verify the entry point script was actually generated
-    if [ ! -x "$HERMES_BIN" ]; then
-        log_warn "hermes entry point not found at $HERMES_BIN"
+    if [ ! -x "$MYAI_BIN" ]; then
+        log_warn "myai entry point not found at $MYAI_BIN"
         log_info "This usually means the pip install didn't complete successfully."
         if [ "$DISTRO" = "termux" ]; then
             log_info "Try: cd $INSTALL_DIR && python -m pip install -e '.[termux]' -c constraints-termux.txt"
@@ -971,15 +965,15 @@ setup_path() {
     command_link_dir="$(get_command_link_dir)"
     command_link_display_dir="$(get_command_link_display_dir)"
 
-    # Create a user-facing shim for the hermes command.
+    # Create a user-facing shim for the myai command.
     mkdir -p "$command_link_dir"
-    ln -sf "$HERMES_BIN" "$command_link_dir/hermes"
-    log_success "Symlinked hermes → $command_link_display_dir/hermes"
+    ln -sf "$MYAI_BIN" "$command_link_dir/myai"
+    log_success "Symlinked myai → $command_link_display_dir/myai"
 
     if [ "$DISTRO" = "termux" ]; then
         export PATH="$command_link_dir:$PATH"
         log_info "$command_link_display_dir is the native Termux command path"
-        log_success "hermes command ready"
+        log_success "myai command ready"
         return 0
     fi
 
@@ -1049,25 +1043,25 @@ setup_path() {
         log_info "~/.local/bin already on PATH"
     fi
 
-    # Export for current session so hermes works immediately
+    # Export for current session so myai works immediately
     export PATH="$command_link_dir:$PATH"
 
-    log_success "hermes command ready"
+    log_success "myai command ready"
 }
 
 copy_config_templates() {
     log_info "Setting up configuration files..."
 
     # Create ~/.myai directory structure (config at top level, code in subdir)
-    mkdir -p "$HERMES_HOME"/{cron,sessions,logs,pairing,hooks,image_cache,audio_cache,memories,skills,whatsapp/session}
+    mkdir -p "$MYAI_HOME"/{cron,sessions,logs,pairing,hooks,image_cache,audio_cache,memories,skills,whatsapp/session}
 
     # Create .env at ~/.myai/.env (top level, easy to find)
-    if [ ! -f "$HERMES_HOME/.env" ]; then
+    if [ ! -f "$MYAI_HOME/.env" ]; then
         if [ -f "$INSTALL_DIR/.env.example" ]; then
-            cp "$INSTALL_DIR/.env.example" "$HERMES_HOME/.env"
+            cp "$INSTALL_DIR/.env.example" "$MYAI_HOME/.env"
             log_success "Created ~/.myai/.env from template"
         else
-            touch "$HERMES_HOME/.env"
+            touch "$MYAI_HOME/.env"
             log_success "Created ~/.myai/.env"
         fi
     else
@@ -1075,9 +1069,9 @@ copy_config_templates() {
     fi
 
     # Create config.yaml at ~/.myai/config.yaml (top level, easy to find)
-    if [ ! -f "$HERMES_HOME/config.yaml" ]; then
+    if [ ! -f "$MYAI_HOME/config.yaml" ]; then
         if [ -f "$INSTALL_DIR/cli-config.yaml.example" ]; then
-            cp "$INSTALL_DIR/cli-config.yaml.example" "$HERMES_HOME/config.yaml"
+            cp "$INSTALL_DIR/cli-config.yaml.example" "$MYAI_HOME/config.yaml"
             log_success "Created ~/.myai/config.yaml from template"
         fi
     else
@@ -1085,8 +1079,8 @@ copy_config_templates() {
     fi
 
     # Create SOUL.md if it doesn't exist (global persona file)
-    if [ ! -f "$HERMES_HOME/SOUL.md" ]; then
-        cat > "$HERMES_HOME/SOUL.md" << 'SOUL_EOF'
+    if [ ! -f "$MYAI_HOME/SOUL.md" ]; then
+        cat > "$MYAI_HOME/SOUL.md" << 'SOUL_EOF'
 # MyAIOne Agent Persona
 
 <!--
@@ -1114,8 +1108,8 @@ SOUL_EOF
         log_success "Skills synced to ~/.myai/skills/"
     else
         # Fallback: simple directory copy if Python sync fails
-        if [ -d "$INSTALL_DIR/skills" ] && [ ! "$(ls -A "$HERMES_HOME/skills/" 2>/dev/null | grep -v '.bundled_manifest')" ]; then
-            cp -r "$INSTALL_DIR/skills/"* "$HERMES_HOME/skills/" 2>/dev/null || true
+        if [ -d "$INSTALL_DIR/skills" ] && [ ! "$(ls -A "$MYAI_HOME/skills/" 2>/dev/null | grep -v '.bundled_manifest')" ]; then
+            cp -r "$INSTALL_DIR/skills/"* "$MYAI_HOME/skills/" 2>/dev/null || true
             log_success "Skills copied to ~/.myai/skills/"
         fi
     fi
@@ -1206,7 +1200,7 @@ install_node_deps() {
         log_info "Installing TUI dependencies..."
         cd "$INSTALL_DIR/ui-tui"
         npm install --silent 2>/dev/null || {
-            log_warn "TUI npm install failed (hermes --tui may not work)"
+            log_warn "TUI npm install failed (myai --tui may not work)"
         }
         log_success "TUI dependencies installed"
     fi
@@ -1232,7 +1226,7 @@ run_setup_wizard() {
     # install script itself is piped (curl | bash). Only skip if no
     # terminal is available at all (e.g. Docker build, CI).
     if ! [ -e /dev/tty ]; then
-        log_info "Setup wizard skipped (no terminal available). Run 'hermes setup' after install."
+        log_info "Setup wizard skipped (no terminal available). Run 'myai setup' after install."
         return 0
     fi
 
@@ -1242,18 +1236,18 @@ run_setup_wizard() {
 
     cd "$INSTALL_DIR"
 
-    # Run hermes setup using the venv Python directly (no activation needed).
+    # Run myai setup using the venv Python directly (no activation needed).
     # Redirect stdin from /dev/tty so interactive prompts work when piped from curl.
     if [ "$USE_VENV" = true ]; then
-        "$INSTALL_DIR/venv/bin/python" -m hermes_cli.main setup < /dev/tty
+        "$INSTALL_DIR/venv/bin/python" -m myai_cli.main setup < /dev/tty
     else
-        python -m hermes_cli.main setup < /dev/tty
+        python -m myai_cli.main setup < /dev/tty
     fi
 }
 
 maybe_start_gateway() {
     # Check if any messaging platform tokens were configured
-    ENV_FILE="$HERMES_HOME/.env"
+    ENV_FILE="$MYAI_HOME/.env"
     if [ ! -f "$ENV_FILE" ]; then
         return 0
     fi
@@ -1277,24 +1271,24 @@ maybe_start_gateway() {
 
     # If WhatsApp is enabled and no session exists yet, run foreground first for QR scan
     WHATSAPP_VAL=$(grep "^WHATSAPP_ENABLED=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2-)
-    WHATSAPP_SESSION="$HERMES_HOME/whatsapp/session/creds.json"
+    WHATSAPP_SESSION="$MYAI_HOME/whatsapp/session/creds.json"
     if [ "$WHATSAPP_VAL" = "true" ] && [ ! -f "$WHATSAPP_SESSION" ]; then
         if [ "$IS_INTERACTIVE" = true ]; then
             echo ""
             log_info "WhatsApp is enabled but not yet paired."
-            log_info "Running 'hermes whatsapp' to pair via QR code..."
+            log_info "Running 'myai whatsapp' to pair via QR code..."
             echo ""
             if prompt_yes_no "Pair WhatsApp now?" "yes"; then
-                HERMES_CMD="$(get_hermes_command_path)"
-                $HERMES_CMD whatsapp || true
+                MYAI_CMD="$(get_myai_command_path)"
+                $MYAI_CMD whatsapp || true
             fi
         else
-            log_info "WhatsApp pairing skipped (non-interactive). Run 'hermes whatsapp' to pair."
+            log_info "WhatsApp pairing skipped (non-interactive). Run 'myai whatsapp' to pair."
         fi
     fi
 
     if ! [ -e /dev/tty ]; then
-        log_info "Gateway setup skipped (no terminal available). Run 'hermes gateway install' later."
+        log_info "Gateway setup skipped (no terminal available). Run 'myai gateway install' later."
         return 0
     fi
 
@@ -1311,19 +1305,19 @@ maybe_start_gateway() {
     fi
 
     if [ "$should_install_gateway" = true ]; then
-        HERMES_CMD="$(get_hermes_command_path)"
+        MYAI_CMD="$(get_myai_command_path)"
 
         if [ "$DISTRO" != "termux" ] && command -v systemctl &> /dev/null; then
             log_info "Installing systemd service..."
-            if $HERMES_CMD gateway install 2>/dev/null; then
+            if $MYAI_CMD gateway install 2>/dev/null; then
                 log_success "Gateway service installed"
-                if $HERMES_CMD gateway start 2>/dev/null; then
+                if $MYAI_CMD gateway start 2>/dev/null; then
                     log_success "Gateway started! Your bot is now online."
                 else
-                    log_warn "Service installed but failed to start. Try: hermes gateway start"
+                    log_warn "Service installed but failed to start. Try: myai gateway start"
                 fi
             else
-                log_warn "Systemd install failed. You can start manually: hermes gateway"
+                log_warn "Systemd install failed. You can start manually: myai gateway"
             fi
         else
             if [ "$DISTRO" = "termux" ]; then
@@ -1331,17 +1325,17 @@ maybe_start_gateway() {
             else
                 log_info "systemd not available — starting gateway in background..."
             fi
-            nohup $HERMES_CMD gateway > "$HERMES_HOME/logs/gateway.log" 2>&1 &
+            nohup $MYAI_CMD gateway > "$MYAI_HOME/logs/gateway.log" 2>&1 &
             GATEWAY_PID=$!
             log_success "Gateway started (PID $GATEWAY_PID). Logs: ~/.myai/logs/gateway.log"
             log_info "To stop: kill $GATEWAY_PID"
-            log_info "To restart later: hermes gateway"
+            log_info "To restart later: myai gateway"
             if [ "$DISTRO" = "termux" ]; then
                 log_warn "Android may stop background processes when Termux is suspended or the system reclaims resources."
             fi
         fi
     else
-        log_info "Skipped. Start the gateway later with: hermes gateway"
+        log_info "Skipped. Start the gateway later with: myai gateway"
     fi
 }
 
@@ -1367,21 +1361,21 @@ print_success() {
     echo ""
     echo -e "${CYAN}${BOLD}🚀 Commands:${NC}"
     echo ""
-    echo -e "   ${GREEN}hermes${NC}              Start chatting"
-    echo -e "   ${GREEN}hermes setup${NC}        Configure API keys & settings"
-    echo -e "   ${GREEN}hermes config${NC}       View/edit configuration"
-    echo -e "   ${GREEN}hermes config edit${NC}  Open config in editor"
-    echo -e "   ${GREEN}hermes gateway install${NC} Install gateway service (messaging + cron)"
-    echo -e "   ${GREEN}hermes update${NC}       Update to latest version"
+    echo -e "   ${GREEN}myai${NC}              Start chatting"
+    echo -e "   ${GREEN}myai setup${NC}        Configure API keys & settings"
+    echo -e "   ${GREEN}myai config${NC}       View/edit configuration"
+    echo -e "   ${GREEN}myai config edit${NC}  Open config in editor"
+    echo -e "   ${GREEN}myai gateway install${NC} Install gateway service (messaging + cron)"
+    echo -e "   ${GREEN}myai update${NC}       Update to latest version"
     echo ""
 
     echo -e "${CYAN}─────────────────────────────────────────────────────────${NC}"
     echo ""
     if [ "$DISTRO" = "termux" ]; then
-        echo -e "${YELLOW}⚡ 'hermes' was linked into $(get_command_link_display_dir), which is already on PATH in Termux.${NC}"
+        echo -e "${YELLOW}⚡ 'myai' was linked into $(get_command_link_display_dir), which is already on PATH in Termux.${NC}"
         echo ""
     else
-        echo -e "${YELLOW}⚡ Reload your shell to use 'hermes' command:${NC}"
+        echo -e "${YELLOW}⚡ Reload your shell to use 'myai' command:${NC}"
         echo ""
         LOGIN_SHELL="$(basename "${SHELL:-/bin/bash}")"
         if [ "$LOGIN_SHELL" = "zsh" ]; then

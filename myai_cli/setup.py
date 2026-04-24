@@ -8,7 +8,7 @@ Modular wizard with independently-runnable sections:
   4. Messaging Platforms — connect Telegram, Discord, etc.
   5. Tools — configure TTS, web search, image generation, etc.
 
-Config files are stored in ~/.hermes/ for easy access.
+Config files are stored in ~/.myai/ for easy access.
 """
 
 import importlib.util
@@ -130,16 +130,16 @@ def _set_reasoning_effort(config: Dict[str, Any], effort: str) -> None:
 # Import config helpers
 from myai_cli.config import (
     DEFAULT_CONFIG,
-    get_hermes_home,
+    get_myai_home,
     get_config_path,
     get_env_path,
     load_config,
     save_config,
     save_env_value,
     get_env_value,
-    ensure_hermes_home,
+    ensure_myai_home,
 )
-# display_hermes_home imported lazily at call sites (stale-module safety during myai update)
+# display_myai_home imported lazily at call sites (stale-module safety during myai update)
 
 from myai_cli.colors import Colors, color
 
@@ -172,7 +172,7 @@ def is_interactive_stdin() -> bool:
 def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     """Print guidance for headless/non-interactive setup flows."""
     print()
-    print(color("⚕ MyAIOne Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
+    print(color("🤖 MyAIOne Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
     print()
     if reason:
         print_info(reason)
@@ -340,7 +340,7 @@ def _prompt_api_key(var: dict):
         print_warning("  Skipped (configure later with 'myai setup')")
 
 
-def _print_setup_summary(config: dict, hermes_home):
+def _print_setup_summary(config: dict, myai_home):
     """Print the setup completion summary."""
     # Tool availability summary
     print()
@@ -503,7 +503,7 @@ def _print_setup_summary(config: dict, hermes_home):
         print_warning(
             "Some tools are disabled. Run 'myai setup tools' to configure them,"
         )
-        from myai_constants import display_hermes_home as _dhh
+        from myai_constants import display_myai_home as _dhh
         print_warning(f"or edit {_dhh()}/.env directly to add the missing API keys.")
         print()
 
@@ -527,13 +527,13 @@ def _print_setup_summary(config: dict, hermes_home):
     print()
 
     # Show file locations prominently
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     print(color(f"📁 All your files are in {_dhh()}/:", Colors.CYAN, Colors.BOLD))
     print()
     print(f"   {color('Settings:', Colors.YELLOW)}  {get_config_path()}")
     print(f"   {color('API Keys:', Colors.YELLOW)}  {get_env_path()}")
     print(
-        f"   {color('Data:', Colors.YELLOW)}      {hermes_home}/cron/, sessions/, logs/"
+        f"   {color('Data:', Colors.YELLOW)}      {myai_home}/cron/, sessions/, logs/"
     )
     print()
 
@@ -955,7 +955,7 @@ def _setup_tts_provider(config: dict):
         selected = "openai"
         print_info("OpenAI TTS will use the managed Nous gateway and bill to your subscription.")
         if get_env_value("VOICE_TOOLS_OPENAI_KEY") or get_env_value("OPENAI_API_KEY"):
-            from myai_constants import display_hermes_home as _dhh
+            from myai_constants import display_myai_home as _dhh
             print_warning(
                 f"Direct OpenAI credentials are still configured and may take precedence until removed from {_dhh()}/.env."
             )
@@ -1017,7 +1017,7 @@ def _setup_tts_provider(config: dict):
                 save_env_value("XAI_API_KEY", api_key)
                 print_success("xAI TTS API key saved")
             else:
-                from myai_constants import display_hermes_home as _dhh
+                from myai_constants import display_myai_home as _dhh
                 print_warning(
                     "No xAI API key provided for TTS. Configure XAI_API_KEY via "
                     f"myai setup model or {_dhh()}/.env to use xAI TTS. "
@@ -2113,7 +2113,7 @@ def _setup_webhooks():
     save_env_value("WEBHOOK_ENABLED", "true")
     print()
     print_success("Webhooks enabled! Next steps:")
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     print_info(f"   1. Define webhook routes in {_dhh()}/config.yaml")
     print_info("   2. Point your service (GitHub, GitLab, etc.) at:")
     print_info("      http://your-server:8644/webhooks/<route-name>")
@@ -2583,7 +2583,7 @@ def _print_migration_preview(report: dict):
         print()
 
 
-def _offer_openclaw_migration(hermes_home: Path) -> bool:
+def _offer_openclaw_migration(myai_home: Path) -> bool:
     """Detect ~/.openclaw and offer to migrate during first-time setup.
 
     Runs a dry-run first to show the user exactly what would be imported,
@@ -2631,7 +2631,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
         selected = mod.resolve_selected_options(None, None, preset="full")
         dry_migrator = mod.Migrator(
             source_root=openclaw_dir.resolve(),
-            target_root=hermes_home.resolve(),
+            target_root=myai_home.resolve(),
             execute=False,  # dry-run — no files modified
             workspace_target=None,
             overwrite=True,  # show everything including conflicts
@@ -2676,7 +2676,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
     try:
         migrator = mod.Migrator(
             source_root=openclaw_dir.resolve(),
-            target_root=hermes_home.resolve(),
+            target_root=myai_home.resolve(),
             execute=True,
             workspace_target=None,
             overwrite=False,  # preserve existing MyAIOne config
@@ -2757,7 +2757,7 @@ def run_setup_wizard(args):
     if is_managed():
         managed_error("run setup wizard")
         return
-    ensure_hermes_home()
+    ensure_myai_home()
 
     reset_requested = bool(getattr(args, "reset", False))
     if reset_requested:
@@ -2765,7 +2765,7 @@ def run_setup_wizard(args):
         print_success("Configuration reset to defaults.")
 
     config = load_config()
-    hermes_home = get_hermes_home()
+    myai_home = get_myai_home()
 
     # Detect non-interactive environments (headless SSH, Docker, CI/CD)
     non_interactive = getattr(args, 'non_interactive', False)
@@ -2790,7 +2790,7 @@ def run_setup_wizard(args):
                         Colors.MAGENTA,
                     )
                 )
-                print(color(f"│     ⚕ MyAIOne Setup — {label:<34s} │", Colors.MAGENTA))
+                print(color(f"│     🤖 MyAIOne Setup — {label:<34s} │", Colors.MAGENTA))
                 print(
                     color(
                         "└─────────────────────────────────────────────────────────┘",
@@ -2826,7 +2826,7 @@ def run_setup_wizard(args):
     )
     print(
         color(
-            "│             ⚕ MyAIOne Agent Setup Wizard                │", Colors.MAGENTA
+            "│             🤖 MyAIOne Agent Setup Wizard                │", Colors.MAGENTA
         )
     )
     print(
@@ -2875,7 +2875,7 @@ def run_setup_wizard(args):
 
         if choice == 0:
             # Quick setup
-            _run_quick_setup(config, hermes_home)
+            _run_quick_setup(config, myai_home)
             return
         elif choice == 1:
             # Full setup — fall through to run all sections
@@ -2893,14 +2893,14 @@ def run_setup_wizard(args):
                 _, label, func = section
                 func(config)
                 save_config(config)
-                _print_setup_summary(config, hermes_home)
+                _print_setup_summary(config, myai_home)
             return
     else:
         # ── First-Time Setup ──
         print()
 
         # Offer OpenClaw migration before configuration begins
-        migration_ran = _offer_openclaw_migration(hermes_home)
+        migration_ran = _offer_openclaw_migration(myai_home)
         if migration_ran:
             config = load_config()
 
@@ -2910,14 +2910,14 @@ def run_setup_wizard(args):
         ], 0)
 
         if setup_mode == 0:
-            _run_first_time_quick_setup(config, hermes_home, is_existing)
+            _run_first_time_quick_setup(config, myai_home, is_existing)
             return
 
     # ── Full Setup — run all sections ──
     print_header("Configuration Location")
     print_info(f"Config file:  {get_config_path()}")
     print_info(f"Secrets file: {get_env_path()}")
-    print_info(f"Data folder:  {hermes_home}")
+    print_info(f"Data folder:  {myai_home}")
     print_info(f"Install dir:  {PROJECT_ROOT}")
     print()
     print_info("You can edit these files directly or use 'myai config edit'")
@@ -2950,7 +2950,7 @@ def run_setup_wizard(args):
 
     # Save and show summary
     save_config(config)
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, myai_home)
 
     _offer_launch_chat()
 
@@ -2984,7 +2984,7 @@ def _offer_launch_chat():
     os.execvp(chat_argv[0], chat_argv)
 
 
-def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
+def _run_first_time_quick_setup(config: dict, myai_home, is_existing: bool):
     """Streamlined first-time setup: provider + model only.
 
     Applies sensible defaults for TTS (Edge), terminal (local), agent
@@ -3023,12 +3023,12 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
         print_info("  Connect Telegram/Discord:  myai setup gateway")
     print()
 
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, myai_home)
 
     _offer_launch_chat()
 
 
-def _run_quick_setup(config: dict, hermes_home):
+def _run_quick_setup(config: dict, myai_home):
     """Quick setup — only configure items that are missing."""
     from myai_cli.config import (
         get_missing_env_vars,
@@ -3191,4 +3191,4 @@ def _run_quick_setup(config: dict, hermes_home):
         save_config(config)
 
     # Jump to summary
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, myai_home)

@@ -222,7 +222,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
         "platform_toolsets": {
             "cli": [
                 "browser", "clarify", "code_execution", "cronjob",
-                "delegation", "file", "hermes-cli",  # <-- the culprit
+                "delegation", "file", "myai-cli",  # <-- the culprit
                 "memory", "session_search", "skills", "terminal",
                 "todo", "tts", "vision", "web",
             ]
@@ -242,7 +242,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
     saved = config["platform_toolsets"]["cli"]
 
     # hermes-cli must NOT survive — it's a platform default, not an MCP server
-    assert "hermes-cli" not in saved
+    assert "myai-cli" not in saved
 
     # The individual toolset keys the user selected must be present
     assert "web" in saved
@@ -260,7 +260,7 @@ def test_save_platform_tools_does_not_preserve_hermes_telegram():
     config = {
         "platform_toolsets": {
             "telegram": [
-                "browser", "file", "hermes-telegram", "terminal", "web",
+                "browser", "file", "myai-telegram", "terminal", "web",
             ]
         }
     }
@@ -271,7 +271,7 @@ def test_save_platform_tools_does_not_preserve_hermes_telegram():
         _save_platform_tools(config, "telegram", new_selection)
 
     saved = config["platform_toolsets"]["telegram"]
-    assert "hermes-telegram" not in saved
+    assert "myai-telegram" not in saved
     assert "web" in saved
 
 
@@ -281,7 +281,7 @@ def test_save_platform_tools_still_preserves_mcp_with_platform_default_present()
     config = {
         "platform_toolsets": {
             "cli": [
-                "web", "terminal", "hermes-cli", "my-mcp-server", "github-tools",
+                "web", "terminal", "myai-cli", "my-mcp-server", "github-tools",
             ]
         }
     }
@@ -298,7 +298,7 @@ def test_save_platform_tools_still_preserves_mcp_with_platform_default_present()
     assert "github-tools" in saved
 
     # Platform default stripped
-    assert "hermes-cli" not in saved
+    assert "myai-cli" not in saved
 
     # User selections present
     assert "web" in saved
@@ -426,7 +426,7 @@ class TestPlatformToolsetConsistency:
         from myai_cli.tools_config import PLATFORMS
         from toolsets import TOOLSETS
 
-        gateway_includes = set(TOOLSETS["hermes-gateway"]["includes"])
+        gateway_includes = set(TOOLSETS["myai-gateway"]["includes"])
         # Exclude non-messaging platforms from the check
         non_messaging = {"cli", "api_server"}
         for platform, meta in PLATFORMS.items():

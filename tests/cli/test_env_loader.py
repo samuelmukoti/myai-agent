@@ -3,7 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-from myai_cli.env_loader import load_hermes_dotenv
+from myai_cli.env_loader import load_myai_dotenv
 
 
 def test_user_env_overrides_stale_shell_values(tmp_path, monkeypatch):
@@ -14,7 +14,7 @@ def test_user_env_overrides_stale_shell_values(tmp_path, monkeypatch):
 
     monkeypatch.setenv("OPENAI_BASE_URL", "https://old.example/v1")
 
-    loaded = load_hermes_dotenv(hermes_home=home)
+    loaded = load_myai_dotenv(myai_home=home)
 
     assert loaded == [env_file]
     assert os.getenv("OPENAI_BASE_URL") == "https://new.example/v1"
@@ -27,7 +27,7 @@ def test_project_env_overrides_stale_shell_values_when_user_env_missing(tmp_path
 
     monkeypatch.setenv("OPENAI_BASE_URL", "https://old.example/v1")
 
-    loaded = load_hermes_dotenv(hermes_home=home, project_env=project_env)
+    loaded = load_myai_dotenv(myai_home=home, project_env=project_env)
 
     assert loaded == [project_env]
     assert os.getenv("OPENAI_BASE_URL") == "https://project.example/v1"
@@ -44,7 +44,7 @@ def test_user_env_takes_precedence_over_project_env(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENAI_BASE_URL", "https://old.example/v1")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
-    loaded = load_hermes_dotenv(hermes_home=home, project_env=project_env)
+    loaded = load_myai_dotenv(myai_home=home, project_env=project_env)
 
     assert loaded == [user_env, project_env]
     assert os.getenv("OPENAI_BASE_URL") == "https://user.example/v1"

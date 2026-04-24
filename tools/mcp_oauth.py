@@ -93,12 +93,12 @@ _oauth_port: int | None = None
 def _get_token_dir() -> Path:
     """Return the directory for MCP OAuth token files.
 
-    Uses HERMES_HOME so each profile gets its own OAuth tokens.
-    Layout: ``HERMES_HOME/mcp-tokens/``
+    Uses MYAI_HOME so each profile gets its own OAuth tokens.
+    Layout: ``MYAI_HOME/mcp-tokens/``
     """
     try:
-        from myai_constants import get_hermes_home
-        base = Path(get_hermes_home())
+        from myai_constants import get_myai_home
+        base = Path(get_myai_home())
     except ImportError:
         base = Path(os.environ.get("MYAI_HOME", str(Path.home() / ".myai")))
     return base / "mcp-tokens"
@@ -177,8 +177,8 @@ class HermesTokenStorage:
 
     File layout::
 
-        HERMES_HOME/mcp-tokens/<server_name>.json         -- tokens
-        HERMES_HOME/mcp-tokens/<server_name>.client.json   -- client info
+        MYAI_HOME/mcp-tokens/<server_name>.json         -- tokens
+        MYAI_HOME/mcp-tokens/<server_name>.client.json   -- client info
     """
 
     def __init__(self, server_name: str):

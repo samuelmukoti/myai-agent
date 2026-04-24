@@ -11,12 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def get_hermes_home() -> Path:
+def get_myai_home() -> Path:
     return Path(os.environ.get("MYAI_HOME", Path.home() / ".myai"))
 
 
 def get_token_path() -> Path:
-    return get_hermes_home() / "google_token.json"
+    return get_myai_home() / "google_token.json"
 
 
 def _normalize_authorized_user_payload(payload: dict) -> dict:

@@ -66,7 +66,7 @@ import requests
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from agent.auxiliary_client import call_llm
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
 try:
     from tools.website_policy import check_website_access
@@ -136,8 +136,8 @@ def _discover_homebrew_node_dirs() -> tuple[str, ...]:
 
 def _browser_candidate_path_dirs() -> list[str]:
     """Return ordered browser CLI PATH candidates shared by discovery and execution."""
-    hermes_home = get_hermes_home()
-    hermes_node_bin = str(hermes_home / "node" / "bin")
+    myai_home = get_myai_home()
+    hermes_node_bin = str(myai_home / "node" / "bin")
     return [hermes_node_bin, *list(_discover_homebrew_node_dirs()), *_SANE_PATH_DIRS]
 
 
@@ -1898,14 +1898,14 @@ def _maybe_start_recording(task_id: str):
             return
     try:
         from myai_cli.config import read_raw_config
-        hermes_home = get_hermes_home()
+        myai_home = get_myai_home()
         cfg = read_raw_config()
         record_enabled = cfg.get("browser", {}).get("record_sessions", False)
         
         if not record_enabled:
             return
         
-        recordings_dir = hermes_home / "browser_recordings"
+        recordings_dir = myai_home / "browser_recordings"
         recordings_dir.mkdir(parents=True, exist_ok=True)
         _cleanup_old_recordings(max_age_hours=72)
         
@@ -2030,8 +2030,8 @@ def browser_vision(question: str, annotate: bool = False, task_id: Optional[str]
     effective_task_id = task_id or "default"
     
     # Save screenshot to persistent location so it can be shared with users
-    from myai_constants import get_hermes_dir
-    screenshots_dir = get_hermes_dir("cache/screenshots", "browser_screenshots")
+    from myai_constants import get_myai_dir
+    screenshots_dir = get_myai_dir("cache/screenshots", "browser_screenshots")
     screenshot_path = screenshots_dir / f"browser_screenshot_{uuid_mod.uuid4().hex}.png"
     
     try:
@@ -2205,8 +2205,8 @@ def _cleanup_old_recordings(max_age_hours=72):
     """Remove browser recordings older than max_age_hours to prevent disk bloat."""
     import time
     try:
-        hermes_home = get_hermes_home()
-        recordings_dir = hermes_home / "browser_recordings"
+        myai_home = get_myai_home()
+        recordings_dir = myai_home / "browser_recordings"
         if not recordings_dir.exists():
             return
         cutoff = time.time() - (max_age_hours * 3600)

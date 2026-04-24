@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from cli import HermesCLI
+from cli import MyAIOneCLI
 
 
 def _make_cli(model: str = "anthropic/claude-sonnet-4-20250514"):
-    cli_obj = HermesCLI.__new__(HermesCLI)
+    cli_obj = MyAIOneCLI.__new__(MyAIOneCLI)
     cli_obj.model = model
     cli_obj.session_start = datetime.now() - timedelta(minutes=14, seconds=32)
     cli_obj.conversation_history = [{"role": "user", "content": "hi"}]
@@ -118,7 +118,7 @@ class TestCLIStatusBar:
 
         mock_app = MagicMock()
         mock_app.output.get_size.return_value = MagicMock(columns=14)
-        with patch.object(HermesCLI, "_get_tui_prompt_text", return_value="❯ "), \
+        with patch.object(MyAIOneCLI, "_get_tui_prompt_text", return_value="❯ "), \
              patch("prompt_toolkit.application.get_app", return_value=mock_app):
             assert _input_height() == 2
 
@@ -160,7 +160,7 @@ class TestCLIStatusBar:
 
         mock_app = MagicMock()
         mock_app.output.get_size.return_value = MagicMock(columns=14)
-        with patch.object(HermesCLI, "_get_tui_prompt_text", return_value="❯ "), \
+        with patch.object(MyAIOneCLI, "_get_tui_prompt_text", return_value="❯ "), \
              patch("prompt_toolkit.application.get_app", return_value=mock_app), \
              patch("shutil.get_terminal_size") as mock_shutil:
             assert _input_height() == 2
@@ -193,7 +193,7 @@ class TestCLIStatusBar:
 
         text = cli_obj._build_status_bar_text(width=60)
 
-        assert "⚕" in text
+        assert "🤖" in text
         assert "$0.06" not in text  # cost hidden by default
         assert "15m" in text
         assert "200K" not in text
@@ -203,7 +203,7 @@ class TestCLIStatusBar:
 
         text = cli_obj._build_status_bar_text(width=100)
 
-        assert "⚕" in text
+        assert "🤖" in text
         assert "claude-sonnet-4-20250514" in text
 
     def test_minimal_tui_chrome_threshold(self):

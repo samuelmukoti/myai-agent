@@ -7,17 +7,17 @@ from unittest.mock import patch
 import pytest
 
 import myai_constants
-from myai_constants import get_default_hermes_root, is_container
+from myai_constants import get_default_myai_root, is_container
 
 
 class TestGetDefaultHermesRoot:
-    """Tests for get_default_hermes_root() — Docker/custom deployment awareness."""
+    """Tests for get_default_myai_root() — Docker/custom deployment awareness."""
 
     def test_no_myai_home_returns_native(self, tmp_path, monkeypatch):
         """When MYAI_HOME is not set, returns ~/.myai."""
         monkeypatch.delenv("MYAI_HOME", raising=False)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        assert get_default_hermes_root() == tmp_path / ".myai"
+        assert get_default_myai_root() == tmp_path / ".myai"
 
     def test_myai_home_is_native(self, tmp_path, monkeypatch):
         """When MYAI_HOME = ~/.myai, returns ~/.myai."""
@@ -25,7 +25,7 @@ class TestGetDefaultHermesRoot:
         native.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(native))
-        assert get_default_hermes_root() == native
+        assert get_default_myai_root() == native
 
     def test_myai_home_is_profile(self, tmp_path, monkeypatch):
         """When MYAI_HOME is a profile under ~/.myai, returns ~/.myai."""
@@ -34,7 +34,7 @@ class TestGetDefaultHermesRoot:
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(profile))
-        assert get_default_hermes_root() == native
+        assert get_default_myai_root() == native
 
     def test_myai_home_is_docker(self, tmp_path, monkeypatch):
         """When MYAI_HOME points outside ~/.myai (Docker), returns MYAI_HOME."""
@@ -42,7 +42,7 @@ class TestGetDefaultHermesRoot:
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(docker_home))
-        assert get_default_hermes_root() == docker_home
+        assert get_default_myai_root() == docker_home
 
     def test_myai_home_is_custom_path(self, tmp_path, monkeypatch):
         """Any MYAI_HOME outside ~/.myai is treated as the root."""
@@ -50,7 +50,7 @@ class TestGetDefaultHermesRoot:
         custom.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(custom))
-        assert get_default_hermes_root() == custom
+        assert get_default_myai_root() == custom
 
     def test_docker_profile_active(self, tmp_path, monkeypatch):
         """When a Docker profile is active (MYAI_HOME=<root>/profiles/<name>),
@@ -60,15 +60,15 @@ class TestGetDefaultHermesRoot:
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(profile))
-        assert get_default_hermes_root() == docker_root
+        assert get_default_myai_root() == docker_root
 
     def test_hermes_home_is_ignored(self, tmp_path, monkeypatch):
-        """HERMES_HOME must never influence resolution — MyAIOne keeps
+        """MYAI_HOME must never influence resolution — MyAIOne keeps
         its state separate from Hermes so both can coexist on one box."""
         monkeypatch.delenv("MYAI_HOME", raising=False)
-        monkeypatch.setenv("HERMES_HOME", "/should/not/be/read")
+        monkeypatch.setenv("MYAI_HOME", "/should/not/be/read")
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        assert get_default_hermes_root() == tmp_path / ".myai"
+        assert get_default_myai_root() == tmp_path / ".myai"
 
 
 class TestIsContainer:

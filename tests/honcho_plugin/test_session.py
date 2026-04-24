@@ -569,7 +569,7 @@ class TestToolsModeInitBehavior:
         with patch("plugins.memory.honcho.client.HonchoClientConfig.from_global_config", return_value=cfg), \
              patch("plugins.memory.honcho.client.get_honcho_client", return_value=MagicMock()), \
              patch("plugins.memory.honcho.session.HonchoSessionManager", return_value=mock_manager), \
-             patch("myai_constants.get_hermes_home", return_value=MagicMock()):
+             patch("myai_constants.get_myai_home", return_value=MagicMock()):
             provider.initialize(session_id="test-session-001", **init_kwargs)
 
         return provider, cfg
@@ -654,7 +654,7 @@ class TestPerSessionMigrateGuard:
         with patch("plugins.memory.honcho.client.HonchoClientConfig.from_global_config", return_value=cfg), \
              patch("plugins.memory.honcho.client.get_honcho_client", return_value=MagicMock()), \
              patch("plugins.memory.honcho.session.HonchoSessionManager", return_value=mock_manager), \
-             patch("myai_constants.get_hermes_home", return_value=MagicMock()):
+             patch("myai_constants.get_myai_home", return_value=MagicMock()):
             provider.initialize(session_id="test-session-001")
 
         return provider, mock_manager
@@ -837,7 +837,7 @@ class TestDialecticCadenceDefaults:
         with patch("plugins.memory.honcho.client.HonchoClientConfig.from_global_config", return_value=cfg), \
              patch("plugins.memory.honcho.client.get_honcho_client", return_value=MagicMock()), \
              patch("plugins.memory.honcho.session.HonchoSessionManager", return_value=mock_manager), \
-             patch("myai_constants.get_hermes_home", return_value=MagicMock()):
+             patch("myai_constants.get_myai_home", return_value=MagicMock()):
             provider.initialize(session_id="test-session-001")
 
         return provider
@@ -905,7 +905,7 @@ class TestDialecticDepth:
         with patch("plugins.memory.honcho.client.HonchoClientConfig.from_global_config", return_value=cfg), \
              patch("plugins.memory.honcho.client.get_honcho_client", return_value=MagicMock()), \
              patch("plugins.memory.honcho.session.HonchoSessionManager", return_value=mock_manager), \
-             patch("myai_constants.get_hermes_home", return_value=MagicMock()):
+             patch("myai_constants.get_myai_home", return_value=MagicMock()):
             provider.initialize(session_id="test-session-001")
 
         return provider

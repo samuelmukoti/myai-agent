@@ -2,7 +2,7 @@
 """
 Skills Sync -- Manifest-based seeding and updating of bundled skills.
 
-Copies bundled skills from the repo's skills/ directory into ~/.hermes/skills/
+Copies bundled skills from the repo's skills/ directory into ~/.myai/skills/
 and uses a manifest to track which skills have been synced and their origin hash.
 
 Manifest format (v2): each line is "skill_name:origin_hash" where origin_hash
@@ -17,8 +17,13 @@ Update logic:
       * If user copy differs from origin hash: user customized it → SKIP.
   - DELETED by user (in manifest, absent from user dir): respected, not re-added.
   - REMOVED from bundled (in manifest, gone from repo): cleaned from manifest.
+  - RENAMED in bundled (see _LEGACY_RENAMES): old user copy is removed and
+    manifest entry migrated to the new name on a one-shot basis. Used when a
+    bundled skill changes its frontmatter `name` (e.g. the rebrand from
+    `hermes-agent` to `myaione-agent`) so the new copy isn't shadowed by an
+    orphan old directory.
 
-The manifest lives at ~/.hermes/skills/.bundled_manifest.
+The manifest lives at ~/.myai/skills/.bundled_manifest.
 """
 
 import hashlib
@@ -26,15 +31,25 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
 
-HERMES_HOME = get_hermes_home()
-SKILLS_DIR = HERMES_HOME / "skills"
+MYAI_HOME = get_myai_home()
+SKILLS_DIR = MYAI_HOME / "skills"
 MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
+
+# One-shot legacy renames: maps old skill name → new skill name. When the
+# bundled skill is discovered under the new name and the user dir still
+# contains the old directory, the old directory is removed and the manifest
+# entry is migrated. Old directory paths are derived from the user's actual
+# layout under SKILLS_DIR, not assumed.
+_LEGACY_RENAMES: Dict[str, str] = {
+    # 0.10 rebrand: NousResearch/hermes-agent → MyAIOne Agent
+    "hermes-agent": "myaione-agent",
+}
 
 
 def _get_bundled_dir() -> Path:
@@ -153,10 +168,53 @@ def _discover_bundled_skills(bundled_dir: Path) -> List[Tuple[str, Path]]:
 def _compute_relative_dest(skill_dir: Path, bundled_dir: Path) -> Path:
     """
     Compute the destination path in SKILLS_DIR preserving the category structure.
-    e.g., bundled/skills/mlops/axolotl -> ~/.hermes/skills/mlops/axolotl
+    e.g., bundled/skills/mlops/axolotl -> ~/.myai/skills/mlops/axolotl
     """
     rel = skill_dir.relative_to(bundled_dir)
     return SKILLS_DIR / rel
+
+
+def _apply_legacy_renames(manifest: Dict[str, str]) -> List[str]:
+    """Migrate user dirs and manifest entries for renamed bundled skills.
+
+    For each (old, new) pair in ``_LEGACY_RENAMES``: drop any stale manifest
+    entry under *old*, then walk SKILLS_DIR and delete every directory whose
+    SKILL.md frontmatter declares ``name: <old>``. The next sync pass copies
+    the new bundled skill into its canonical location.
+
+    The user-dir scan runs even when the manifest no longer references the
+    old name, because previous sync versions used to clean the manifest
+    without removing the orphan directory — leaving the new and old skills
+    side-by-side.
+
+    Returns the list of old names that were migrated (for logging).
+    """
+    migrated: List[str] = []
+    if not SKILLS_DIR.exists():
+        for old in list(_LEGACY_RENAMES):
+            if old in manifest:
+                del manifest[old]
+                migrated.append(old)
+        return migrated
+
+    for old in _LEGACY_RENAMES:
+        removed_any = False
+        for skill_md in list(SKILLS_DIR.rglob("SKILL.md")):
+            path_str = str(skill_md)
+            if "/.git/" in path_str or "/.github/" in path_str or "/.hub/" in path_str:
+                continue
+            if _read_skill_name(skill_md, skill_md.parent.name) == old:
+                try:
+                    shutil.rmtree(skill_md.parent)
+                    removed_any = True
+                except (OSError, IOError) as e:
+                    logger.debug("Could not remove legacy skill dir %s: %s", skill_md.parent, e)
+        if old in manifest:
+            del manifest[old]
+            migrated.append(old)
+        elif removed_any:
+            migrated.append(old)
+    return migrated
 
 
 def _dir_hash(directory: Path) -> str:
@@ -175,7 +233,7 @@ def _dir_hash(directory: Path) -> str:
 
 def sync_skills(quiet: bool = False) -> dict:
     """
-    Sync bundled skills into ~/.hermes/skills/ using the manifest.
+    Sync bundled skills into ~/.myai/skills/ using the manifest.
 
     Returns:
         dict with keys: copied (list), updated (list), skipped (int),
@@ -190,6 +248,10 @@ def sync_skills(quiet: bool = False) -> dict:
 
     SKILLS_DIR.mkdir(parents=True, exist_ok=True)
     manifest = _read_manifest()
+    migrated = _apply_legacy_renames(manifest)
+    if migrated and not quiet:
+        for old in migrated:
+            print(f"  ⇄ {old} → {_LEGACY_RENAMES[old]} (legacy rename migrated)")
     bundled_skills = _discover_bundled_skills(bundled_dir)
     bundled_names = {name for name, _ in bundled_skills}
 
@@ -339,7 +401,7 @@ def reset_bundled_skill(name: str, restore: bool = False) -> dict:
             "action": "not_in_manifest",
             "message": (
                 f"'{name}' is not a tracked bundled skill. Nothing to reset. "
-                f"(Hub-installed skills use `hermes skills uninstall`.)"
+                f"(Hub-installed skills use `myai skills uninstall`.)"
             ),
             "synced": None,
         }
@@ -392,7 +454,7 @@ def reset_bundled_skill(name: str, restore: bool = False) -> dict:
     else:
         action = "manifest_cleared"
         message = (
-            f"Cleared manifest entry for '{name}'. Future `hermes update` runs "
+            f"Cleared manifest entry for '{name}'. Future `myai update` runs "
             f"will re-baseline against your current copy and accept upstream changes."
         )
 
@@ -400,7 +462,7 @@ def reset_bundled_skill(name: str, restore: bool = False) -> dict:
 
 
 if __name__ == "__main__":
-    print("Syncing bundled skills into ~/.hermes/skills/ ...")
+    print("Syncing bundled skills into ~/.myai/skills/ ...")
     result = sync_skills(quiet=False)
     parts = [
         f"{len(result['copied'])} new",

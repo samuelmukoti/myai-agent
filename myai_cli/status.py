@@ -13,7 +13,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 from myai_cli.auth import AuthError, resolve_provider
 from myai_cli.colors import Colors, color
-from myai_cli.config import get_env_path, get_env_value, get_hermes_home, load_config
+from myai_cli.config import get_env_path, get_env_value, get_myai_home, load_config
 from myai_cli.models import provider_label
 from myai_cli.nous_subscription import get_nous_subscription_features
 from myai_cli.runtime_provider import resolve_requested_provider
@@ -89,7 +89,7 @@ def show_status(args):
     
     print()
     print(color("┌─────────────────────────────────────────────────────────┐", Colors.CYAN))
-    print(color("│                 ⚕ MyAIOne Agent Status                  │", Colors.CYAN))
+    print(color("│                 🤖 MyAIOne Agent Status                  │", Colors.CYAN))
     print(color("└─────────────────────────────────────────────────────────┘", Colors.CYAN))
     
     # =========================================================================
@@ -379,7 +379,7 @@ def show_status(args):
     print()
     print(color("◆ Scheduled Jobs", Colors.CYAN, Colors.BOLD))
     
-    jobs_file = get_hermes_home() / "cron" / "jobs.json"
+    jobs_file = get_myai_home() / "cron" / "jobs.json"
     if jobs_file.exists():
         import json
         try:
@@ -399,7 +399,7 @@ def show_status(args):
     print()
     print(color("◆ Sessions", Colors.CYAN, Colors.BOLD))
     
-    sessions_file = get_hermes_home() / "sessions" / "sessions.json"
+    sessions_file = get_myai_home() / "sessions" / "sessions.json"
     if sessions_file.exists():
         import json
         try:

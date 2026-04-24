@@ -52,7 +52,7 @@ get_command_link_display_dir() {
 }
 
 echo ""
-echo -e "${CYAN}⚕ MyAIOne Agent Setup${NC}"
+echo -e "${CYAN}🤖 MyAIOne Agent Setup${NC}"
 echo ""
 
 # ============================================================================

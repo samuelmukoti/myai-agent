@@ -6,7 +6,7 @@ author: MyAIOne Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  myai:
     tags: [Notes, Apple, macOS, note-taking]
     related_skills: [obsidian]
 prerequisites:

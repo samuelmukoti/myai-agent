@@ -5,9 +5,9 @@ version: 2.2.0
 author: MyAIOne Agent + Teknium
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [Coding-Agent, Claude, Anthropic, Code-Review, Refactoring, PTY, Automation]
-    related_skills: [codex, hermes-agent, opencode]
+    related_skills: [codex, myaione-agent, opencode]
 ---
 
 # Claude Code — MyAIOne Orchestration Guide

@@ -35,16 +35,16 @@ def _make_fake_jwt(expiry_offset: int = 3600) -> str:
 def codex_cli_only_env(tmp_path, monkeypatch):
     """Set up an environment where Codex tokens exist only in ~/.codex/auth.json,
     NOT in the MyAIOne auth store."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
     codex_home = tmp_path / ".codex"
     codex_home.mkdir()
 
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
 
     # Empty MyAIOne auth store
-    (hermes_home / "auth.json").write_text(
+    (myai_home / "auth.json").write_text(
         json.dumps({"version": 2, "providers": {}})
     )
 
@@ -67,7 +67,7 @@ def codex_cli_only_env(tmp_path, monkeypatch):
     ]:
         monkeypatch.delenv(var, raising=False)
 
-    return hermes_home
+    return myai_home
 
 
 def test_codex_cli_tokens_detected_by_model_picker(codex_cli_only_env):
@@ -111,14 +111,14 @@ def test_codex_cli_tokens_migrated_after_detection(codex_cli_only_env):
 @pytest.fixture()
 def hermes_auth_only_env(tmp_path, monkeypatch):
     """Tokens already in MyAIOne auth store (no Codex CLI needed)."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
 
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     # Point CODEX_HOME to nonexistent dir to prove it's not needed
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "no_codex"))
 
-    (hermes_home / "auth.json").write_text(json.dumps({
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 2,
         "providers": {
             "openai-codex": {
@@ -137,7 +137,7 @@ def hermes_auth_only_env(tmp_path, monkeypatch):
     ]:
         monkeypatch.delenv(var, raising=False)
 
-    return hermes_home
+    return myai_home
 
 
 def test_normal_path_still_works(hermes_auth_only_env):
@@ -157,14 +157,14 @@ def claude_code_only_env(tmp_path, monkeypatch):
     """Set up an environment where Anthropic credentials only exist in
     ~/.claude/.credentials.json (Claude Code) — not in env vars or MyAIOne
     auth store."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
 
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     # No Codex CLI
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "no_codex"))
 
-    (hermes_home / "auth.json").write_text(
+    (myai_home / "auth.json").write_text(
         json.dumps({"version": 2, "providers": {}})
     )
 
@@ -189,7 +189,7 @@ def claude_code_only_env(tmp_path, monkeypatch):
     ]:
         monkeypatch.delenv(var, raising=False)
 
-    return hermes_home
+    return myai_home
 
 
 def test_claude_code_file_detected_by_model_picker(claude_code_only_env):
@@ -212,13 +212,13 @@ def test_claude_code_file_detected_by_model_picker(claude_code_only_env):
 
 def test_no_codex_when_no_credentials(tmp_path, monkeypatch):
     """openai-codex should NOT appear when no credentials exist anywhere."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
 
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "no_codex"))
 
-    (hermes_home / "auth.json").write_text(
+    (myai_home / "auth.json").write_text(
         json.dumps({"version": 2, "providers": {}})
     )
 

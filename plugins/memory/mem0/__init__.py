@@ -10,7 +10,7 @@ Config via environment variables:
   MEM0_USER_ID       — User identifier (default: hermes-user)
   MEM0_AGENT_ID      — Agent identifier (default: hermes)
 
-Or via $HERMES_HOME/mem0.json.
+Or via $MYAI_HOME/mem0.json.
 """
 
 from __future__ import annotations
@@ -38,13 +38,13 @@ _BREAKER_COOLDOWN_SECS = 120
 # ---------------------------------------------------------------------------
 
 def _load_config() -> dict:
-    """Load config from env vars, with $HERMES_HOME/mem0.json overrides.
+    """Load config from env vars, with $MYAI_HOME/mem0.json overrides.
 
     Environment variables provide defaults; mem0.json (if present) overrides
     individual keys.  This avoids a silent failure when the JSON file exists
     but is missing fields like ``api_key`` that the user set in ``.env``.
     """
-    from myai_constants import get_hermes_home
+    from myai_constants import get_myai_home
 
     config = {
         "api_key": os.environ.get("MEM0_API_KEY", ""),
@@ -54,7 +54,7 @@ def _load_config() -> dict:
         "keyword_search": False,
     }
 
-    config_path = get_hermes_home() / "mem0.json"
+    config_path = get_myai_home() / "mem0.json"
     if config_path.exists():
         try:
             file_cfg = json.loads(config_path.read_text(encoding="utf-8"))
@@ -143,11 +143,11 @@ class Mem0MemoryProvider(MemoryProvider):
         cfg = _load_config()
         return bool(cfg.get("api_key"))
 
-    def save_config(self, values, hermes_home):
-        """Write config to $HERMES_HOME/mem0.json."""
+    def save_config(self, values, myai_home):
+        """Write config to $MYAI_HOME/mem0.json."""
         import json
         from pathlib import Path
-        config_path = Path(hermes_home) / "mem0.json"
+        config_path = Path(myai_home) / "mem0.json"
         existing = {}
         if config_path.exists():
             try:

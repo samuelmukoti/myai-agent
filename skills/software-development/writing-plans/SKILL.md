@@ -5,7 +5,7 @@ version: 1.1.0
 author: MyAIOne Agent (adapted from obra/superpowers)
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [planning, design, implementation, workflow, documentation]
     related_skills: [subagent-driven-development, test-driven-development, requesting-code-review]
 ---

@@ -1,6 +1,6 @@
 """ACP session manager — maps ACP sessions to MyAIOne AIAgent instances.
 
-Sessions are persisted to the shared SessionDB (``~/.hermes/state.db``) so they
+Sessions are persisted to the shared SessionDB (``~/.myai/state.db``) so they
 survive process restarts and appear in ``session_search``.  When the editor
 reconnects after idle/restart, the ``load_session`` / ``resume_session`` calls
 find the persisted session in the database and restore the full conversation
@@ -8,7 +8,7 @@ history.
 """
 from __future__ import annotations
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
 import copy
 import json
@@ -144,7 +144,7 @@ class SessionManager:
                            Used by tests. When omitted, a real AIAgent is created
                            using the current MyAIOne runtime provider configuration.
             db:            Optional SessionDB instance. When omitted, the default
-                           SessionDB (``~/.hermes/state.db``) is lazily created.
+                           SessionDB (``~/.myai/state.db``) is lazily created.
         """
         self._sessions: Dict[str, SessionState] = {}
         self._lock = Lock()
@@ -347,7 +347,7 @@ class SessionManager:
         Returns ``None`` if the DB is unavailable (e.g. import error in a
         minimal test environment).
 
-        Note: we resolve ``HERMES_HOME`` dynamically rather than relying on
+        Note: we resolve ``MYAI_HOME`` dynamically rather than relying on
         the module-level ``DEFAULT_DB_PATH`` constant, because that constant
         is evaluated at import time and won't reflect env-var changes made
         later (e.g. by the test fixture ``_isolate_hermes_home``).
@@ -356,8 +356,8 @@ class SessionManager:
             return self._db_instance
         try:
             from myai_state import SessionDB
-            hermes_home = get_hermes_home()
-            self._db_instance = SessionDB(db_path=hermes_home / "state.db")
+            myai_home = get_myai_home()
+            self._db_instance = SessionDB(db_path=myai_home / "state.db")
             return self._db_instance
         except Exception:
             logger.debug("SessionDB unavailable for ACP persistence", exc_info=True)
@@ -539,7 +539,7 @@ class SessionManager:
 
         kwargs = {
             "platform": "acp",
-            "enabled_toolsets": ["hermes-acp"],
+            "enabled_toolsets": ["myai-acp"],
             "quiet_mode": True,
             "session_id": session_id,
             "model": model or default_model,

@@ -14,7 +14,7 @@ import pytest
 
 @pytest.fixture
 def config_home(tmp_path, monkeypatch):
-    """Isolated HERMES_HOME with a minimal string-format config."""
+    """Isolated MYAI_HOME with a minimal string-format config."""
     home = tmp_path / "hermes"
     home.mkdir()
     config_yaml = home / "config.yaml"
@@ -278,7 +278,7 @@ class TestBaseUrlValidation:
         # User types a shell command instead of a URL at the base URL prompt
         with patch("myai_cli.auth._prompt_model_selection", return_value="glm-5"), \
              patch("myai_cli.auth.deactivate_provider"), \
-             patch("builtins.input", return_value="nano ~/.hermes/.env"):
+             patch("builtins.input", return_value="nano ~/.myai/.env"):
             _model_flow_api_key_provider(load_config(), "zai", "old-model")
 
         # The garbage value should NOT have been saved

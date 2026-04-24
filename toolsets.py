@@ -28,7 +28,7 @@ from typing import List, Dict, Any, Set, Optional
 
 # Shared tool list for CLI and all messaging platform toolsets.
 # Edit this once to update all platforms simultaneously.
-_HERMES_CORE_TOOLS = [
+_MYAI_CORE_TOOLS = [
     # Web
     "web_search", "web_extract",
     # Terminal + process management
@@ -238,7 +238,7 @@ TOOLSETS = {
     # which is gated on gateway running via its check_fn).
     # ==========================================================================
 
-    "hermes-acp": {
+    "myai-acp": {
         "description": "Editor integration (VS Code, Zed, JetBrains) — coding-focused tools without messaging, audio, or clarify UI",
         "tools": [
             "web_search", "web_extract",
@@ -257,7 +257,7 @@ TOOLSETS = {
         "includes": []
     },
 
-    "hermes-api-server": {
+    "myai-api-server": {
         "description": "OpenAI-compatible API server — full agent tools accessible via HTTP (no interactive UI tools like clarify or send_message)",
         "tools": [
             # Web
@@ -290,124 +290,124 @@ TOOLSETS = {
         "includes": []
     },
     
-    "hermes-cli": {
+    "myai-cli": {
         "description": "Full interactive CLI toolset - all default tools plus cronjob management",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-telegram": {
+    "myai-telegram": {
         "description": "Telegram bot toolset - full access for personal use (terminal has safety checks)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-discord": {
+    "myai-discord": {
         "description": "Discord bot toolset - full access (terminal has safety checks via dangerous command approval)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-whatsapp": {
+    "myai-whatsapp": {
         "description": "WhatsApp bot toolset - similar to Telegram (personal messaging, more trusted)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-slack": {
+    "myai-slack": {
         "description": "Slack bot toolset - full access for workspace use (terminal has safety checks)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-signal": {
+    "myai-signal": {
         "description": "Signal bot toolset - encrypted messaging platform (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-bluebubbles": {
+    "myai-bluebubbles": {
         "description": "BlueBubbles iMessage bot toolset - Apple iMessage via local BlueBubbles server",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-homeassistant": {
+    "myai-homeassistant": {
         "description": "Home Assistant bot toolset - smart home event monitoring and control",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-email": {
+    "myai-email": {
         "description": "Email bot toolset - interact with MyAIOne via email (IMAP/SMTP)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-mattermost": {
+    "myai-mattermost": {
         "description": "Mattermost bot toolset - self-hosted team messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-matrix": {
+    "myai-matrix": {
         "description": "Matrix bot toolset - decentralized encrypted messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-dingtalk": {
+    "myai-dingtalk": {
         "description": "DingTalk bot toolset - enterprise messaging platform (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-feishu": {
+    "myai-feishu": {
         "description": "Feishu/Lark bot toolset - enterprise messaging via Feishu/Lark (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-weixin": {
+    "myai-weixin": {
         "description": "Weixin bot toolset - personal WeChat messaging via iLink (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-qqbot": {
+    "myai-qqbot": {
         "description": "QQBot toolset - QQ messaging via Official Bot API v2 (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-wecom": {
+    "myai-wecom": {
         "description": "WeCom bot toolset - enterprise WeChat messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-wecom-callback": {
+    "myai-wecom-callback": {
         "description": "WeCom callback toolset - enterprise self-built app messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-sms": {
+    "myai-sms": {
         "description": "SMS bot toolset - interact with MyAIOne via SMS (Twilio)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-webhook": {
+    "myai-webhook": {
         "description": "Webhook toolset - receive and process external webhook events",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _MYAI_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-gateway": {
+    "myai-gateway": {
         "description": "Gateway toolset - union of all messaging platform tools",
         "tools": [],
-        "includes": ["hermes-telegram", "hermes-discord", "hermes-whatsapp", "hermes-slack", "hermes-signal", "hermes-bluebubbles", "hermes-homeassistant", "hermes-email", "hermes-sms", "hermes-mattermost", "hermes-matrix", "hermes-dingtalk", "hermes-feishu", "hermes-wecom", "hermes-wecom-callback", "hermes-weixin", "hermes-qqbot", "hermes-webhook"]
+        "includes": ["myai-telegram", "myai-discord", "myai-whatsapp", "myai-slack", "myai-signal", "myai-bluebubbles", "myai-homeassistant", "myai-email", "myai-sms", "myai-mattermost", "myai-matrix", "myai-dingtalk", "myai-feishu", "myai-wecom", "myai-wecom-callback", "myai-weixin", "myai-qqbot", "myai-webhook"]
     }
 }
 

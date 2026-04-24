@@ -12,7 +12,7 @@ from agent.prompt_builder import (
     _truncate_content,
     _parse_skill_file,
     _skill_should_show,
-    _find_hermes_md,
+    _find_myai_md,
     _find_git_root,
     _strip_yaml_frontmatter,
     build_skills_system_prompt,
@@ -495,30 +495,30 @@ class TestBuildContextFilesPrompt:
         assert "type hints" in result
 
     def test_loads_soul_md_from_hermes_home_only(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "hermes_home"))
-        hermes_home = tmp_path / "hermes_home"
-        hermes_home.mkdir()
-        (hermes_home / "SOUL.md").write_text("Be concise and friendly.", encoding="utf-8")
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "myai_home"))
+        myai_home = tmp_path / "myai_home"
+        myai_home.mkdir()
+        (myai_home / "SOUL.md").write_text("Be concise and friendly.", encoding="utf-8")
         (tmp_path / "SOUL.md").write_text("cwd soul should be ignored", encoding="utf-8")
         result = build_context_files_prompt(cwd=str(tmp_path))
         assert "Be concise and friendly." in result
         assert "cwd soul should be ignored" not in result
 
     def test_soul_md_has_no_wrapper_text(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "hermes_home"))
-        hermes_home = tmp_path / "hermes_home"
-        hermes_home.mkdir()
-        (hermes_home / "SOUL.md").write_text("Be concise and friendly.", encoding="utf-8")
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "myai_home"))
+        myai_home = tmp_path / "myai_home"
+        myai_home.mkdir()
+        (myai_home / "SOUL.md").write_text("Be concise and friendly.", encoding="utf-8")
         result = build_context_files_prompt(cwd=str(tmp_path))
         assert "Be concise and friendly." in result
         assert "If SOUL.md is present" not in result
         assert "## SOUL.md" not in result
 
     def test_empty_soul_md_adds_nothing(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "hermes_home"))
-        hermes_home = tmp_path / "hermes_home"
-        hermes_home.mkdir()
-        (hermes_home / "SOUL.md").write_text("\n\n", encoding="utf-8")
+        monkeypatch.setenv("MYAI_HOME", str(tmp_path / "myai_home"))
+        myai_home = tmp_path / "myai_home"
+        myai_home.mkdir()
+        (myai_home / "SOUL.md").write_text("\n\n", encoding="utf-8")
         result = build_context_files_prompt(cwd=str(tmp_path))
         assert result == ""
 
@@ -680,26 +680,26 @@ class TestBuildContextFilesPrompt:
 class TestFindHermesMd:
     def test_finds_in_cwd(self, tmp_path):
         (tmp_path / ".hermes.md").write_text("rules")
-        assert _find_hermes_md(tmp_path) == tmp_path / ".hermes.md"
+        assert _find_myai_md(tmp_path) == tmp_path / ".hermes.md"
 
     def test_finds_uppercase(self, tmp_path):
         (tmp_path / "HERMES.md").write_text("rules")
-        assert _find_hermes_md(tmp_path) == tmp_path / "HERMES.md"
+        assert _find_myai_md(tmp_path) == tmp_path / "HERMES.md"
 
     def test_prefers_lowercase(self, tmp_path):
         (tmp_path / ".hermes.md").write_text("lower")
         (tmp_path / "HERMES.md").write_text("upper")
-        assert _find_hermes_md(tmp_path) == tmp_path / ".hermes.md"
+        assert _find_myai_md(tmp_path) == tmp_path / ".hermes.md"
 
     def test_walks_to_git_root(self, tmp_path):
         (tmp_path / ".git").mkdir()
         (tmp_path / ".hermes.md").write_text("root rules")
         sub = tmp_path / "a" / "b"
         sub.mkdir(parents=True)
-        assert _find_hermes_md(sub) == tmp_path / ".hermes.md"
+        assert _find_myai_md(sub) == tmp_path / ".hermes.md"
 
     def test_returns_none_when_absent(self, tmp_path):
-        assert _find_hermes_md(tmp_path) is None
+        assert _find_myai_md(tmp_path) is None
 
     def test_stops_at_git_root(self, tmp_path):
         """Does not walk past the git root."""
@@ -707,7 +707,7 @@ class TestFindHermesMd:
         repo = tmp_path / "repo"
         repo.mkdir()
         (repo / ".git").mkdir()
-        assert _find_hermes_md(repo) is None
+        assert _find_myai_md(repo) is None
 
 
 class TestFindGitRoot:

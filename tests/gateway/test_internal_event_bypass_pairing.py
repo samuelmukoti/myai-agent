@@ -19,6 +19,13 @@ from gateway.run import GatewayRunner
 from gateway.session import SessionSource
 
 
+# These tests patch ``gateway.run`` symbols at module scope. xdist's default
+# loadbalance distribution schedules sibling ``gateway.*`` tests onto the
+# same workers and produces flaky cross-test pollution. Pin the whole file
+# to a dedicated xdist group so it runs serially on one worker.
+pytestmark = pytest.mark.xdist_group(name="gateway_pairing")
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -48,7 +55,7 @@ def _build_runner(monkeypatch, tmp_path) -> GatewayRunner:
 
     import gateway.run as gateway_run
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
 
     runner = GatewayRunner(GatewayConfig())
     adapter = SimpleNamespace(send=AsyncMock(), handle_message=AsyncMock())
@@ -104,7 +111,7 @@ async def test_internal_event_bypasses_authorization(monkeypatch, tmp_path):
     """An internal event should skip _is_user_authorized entirely."""
     import gateway.run as gateway_run
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
     (tmp_path / "config.yaml").write_text("", encoding="utf-8")
 
     runner = GatewayRunner(GatewayConfig())
@@ -153,7 +160,7 @@ async def test_internal_event_does_not_trigger_pairing(monkeypatch, tmp_path):
     """An internal event with no user_id must not generate a pairing code."""
     import gateway.run as gateway_run
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
     (tmp_path / "config.yaml").write_text("", encoding="utf-8")
 
     runner = GatewayRunner(GatewayConfig())
@@ -288,7 +295,7 @@ async def test_none_user_id_skips_pairing(monkeypatch, tmp_path):
     """A non-internal event with user_id=None should be silently dropped."""
     import gateway.run as gateway_run
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
     (tmp_path / "config.yaml").write_text("", encoding="utf-8")
 
     runner = GatewayRunner(GatewayConfig())
@@ -319,7 +326,7 @@ async def test_none_user_id_does_not_generate_pairing_code(monkeypatch, tmp_path
     """A message with user_id=None must never call generate_code."""
     import gateway.run as gateway_run
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
     (tmp_path / "config.yaml").write_text("", encoding="utf-8")
 
     runner = GatewayRunner(GatewayConfig())
@@ -355,12 +362,20 @@ async def test_none_user_id_does_not_generate_pairing_code(monkeypatch, tmp_path
 async def test_non_internal_event_without_user_triggers_pairing(monkeypatch, tmp_path):
     """Verify the normal (non-internal) path still triggers pairing for unknown users."""
     import gateway.run as gateway_run
+    import gateway.pairing as gateway_pairing
 
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_myai_home", tmp_path)
+    # PAIRING_DIR is resolved at module import time, so it points at the real
+    # ~/.myai/platforms/pairing/ and persists rate-limit state across test
+    # invocations on the same machine. Redirect it to tmp_path so the pair
+    # store starts with a clean slate.
+    pairing_dir = tmp_path / "pairing"
+    pairing_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(gateway_pairing, "PAIRING_DIR", pairing_dir)
     (tmp_path / "config.yaml").write_text("", encoding="utf-8")
 
     # Clear env vars that could let all users through (loaded by
-    # module-level dotenv in gateway/run.py from the real ~/.hermes/.env).
+    # module-level dotenv in gateway/run.py from the real ~/.myai/.env).
     monkeypatch.delenv("DISCORD_ALLOW_ALL_USERS", raising=False)
     monkeypatch.delenv("DISCORD_ALLOWED_USERS", raising=False)
     monkeypatch.delenv("GATEWAY_ALLOW_ALL_USERS", raising=False)

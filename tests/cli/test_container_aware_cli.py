@@ -23,13 +23,13 @@ from myai_cli.config import (
 
 @pytest.fixture
 def container_env(tmp_path, monkeypatch):
-    """Set up a fake HERMES_HOME with .container-mode file."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    """Set up a fake MYAI_HOME with .container-mode file."""
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     monkeypatch.delenv("MYAI_DEV", raising=False)
 
-    container_mode = hermes_home / ".container-mode"
+    container_mode = myai_home / ".container-mode"
     container_mode.write_text(
         "# Written by NixOS activation script. Do not edit manually.\n"
         "backend=podman\n"
@@ -37,7 +37,7 @@ def container_env(tmp_path, monkeypatch):
         "exec_user=myai\n"
         "myai_bin=/data/current-package/bin/myai\n"
     )
-    return hermes_home
+    return myai_home
 
 
 def test_get_container_exec_info_returns_metadata(container_env):
@@ -62,9 +62,9 @@ def test_get_container_exec_info_none_inside_container(container_env):
 
 def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     """Returns None when .container-mode doesn't exist (native mode)."""
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     monkeypatch.delenv("MYAI_DEV", raising=False)
 
     with patch("myai_constants.is_container", return_value=False):
@@ -98,14 +98,14 @@ def test_get_container_exec_info_defaults():
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        hermes_home = Path(tmpdir) / ".hermes"
-        hermes_home.mkdir()
-        (hermes_home / ".container-mode").write_text(
+        myai_home = Path(tmpdir) / ".hermes"
+        myai_home.mkdir()
+        (myai_home / ".container-mode").write_text(
             "# minimal file with no keys\n"
         )
 
         with patch("myai_constants.is_container", return_value=False), \
-             patch("myai_cli.config.get_hermes_home", return_value=hermes_home), \
+             patch("myai_cli.config.get_myai_home", return_value=myai_home), \
              patch.dict(os.environ, {}, clear=False):
             os.environ.pop("MYAI_DEV", None)
             info = get_container_exec_info()

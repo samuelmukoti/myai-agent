@@ -65,8 +65,8 @@ class MemoryProvider(ABC):
         establish connections, start background threads, etc.
 
         kwargs always include:
-          - hermes_home (str): The active HERMES_HOME directory path. Use this
-            for profile-scoped storage instead of hardcoding ``~/.hermes``.
+          - myai_home (str): The active MYAI_HOME directory path. Use this
+            for profile-scoped storage instead of hardcoding ``~/.myai``.
           - platform (str): "cli", "telegram", "discord", "cron", etc.
 
         kwargs may also include:
@@ -203,12 +203,12 @@ class MemoryProvider(ABC):
         """
         return []
 
-    def save_config(self, values: Dict[str, Any], hermes_home: str) -> None:
+    def save_config(self, values: Dict[str, Any], myai_home: str) -> None:
         """Write non-secret config to the provider's native location.
 
         Called by 'myai memory setup' after collecting user inputs.
         ``values`` contains only non-secret fields (secrets go to .env).
-        ``hermes_home`` is the active HERMES_HOME directory path.
+        ``myai_home`` is the active MYAI_HOME directory path.
 
         Providers with native config files (JSON, YAML) should override
         this to write to their expected location. Providers that use only

@@ -136,8 +136,8 @@ class SlackAdapter(BasePlatformAdapter):
         bot_tokens = [t.strip() for t in raw_token.split(",") if t.strip()]
 
         # Also load tokens from OAuth token file
-        from myai_constants import get_hermes_home
-        tokens_file = get_hermes_home() / "slack_tokens.json"
+        from myai_constants import get_myai_home
+        tokens_file = get_myai_home() / "slack_tokens.json"
         if tokens_file.exists():
             try:
                 saved = json.loads(tokens_file.read_text(encoding="utf-8"))

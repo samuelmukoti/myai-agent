@@ -4,7 +4,7 @@ Cron job scheduler - executes due jobs.
 Provides tick() which checks for due jobs and runs them. The gateway
 calls this every 60 seconds from a background thread.
 
-Uses a file-based lock (~/.hermes/cron/.tick.lock) so only one tick
+Uses a file-based lock (~/.myai/cron/.tick.lock) so only one tick
 runs at a time if multiple processes overlap.
 """
 
@@ -34,7 +34,7 @@ from typing import List, Optional
 # the module) fail with ModuleNotFoundError for myai_time et al.
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from myai_cli.config import load_config
 from myai_time import now as _hermes_now
 
@@ -83,11 +83,11 @@ from cron.jobs import get_due_jobs, mark_job_run, save_job_output, advance_next_
 # locally for audit.
 SILENT_MARKER = "[SILENT]"
 
-# Resolve MyAIOne home directory (respects HERMES_HOME override)
-_hermes_home = get_hermes_home()
+# Resolve MyAIOne home directory (respects MYAI_HOME override)
+_myai_home = get_myai_home()
 
 # File-based lock prevents concurrent ticks from gateway + daemon + systemd timer
-_LOCK_DIR = _hermes_home / "cron"
+_LOCK_DIR = _myai_home / "cron"
 _LOCK_FILE = _LOCK_DIR / ".tick.lock"
 
 
@@ -486,23 +486,23 @@ def _get_script_timeout() -> int:
 def _run_job_script(script_path: str) -> tuple[bool, str]:
     """Execute a cron job's data-collection script and capture its output.
 
-    Scripts must reside within HERMES_HOME/scripts/.  Both relative and
+    Scripts must reside within MYAI_HOME/scripts/.  Both relative and
     absolute paths are resolved and validated against this directory to
     prevent arbitrary script execution via path traversal or absolute
     path injection.
 
     Args:
         script_path: Path to a Python script.  Relative paths are resolved
-            against HERMES_HOME/scripts/.  Absolute and ~-prefixed paths
+            against MYAI_HOME/scripts/.  Absolute and ~-prefixed paths
             are also validated to ensure they stay within the scripts dir.
 
     Returns:
         (success, output) — on failure *output* contains the error message so the
         LLM can report the problem to the user.
     """
-    from myai_constants import get_hermes_home
+    from myai_constants import get_myai_home
 
-    scripts_dir = get_hermes_home() / "scripts"
+    scripts_dir = get_myai_home() / "scripts"
     scripts_dir.mkdir(parents=True, exist_ok=True)
     scripts_dir_resolved = scripts_dir.resolve()
 
@@ -513,7 +513,7 @@ def _run_job_script(script_path: str) -> tuple[bool, str]:
         path = (scripts_dir / raw).resolve()
 
     # Guard against path traversal, absolute path injection, and symlink
-    # escape — scripts MUST reside within HERMES_HOME/scripts/.
+    # escape — scripts MUST reside within MYAI_HOME/scripts/.
     try:
         path.relative_to(scripts_dir_resolved)
     except ValueError:
@@ -693,9 +693,9 @@ def run_job(job: dict) -> tuple[bool, str, str, Optional[str]]:
         # changes take effect without a gateway restart.
         from dotenv import load_dotenv
         try:
-            load_dotenv(str(_hermes_home / ".env"), override=True, encoding="utf-8")
+            load_dotenv(str(_myai_home / ".env"), override=True, encoding="utf-8")
         except UnicodeDecodeError:
-            load_dotenv(str(_hermes_home / ".env"), override=True, encoding="latin-1")
+            load_dotenv(str(_myai_home / ".env"), override=True, encoding="latin-1")
 
         delivery_target = _resolve_delivery_target(job)
         if delivery_target:
@@ -710,7 +710,7 @@ def run_job(job: dict) -> tuple[bool, str, str, Optional[str]]:
         _cfg = {}
         try:
             import yaml
-            _cfg_path = str(_hermes_home / "config.yaml")
+            _cfg_path = str(_myai_home / "config.yaml")
             if os.path.exists(_cfg_path):
                 with open(_cfg_path) as _f:
                     _cfg = yaml.safe_load(_f) or {}
@@ -744,7 +744,7 @@ def run_job(job: dict) -> tuple[bool, str, str, Optional[str]]:
             import json as _json
             pfpath = Path(prefill_file).expanduser()
             if not pfpath.is_absolute():
-                pfpath = _hermes_home / pfpath
+                pfpath = _myai_home / pfpath
             if pfpath.exists():
                 try:
                     with open(pfpath, "r", encoding="utf-8") as _pf:

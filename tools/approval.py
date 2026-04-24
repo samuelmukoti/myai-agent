@@ -55,12 +55,12 @@ def get_current_session_key(default: str = "default") -> str:
     return get_session_env("MYAI_SESSION_KEY", default)
 
 # Sensitive write targets that should trigger approval even when referenced
-# via shell expansions like $HOME or $HERMES_HOME.
+# via shell expansions like $HOME or $MYAI_HOME.
 _SSH_SENSITIVE_PATH = r'(?:~|\$home|\$\{home\})/\.ssh(?:/|$)'
 _HERMES_ENV_PATH = (
     r'(?:~\/\.hermes/|'
     r'(?:\$home|\$\{home\})/\.hermes/|'
-    r'(?:\$hermes_home|\$\{hermes_home\})/)'
+    r'(?:\$myai_home|\$\{myai_home\})/)'
     r'\.env\b'
 )
 _SENSITIVE_WRITE_TARGET = (

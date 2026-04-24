@@ -4,9 +4,9 @@ Gateway runtime status helpers.
 Provides PID-file based detection of whether the gateway daemon is running,
 used by send_message's check_fn to gate availability in the CLI.
 
-The PID file lives at ``{HERMES_HOME}/gateway.pid``.  HERMES_HOME defaults to
-``~/.hermes`` but can be overridden via the environment variable.  This means
-separate HERMES_HOME directories naturally get separate PID files — a property
+The PID file lives at ``{MYAI_HOME}/gateway.pid``.  MYAI_HOME defaults to
+``~/.myai`` but can be overridden via the environment variable.  This means
+separate MYAI_HOME directories naturally get separate PID files — a property
 that will be useful when we add named profiles (multiple agents running
 concurrently under distinct configurations).
 """
@@ -19,10 +19,10 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from typing import Any, Optional
 
-_GATEWAY_KIND = "hermes-gateway"
+_GATEWAY_KIND = "myai-gateway"
 _RUNTIME_STATUS_FILE = "gateway_state.json"
 _LOCKS_DIRNAME = "gateway-locks"
 _IS_WINDOWS = sys.platform == "win32"
@@ -30,8 +30,8 @@ _UNSET = object()
 
 
 def _get_pid_path() -> Path:
-    """Return the path to the gateway PID file, respecting HERMES_HOME."""
-    home = get_hermes_home()
+    """Return the path to the gateway PID file, respecting MYAI_HOME."""
+    home = get_myai_home()
     return home / "gateway.pid"
 
 
@@ -305,7 +305,7 @@ def acquire_scoped_lock(scope: str, identity: str, metadata: Optional[dict[str, 
     """Acquire a machine-local lock keyed by scope + identity.
 
     Used to prevent multiple local gateways from using the same external identity
-    at once (e.g. the same Telegram bot token across different HERMES_HOME dirs).
+    at once (e.g. the same Telegram bot token across different MYAI_HOME dirs).
     """
     lock_path = _get_scope_lock_path(scope, identity)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -450,7 +450,7 @@ _TAKEOVER_MARKER_TTL_S = 60  # Marker older than this is treated as stale
 
 def _get_takeover_marker_path() -> Path:
     """Return the path to the --replace takeover marker file."""
-    home = get_hermes_home()
+    home = get_myai_home()
     return home / _TAKEOVER_MARKER_FILENAME
 
 

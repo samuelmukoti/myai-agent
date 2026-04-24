@@ -8,7 +8,7 @@ prerequisites:
   env_vars: [TENOR_API_KEY]
   commands: [curl, jq]
 metadata:
-  hermes:
+  myai:
     tags: [GIF, Media, Search, Tenor, API]
 ---
 
@@ -18,7 +18,7 @@ Search and download GIFs directly via the Tenor API using curl. No extra tools n
 
 ## Setup
 
-Set your Tenor API key in your environment (add to `~/.hermes/.env`):
+Set your Tenor API key in your environment (add to `~/.myai/.env`):
 
 ```bash
 TENOR_API_KEY=your_key_here

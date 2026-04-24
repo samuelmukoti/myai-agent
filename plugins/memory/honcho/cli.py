@@ -10,7 +10,7 @@ import os
 import sys
 from pathlib import Path
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from plugins.memory.honcho.client import resolve_active_host, resolve_config_path, HOST
 
 
@@ -246,11 +246,11 @@ def _config_path() -> Path:
 def _local_config_path() -> Path:
     """Return the instance-local Honcho config path for writing.
 
-    Always returns $HERMES_HOME/honcho.json so each profile/instance gets
+    Always returns $MYAI_HOME/honcho.json so each profile/instance gets
     its own config file.  The global ~/.honcho/config.json is only used as
     a read fallback (via resolve_config_path) for cross-app interop.
     """
-    return get_hermes_home() / "honcho.json"
+    return get_myai_home() / "honcho.json"
 
 
 def _read_config() -> dict:

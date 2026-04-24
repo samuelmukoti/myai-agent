@@ -360,11 +360,11 @@ def read_file_tool(path: str, offset: int = 1, limit: int = 500, task_id: str = 
 
         # ── MyAIOne internal path guard ────────────────────────────────
         # Prevent prompt injection via catalog or hub metadata files.
-        from myai_constants import get_hermes_home as _get_hh
-        _hermes_home = _get_hh().resolve()
+        from myai_constants import get_myai_home as _get_hh
+        _myai_home = _get_hh().resolve()
         _blocked_dirs = [
-            _hermes_home / "skills" / ".hub" / "index-cache",
-            _hermes_home / "skills" / ".hub",
+            _myai_home / "skills" / ".hub" / "index-cache",
+            _myai_home / "skills" / ".hub",
         ]
         for _blocked in _blocked_dirs:
             try:

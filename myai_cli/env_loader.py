@@ -89,22 +89,22 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
         pass  # best-effort — don't block gateway startup
 
 
-def load_hermes_dotenv(
+def load_myai_dotenv(
     *,
-    hermes_home: str | os.PathLike | None = None,
+    myai_home: str | os.PathLike | None = None,
     project_env: str | os.PathLike | None = None,
 ) -> list[Path]:
     """Load MyAIOne environment files with user config taking precedence.
 
     Behavior:
-    - `~/.hermes/.env` overrides stale shell-exported values when present.
+    - `~/.myai/.env` overrides stale shell-exported values when present.
     - project `.env` acts as a dev fallback and only fills missing values when
       the user env exists.
     - if no user env exists, the project `.env` also overrides stale shell vars.
     """
     loaded: list[Path] = []
 
-    home_path = Path(hermes_home or os.getenv("MYAI_HOME", Path.home() / ".myai"))
+    home_path = Path(myai_home or os.getenv("MYAI_HOME", Path.home() / ".myai"))
     user_env = home_path / ".env"
     project_env_path = Path(project_env) if project_env else None
 

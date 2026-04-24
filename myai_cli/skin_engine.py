@@ -1,7 +1,7 @@
 """MyAIOne CLI skin/theme engine.
 
 A data-driven skin system that lets users customize the CLI's visual appearance.
-Skins are defined as YAML files in ~/.hermes/skins/ or as built-in presets.
+Skins are defined as YAML files in ~/.myai/skins/ or as built-in presets.
 No code changes are needed to add a new skin.
 
 SKIN YAML SCHEMA
@@ -58,8 +58,8 @@ All fields are optional. Missing values inherit from the ``default`` skin.
     branding:
       agent_name: "MyAIOne Agent"          # Banner title, status display
       welcome: "Welcome message"          # Shown at CLI startup
-      goodbye: "Goodbye! ⚕"              # Shown on exit
-      response_label: " ⚕ MyAIOne "       # Response box header label
+      goodbye: "Goodbye! 🤖"              # Shown on exit
+      response_label: " 🤖 MyAIOne "       # Response box header label
       prompt_symbol: "❯ "                # Input prompt symbol
       help_header: "(^_^)? Commands"      # /help header text
 
@@ -84,7 +84,7 @@ USAGE
     print(skin.get_branding("agent_name"))  # "MyAIOne Agent"
 
     set_active_skin("ares")               # Switch to built-in ares skin
-    set_active_skin("mytheme")            # Switch to user skin from ~/.hermes/skins/
+    set_active_skin("mytheme")            # Switch to user skin from ~/.myai/skins/
 
 BUILT-IN SKINS
 ==============
@@ -99,7 +99,7 @@ BUILT-IN SKINS
 USER SKINS
 ==========
 
-Drop a YAML file in ``~/.hermes/skins/<name>.yaml`` following the schema above.
+Drop a YAML file in ``~/.myai/skins/<name>.yaml`` following the schema above.
 Activate with ``/skin <name>`` in the CLI or ``display.skin: <name>`` in config.yaml.
 """
 
@@ -108,7 +108,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
 logger = logging.getLogger(__name__)
 
@@ -127,8 +127,8 @@ class SkinConfig:
     branding: Dict[str, str] = field(default_factory=dict)
     tool_prefix: str = "┊"
     tool_emojis: Dict[str, str] = field(default_factory=dict)  # per-tool emoji overrides
-    banner_logo: str = ""    # Rich-markup ASCII art logo (replaces HERMES_AGENT_LOGO)
-    banner_hero: str = ""    # Rich-markup hero art (replaces HERMES_CADUCEUS)
+    banner_logo: str = ""    # Rich-markup ASCII art logo (replaces MYAIONE_AGENT_LOGO)
+    banner_hero: str = ""    # Rich-markup hero art (replaces MYAIONE_CADUCEUS)
 
     def get_color(self, key: str, fallback: str = "") -> str:
         """Get a color value with fallback."""
@@ -592,7 +592,7 @@ _active_skin_name: str = "default"
 
 def _skins_dir() -> Path:
     """User skins directory."""
-    return get_hermes_home() / "skins"
+    return get_myai_home() / "skins"
 
 
 def _load_skin_from_yaml(path: Path) -> Optional[Dict[str, Any]]:
@@ -741,7 +741,7 @@ def get_active_help_header(fallback: str = "(^_^)? Available Commands") -> str:
 
 
 
-def get_active_goodbye(fallback: str = "Goodbye! ⚕") -> str:
+def get_active_goodbye(fallback: str = "Goodbye! 🤖") -> str:
     """Get the goodbye line from the active skin."""
     try:
         return get_active_skin().get_branding("goodbye", fallback)

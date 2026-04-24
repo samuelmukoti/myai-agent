@@ -129,12 +129,12 @@ def test_myai_cli_init_does_not_eagerly_resolve_runtime_provider(monkeypatch):
 
     def _unexpected_runtime_resolve(**kwargs):
         calls["count"] += 1
-        raise AssertionError("resolve_runtime_provider should not be called in HermesCLI.__init__")
+        raise AssertionError("resolve_runtime_provider should not be called in MyAIOneCLI.__init__")
 
     monkeypatch.setattr("myai_cli.runtime_provider.resolve_runtime_provider", _unexpected_runtime_resolve)
     monkeypatch.setattr("myai_cli.runtime_provider.format_runtime_provider_error", lambda exc: str(exc))
 
-    shell = cli.HermesCLI(model="gpt-5", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="gpt-5", compact=True, max_turns=1)
 
     assert shell is not None
     assert calls["count"] == 0
@@ -164,7 +164,7 @@ def test_runtime_resolution_failure_is_not_sticky(monkeypatch):
     monkeypatch.setattr("myai_cli.runtime_provider.format_runtime_provider_error", lambda exc: str(exc))
     monkeypatch.setattr(cli, "AIAgent", _DummyAgent)
 
-    shell = cli.HermesCLI(model="gpt-5", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="gpt-5", compact=True, max_turns=1)
 
     assert shell._init_agent() is False
     assert shell._init_agent() is True
@@ -187,7 +187,7 @@ def test_runtime_resolution_rebuilds_agent_on_routing_change(monkeypatch):
     monkeypatch.setattr("myai_cli.runtime_provider.resolve_runtime_provider", _runtime_resolve)
     monkeypatch.setattr("myai_cli.runtime_provider.format_runtime_provider_error", lambda exc: str(exc))
 
-    shell = cli.HermesCLI(model="gpt-5", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="gpt-5", compact=True, max_turns=1)
     shell.provider = "openrouter"
     shell.api_mode = "chat_completions"
     shell.base_url = "https://same-endpoint.example/v1"
@@ -202,7 +202,7 @@ def test_runtime_resolution_rebuilds_agent_on_routing_change(monkeypatch):
 
 def test_cli_turn_routing_uses_primary_when_disabled(monkeypatch):
     cli = _import_cli()
-    shell = cli.HermesCLI(model="gpt-5", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="gpt-5", compact=True, max_turns=1)
     shell.provider = "openrouter"
     shell.api_mode = "chat_completions"
     shell.base_url = "https://openrouter.ai/api/v1"
@@ -231,7 +231,7 @@ def test_cli_turn_routing_uses_cheap_model_when_simple(monkeypatch):
 
     monkeypatch.setattr("myai_cli.runtime_provider.resolve_runtime_provider", _runtime_resolve)
 
-    shell = cli.HermesCLI(model="anthropic/claude-sonnet-4", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="anthropic/claude-sonnet-4", compact=True, max_turns=1)
     shell.provider = "openrouter"
     shell.api_mode = "chat_completions"
     shell.base_url = "https://openrouter.ai/api/v1"
@@ -262,7 +262,7 @@ def test_cli_prefers_config_provider_over_stale_env_override(monkeypatch):
     config_copy["model"] = model_copy
     monkeypatch.setattr(cli, "CLI_CONFIG", config_copy)
 
-    shell = cli.HermesCLI(model="fireworks/minimax-m2p5", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="fireworks/minimax-m2p5", compact=True, max_turns=1)
 
     assert shell.requested_provider == "custom"
 
@@ -297,7 +297,7 @@ def test_codex_provider_replaces_incompatible_default_model(monkeypatch):
         lambda access_token=None: ["gpt-5.2-codex", "gpt-5.1-codex-mini"],
     )
 
-    shell = cli.HermesCLI(compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(compact=True, max_turns=1)
 
     assert shell._model_is_default is True
     assert shell._ensure_runtime_credentials() is True
@@ -408,7 +408,7 @@ def test_codex_provider_uses_config_model(monkeypatch):
         lambda access_token=None: ["gpt-5.2-codex"],
     )
 
-    shell = cli.HermesCLI(compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(compact=True, max_turns=1)
 
     assert shell._ensure_runtime_credentials() is True
     assert shell.provider == "openai-codex"
@@ -451,7 +451,7 @@ def test_codex_config_model_not_replaced_by_normalization(monkeypatch):
         lambda access_token=None: ["gpt-5.4", "gpt-5.3-codex"],
     )
 
-    shell = cli.HermesCLI(compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(compact=True, max_turns=1)
 
     # Config model is NOT the global default — user made a deliberate choice
     assert shell._model_is_default is False
@@ -481,7 +481,7 @@ def test_codex_provider_preserves_explicit_codex_model(monkeypatch):
     monkeypatch.setattr("myai_cli.runtime_provider.resolve_runtime_provider", _runtime_resolve)
     monkeypatch.setattr("myai_cli.runtime_provider.format_runtime_provider_error", lambda exc: str(exc))
 
-    shell = cli.HermesCLI(model="gpt-5.1-codex-mini", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="gpt-5.1-codex-mini", compact=True, max_turns=1)
 
     assert shell._model_is_default is False
     assert shell._ensure_runtime_credentials() is True
@@ -508,7 +508,7 @@ def test_codex_provider_strips_provider_prefix_from_model(monkeypatch):
     monkeypatch.setattr("myai_cli.runtime_provider.resolve_runtime_provider", _runtime_resolve)
     monkeypatch.setattr("myai_cli.runtime_provider.format_runtime_provider_error", lambda exc: str(exc))
 
-    shell = cli.HermesCLI(model="openai/gpt-5.3-codex", compact=True, max_turns=1)
+    shell = cli.MyAIOneCLI(model="openai/gpt-5.3-codex", compact=True, max_turns=1)
 
     assert shell._ensure_runtime_credentials() is True
     assert shell.model == "gpt-5.3-codex"
@@ -594,7 +594,16 @@ def test_cmd_model_forwards_nous_login_tls_options(monkeypatch):
     monkeypatch.setattr("myai_cli.config.save_env_value", lambda key, value: None)
     monkeypatch.setattr("myai_cli.auth.resolve_provider", lambda requested, **kwargs: "nous")
     monkeypatch.setattr("myai_cli.auth.get_provider_auth_state", lambda provider_id: None)
-    monkeypatch.setattr(hermes_main, "_prompt_provider_choice", lambda choices, **kwargs: 0)
+    # Select "Nous Portal" from the picker dynamically so this test doesn't
+    # break when CANONICAL_PROVIDERS is reordered (e.g. MyAIOne Inference
+    # is now at index 0 post-rebrand).
+    def _pick_nous(choices, **kwargs):
+        for i, label in enumerate(choices):
+            if "Nous Portal" in label:
+                return i
+        raise AssertionError(f"Nous Portal not in picker choices: {choices}")
+
+    monkeypatch.setattr(hermes_main, "_prompt_provider_choice", _pick_nous)
 
     captured = {}
 

@@ -3,7 +3,7 @@ Skills configuration for MyAIOne Agent.
 `myai skills` enters this module.
 
 Toggle individual skills or categories on/off, globally or per-platform.
-Config stored in ~/.hermes/config.yaml under:
+Config stored in ~/.myai/config.yaml under:
 
   skills:
     disabled: [skill-a, skill-b]          # global disabled list

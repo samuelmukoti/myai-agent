@@ -1,6 +1,6 @@
 """Welcome banner, ASCII art, skills summary, and update check for the CLI.
 
-Pure display functions with no HermesCLI state dependency.
+Pure display functions with no MyAIOneCLI state dependency.
 """
 
 import json
@@ -10,7 +10,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from typing import Dict, List, Optional
 
 from rich.console import Console
@@ -66,14 +66,14 @@ def _skin_branding(key: str, fallback: str) -> str:
 
 from myai_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
 
-HERMES_AGENT_LOGO = """[bold #FFD700]███╗   ███╗██╗   ██╗ █████╗ ██╗ ██████╗ ███╗   ██╗███████╗       █████╗  ██████╗ ███████╗███╗   ██╗████████╗[/]
-[bold #FFD700]████╗ ████║╚██╗ ██╔╝██╔══██╗██║██╔═══██╗████╗  ██║██╔════╝      ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝[/]
-[#FFBF00]██╔████╔██║ ╚████╔╝ ███████║██║██║   ██║██╔██╗ ██║█████╗  █████╗███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║[/]
-[#FFBF00]██║╚██╔╝██║  ╚██╔╝  ██╔══██║██║██║   ██║██║╚██╗██║██╔══╝  ╚════╝██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║[/]
-[#CD7F32]██║ ╚═╝ ██║   ██║   ██║  ██║██║╚██████╔╝██║ ╚████║███████╗      ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║[/]
-[#CD7F32]╚═╝     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝      ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝[/]"""
+MYAIONE_AGENT_LOGO = """[bold #FFD700]███╗   ███╗██╗   ██╗ █████╗ ██╗     █████╗  ██████╗ ███████╗███╗   ██╗████████╗[/]
+[bold #FFD700]████╗ ████║╚██╗ ██╔╝██╔══██╗██║    ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝[/]
+[#FFBF00]██╔████╔██║ ╚████╔╝ ███████║██║    ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║[/]
+[#FFBF00]██║╚██╔╝██║  ╚██╔╝  ██╔══██║██║    ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║[/]
+[#CD7F32]██║ ╚═╝ ██║   ██║   ██║  ██║██║    ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║[/]
+[#CD7F32]╚═╝     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝[/]"""
 
-HERMES_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
+MYAIONE_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
 [#CD7F32]⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀[/]
 [#FFBF00]⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀[/]
 [#FFBF00]⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀[/]
@@ -127,12 +127,12 @@ def check_for_updates() -> Optional[int]:
     """Check how many commits behind origin/main the local repo is.
 
     Does a ``git fetch`` at most once every 6 hours (cached to
-    ``~/.hermes/.update_check``).  Returns the number of commits behind,
+    ``~/.myai/.update_check``).  Returns the number of commits behind,
     or ``None`` if the check fails or isn't applicable.
     """
-    hermes_home = get_hermes_home()
-    repo_dir = hermes_home / "hermes-agent"
-    cache_file = hermes_home / ".update_check"
+    myai_home = get_myai_home()
+    repo_dir = myai_home / "myaione-agent"
+    cache_file = myai_home / ".update_check"
 
     # Must be a git repo — fall back to project root for dev installs
     if not (repo_dir / ".git").exists():
@@ -185,8 +185,8 @@ def check_for_updates() -> Optional[int]:
 
 def _resolve_repo_dir() -> Optional[Path]:
     """Return the active MyAIOne git checkout, or None if this isn't a git install."""
-    hermes_home = get_hermes_home()
-    repo_dir = hermes_home / "hermes-agent"
+    myai_home = get_myai_home()
+    repo_dir = myai_home / "myaione-agent"
     if not (repo_dir / ".git").exists():
         repo_dir = Path(__file__).parent.parent.resolve()
     return repo_dir if (repo_dir / ".git").exists() else None
@@ -530,7 +530,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     console.print()
     term_width = shutil.get_terminal_size().columns
     if term_width >= 95:
-        _logo = _bskin.banner_logo if _bskin and hasattr(_bskin, 'banner_logo') and _bskin.banner_logo else HERMES_AGENT_LOGO
+        _logo = _bskin.banner_logo if _bskin and hasattr(_bskin, 'banner_logo') and _bskin.banner_logo else MYAIONE_AGENT_LOGO
         console.print(_logo)
         console.print()
     console.print(outer_panel)

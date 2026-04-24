@@ -3,7 +3,7 @@ Multi-provider authentication system for MyAIOne Agent.
 
 Supports OAuth device code flows (Nous Portal, future: OpenAI Codex) and
 traditional API key providers (OpenRouter, custom endpoints). Auth state
-is persisted in ~/.hermes/auth.json with cross-process file locking.
+is persisted in ~/.myai/auth.json with cross-process file locking.
 
 Architecture:
 - ProviderConfig registry defines known OAuth providers
@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 import yaml
 
-from myai_cli.config import get_hermes_home, get_config_path, read_raw_config
+from myai_cli.config import get_myai_home, get_config_path, read_raw_config
 from myai_constants import OPENROUTER_BASE_URL
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ AUTH_LOCK_TIMEOUT_SECONDS = 15.0
 # Nous Portal defaults
 DEFAULT_NOUS_PORTAL_URL = "https://portal.nousresearch.com"
 DEFAULT_NOUS_INFERENCE_URL = "https://inference-api.nousresearch.com/v1"
-DEFAULT_NOUS_CLIENT_ID = "hermes-cli"
+DEFAULT_NOUS_CLIENT_ID = "myai-cli"
 DEFAULT_NOUS_SCOPE = "inference:mint_agent_key"
 DEFAULT_AGENT_KEY_MIN_TTL_SECONDS = 30 * 60  # 30 minutes
 ACCESS_TOKEN_REFRESH_SKEW_SECONDS = 120       # refresh 2 min before expiry
@@ -595,11 +595,11 @@ def _oauth_trace(event: str, *, sequence_id: Optional[str] = None, **fields: Any
 
 
 # =============================================================================
-# Auth Store — persistence layer for ~/.hermes/auth.json
+# Auth Store — persistence layer for ~/.myai/auth.json
 # =============================================================================
 
 def _auth_file_path() -> Path:
-    return get_hermes_home() / "auth.json"
+    return get_myai_home() / "auth.json"
 
 
 def _auth_lock_path() -> Path:
@@ -1061,7 +1061,7 @@ def resolve_provider(
     except ImportError:
         pass  # boto3 not installed — skip Bedrock auto-detection
 
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     raise AuthError(
         "No inference provider configured. Run 'myai model' to choose a "
         "provider and model, or set an API key (OPENROUTER_API_KEY, "
@@ -1307,7 +1307,7 @@ def get_qwen_auth_status() -> Dict[str, Any]:
 # =============================================================================
 # Google Gemini OAuth (google-gemini-cli) — PKCE flow + Cloud Code Assist.
 #
-# Tokens live in ~/.hermes/auth/google_oauth.json (managed by agent.google_oauth).
+# Tokens live in ~/.myai/auth/google_oauth.json (managed by agent.google_oauth).
 # The `base_url` here is the marker "cloudcode-pa://google" that run_agent.py
 # uses to construct a GeminiCloudCodeClient instead of the default OpenAI SDK.
 # Actual HTTP traffic goes to https://cloudcode-pa.googleapis.com/v1internal:*.
@@ -1391,7 +1391,7 @@ def _is_remote_session() -> bool:
 
 
 # =============================================================================
-# OpenAI Codex auth — tokens stored in ~/.hermes/auth.json (not ~/.codex/)
+# OpenAI Codex auth — tokens stored in ~/.myai/auth.json (not ~/.codex/)
 #
 # MyAIOne maintains its own Codex OAuth session separate from the Codex CLI
 # and VS Code extension. This prevents refresh token rotation conflicts
@@ -1399,7 +1399,7 @@ def _is_remote_session() -> bool:
 # =============================================================================
 
 def _read_codex_tokens(*, _lock: bool = True) -> Dict[str, Any]:
-    """Read Codex OAuth tokens from MyAIOne auth store (~/.hermes/auth.json).
+    """Read Codex OAuth tokens from MyAIOne auth store (~/.myai/auth.json).
     
     Returns dict with 'tokens' (access_token, refresh_token) and 'last_refresh'.
     Raises AuthError if no Codex tokens are stored.
@@ -1491,7 +1491,7 @@ def _write_codex_cli_tokens(
 
 
 def _save_codex_tokens(tokens: Dict[str, str], last_refresh: str = None) -> None:
-    """Save Codex OAuth tokens to MyAIOne auth store (~/.hermes/auth.json)."""
+    """Save Codex OAuth tokens to MyAIOne auth store (~/.myai/auth.json)."""
     if last_refresh is None:
         last_refresh = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     with _auth_store_lock():
@@ -2154,7 +2154,7 @@ def refresh_nous_oauth_from_state(
     return refresh_nous_oauth_pure(
         state.get("access_token", ""),
         state.get("refresh_token", ""),
-        state.get("client_id", "hermes-cli"),
+        state.get("client_id", "myai-cli"),
         state.get("portal_base_url", DEFAULT_NOUS_PORTAL_URL),
         state.get("inference_base_url", DEFAULT_NOUS_INFERENCE_URL),
         token_type=state.get("token_type", "Bearer"),
@@ -3031,7 +3031,7 @@ def login_command(args) -> None:
 
 
 def _login_openai_codex(args, pconfig: ProviderConfig) -> None:
-    """OpenAI Codex login via device code flow. Tokens stored in ~/.hermes/auth.json."""
+    """OpenAI Codex login via device code flow. Tokens stored in ~/.myai/auth.json."""
 
     # Check for existing MyAIOne-owned credentials
     try:
@@ -3090,7 +3090,7 @@ def _login_openai_codex(args, pconfig: ProviderConfig) -> None:
     config_path = _update_config_for_provider("openai-codex", creds.get("base_url", DEFAULT_CODEX_BASE_URL))
     print()
     print("Login successful!")
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     print(f"  Auth state: {_dhh()}/auth.json")
     print(f"  Config updated: {config_path} (model.provider=openai-codex)")
 

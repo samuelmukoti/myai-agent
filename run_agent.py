@@ -43,15 +43,15 @@ import fire
 from datetime import datetime
 from pathlib import Path
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
-# Load .env from ~/.hermes/.env first, then project root as dev fallback.
+# Load .env from ~/.myai/.env first, then project root as dev fallback.
 # User-managed env files should override stale shell exports on restart.
-from myai_cli.env_loader import load_hermes_dotenv
+from myai_cli.env_loader import load_myai_dotenv
 
-_hermes_home = get_hermes_home()
+_myai_home = get_myai_home()
 _project_env = Path(__file__).parent / '.env'
-_loaded_env_paths = load_hermes_dotenv(hermes_home=_hermes_home, project_env=_project_env)
+_loaded_env_paths = load_myai_dotenv(myai_home=_myai_home, project_env=_project_env)
 if _loaded_env_paths:
     for _env_path in _loaded_env_paths:
         logger.info("Loaded environment variables from %s", _env_path)
@@ -909,10 +909,10 @@ class AIAgent:
         self._rate_limit_state: Optional["RateLimitState"] = None
 
         # Centralized logging — agent.log (INFO+) and errors.log (WARNING+)
-        # both live under ~/.hermes/logs/.  Idempotent, so gateway mode
+        # both live under ~/.myai/logs/.  Idempotent, so gateway mode
         # (which creates a new AIAgent per message) won't duplicate handlers.
         from myai_logging import setup_logging, setup_verbose_logging
-        setup_logging(hermes_home=_hermes_home)
+        setup_logging(myai_home=_myai_home)
 
         if self.verbose_logging:
             setup_verbose_logging()
@@ -1213,9 +1213,9 @@ class AIAgent:
             short_uuid = uuid.uuid4().hex[:6]
             self.session_id = f"{timestamp_str}_{short_uuid}"
         
-        # Session logs go into ~/.hermes/sessions/ alongside gateway sessions
-        hermes_home = get_hermes_home()
-        self.logs_dir = hermes_home / "sessions"
+        # Session logs go into ~/.myai/sessions/ alongside gateway sessions
+        myai_home = get_myai_home()
+        self.logs_dir = myai_home / "sessions"
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.session_log_file = self.logs_dir / f"session_{self.session_id}.json"
         
@@ -1339,11 +1339,11 @@ class AIAgent:
                     if _mp and _mp.is_available():
                         self._memory_manager.add_provider(_mp)
                     if self._memory_manager.providers:
-                        from myai_constants import get_hermes_home as _ghh
+                        from myai_constants import get_myai_home as _ghh
                         _init_kwargs = {
                             "session_id": self.session_id,
                             "platform": platform or "cli",
-                            "hermes_home": str(_ghh()),
+                            "myai_home": str(_ghh()),
                             "agent_context": "primary",
                         }
                         # Thread session title for memory provider scoping
@@ -1597,7 +1597,7 @@ class AIAgent:
             try:
                 self.context_compressor.on_session_start(
                     self.session_id,
-                    hermes_home=str(get_hermes_home()),
+                    myai_home=str(get_myai_home()),
                     platform=self.platform or "cli",
                     model=self.model,
                     context_length=getattr(self.context_compressor, "context_length", 0),
@@ -10147,7 +10147,7 @@ class AIAgent:
                         print(f"{self.log_prefix}   Auth method: {auth_method}")
                         print(f"{self.log_prefix}   Token prefix: {key[:12]}..." if key and len(key) > 12 else f"{self.log_prefix}   Token: (empty or short)")
                         print(f"{self.log_prefix}   Troubleshooting:")
-                        from myai_constants import display_hermes_home as _dhh_fn
+                        from myai_constants import display_myai_home as _dhh_fn
                         _dhh = _dhh_fn()
                         print(f"{self.log_prefix}     • Check ANTHROPIC_TOKEN in {_dhh}/.env for MyAIOne-managed OAuth/setup tokens")
                         print(f"{self.log_prefix}     • Check ANTHROPIC_API_KEY in {_dhh}/.env for API keys or legacy token values")

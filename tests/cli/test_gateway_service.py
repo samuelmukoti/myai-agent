@@ -688,7 +688,7 @@ class TestDetectVenvDir:
 
 
 class TestSystemUnitHermesHome:
-    """HERMES_HOME in system units must reference the target user, not root."""
+    """MYAI_HOME in system units must reference the target user, not root."""
 
     def test_system_unit_uses_target_user_home_not_calling_user(self, monkeypatch):
         # Simulate sudo: Path.home() returns /root, target user is alice
@@ -709,7 +709,7 @@ class TestSystemUnitHermesHome:
         assert '/root/.hermes' not in unit
 
     def test_system_unit_remaps_profile_to_target_user(self, monkeypatch):
-        # Simulate sudo with a profile: HERMES_HOME was resolved under root
+        # Simulate sudo with a profile: MYAI_HOME was resolved under root
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("MYAI_HOME", "/root/.hermes/profiles/coder")
         monkeypatch.setattr(
@@ -727,7 +727,7 @@ class TestSystemUnitHermesHome:
         assert '/root/' not in unit
 
     def test_system_unit_preserves_custom_hermes_home(self, monkeypatch):
-        # Custom HERMES_HOME not under any user's home — keep as-is
+        # Custom MYAI_HOME not under any user's home — keep as-is
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("MYAI_HOME", "/opt/hermes-shared")
         monkeypatch.setattr(
@@ -744,11 +744,11 @@ class TestSystemUnitHermesHome:
         assert 'MYAI_HOME=/opt/hermes-shared' in unit
 
     def test_user_unit_unaffected_by_change(self):
-        # User-scope units should still use the calling user's HERMES_HOME
+        # User-scope units should still use the calling user's MYAI_HOME
         unit = gateway_cli.generate_systemd_unit(system=False)
 
-        hermes_home = str(gateway_cli.get_hermes_home().resolve())
-        assert f'MYAI_HOME={hermes_home}' in unit
+        myai_home = str(gateway_cli.get_myai_home().resolve())
+        assert f'MYAI_HOME={myai_home}' in unit
 
 
 class TestHermesHomeForTargetUser:
@@ -948,15 +948,15 @@ class TestProfileArg:
 
     def test_default_hermes_home_returns_empty(self, tmp_path, monkeypatch):
         """Default ~/.hermes should not produce a --profile flag."""
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
-        result = gateway_cli._profile_arg(str(hermes_home))
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
+        result = gateway_cli._profile_arg(str(myai_home))
         assert result == ""
 
     def test_named_profile_returns_flag(self, tmp_path, monkeypatch):
-        """~/.hermes/profiles/mybot should return '--profile mybot'."""
+        """~/.myai/profiles/mybot should return '--profile mybot'."""
         profile_dir = tmp_path / ".hermes" / "profiles" / "mybot"
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -965,7 +965,7 @@ class TestProfileArg:
         assert result == "--profile mybot"
 
     def test_hash_path_returns_empty(self, tmp_path, monkeypatch):
-        """Arbitrary non-profile HERMES_HOME should return empty string."""
+        """Arbitrary non-profile MYAI_HOME should return empty string."""
         custom_home = tmp_path / "custom" / "hermes"
         custom_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -974,7 +974,7 @@ class TestProfileArg:
         assert result == ""
 
     def test_nested_profile_path_returns_empty(self, tmp_path, monkeypatch):
-        """~/.hermes/profiles/mybot/subdir should NOT match — too deep."""
+        """~/.myai/profiles/mybot/subdir should NOT match — too deep."""
         nested = tmp_path / ".hermes" / "profiles" / "mybot" / "subdir"
         nested.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -997,7 +997,7 @@ class TestProfileArg:
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_myai_home", lambda: profile_dir)
         unit = gateway_cli.generate_systemd_unit(system=False)
         assert "--profile mybot" in unit
         assert "gateway run --replace" in unit
@@ -1008,7 +1008,7 @@ class TestProfileArg:
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("MYAI_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_myai_home", lambda: profile_dir)
         plist = gateway_cli.generate_launchd_plist()
         assert "<string>--profile</string>" in plist
         assert "<string>mybot</string>" in plist
@@ -1023,7 +1023,7 @@ class TestProfileArg:
 
         monkeypatch.setattr(Path, "home", lambda: profile_home)
         monkeypatch.setenv("MYAI_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_myai_home", lambda: profile_dir)
         monkeypatch.setattr(pwd, "getpwuid", lambda uid: SimpleNamespace(pw_dir=str(machine_home)))
 
         plist_path = gateway_cli.get_launchd_plist_path()
@@ -1063,7 +1063,7 @@ class TestSystemUnitPathRemapping:
     def test_system_unit_has_no_root_paths(self, monkeypatch, tmp_path):
         root_home = tmp_path / "root"
         root_home.mkdir()
-        project = root_home / ".hermes" / "hermes-agent"
+        project = root_home / ".myai" / "hermes-agent"
         project.mkdir(parents=True)
         venv_bin = project / "venv" / "bin"
         venv_bin.mkdir(parents=True)
@@ -1072,8 +1072,8 @@ class TestSystemUnitPathRemapping:
         target_home = "/home/alice"
 
         monkeypatch.setattr(Path, "home", lambda: root_home)
-        monkeypatch.setenv("MYAI_HOME", str(root_home / ".hermes"))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: root_home / ".hermes")
+        monkeypatch.setenv("MYAI_HOME", str(root_home / ".myai"))
+        monkeypatch.setattr(gateway_cli, "get_myai_home", lambda: root_home / ".myai")
         monkeypatch.setattr(gateway_cli, "PROJECT_ROOT", project)
         monkeypatch.setattr(gateway_cli, "_detect_venv_dir", lambda: project / "venv")
         monkeypatch.setattr(gateway_cli, "get_python_path", lambda: str(venv_bin / "python"))
@@ -1104,7 +1104,7 @@ class TestDockerAwareGateway:
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
 
         with pytest.raises(RuntimeError, match="systemctl is not available"):
-            gateway_cli._run_systemctl(["start", "hermes-gateway"])
+            gateway_cli._run_systemctl(["start", "myai-gateway"])
 
     def test_run_systemctl_passes_through_on_success(self, monkeypatch):
         """_run_systemctl delegates to subprocess.run when systemctl exists."""
@@ -1116,7 +1116,7 @@ class TestDockerAwareGateway:
 
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
 
-        result = gateway_cli._run_systemctl(["status", "hermes-gateway"])
+        result = gateway_cli._run_systemctl(["status", "myai-gateway"])
         assert result.returncode == 0
         assert len(calls) == 1
         assert "status" in calls[0]

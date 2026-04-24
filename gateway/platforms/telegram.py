@@ -503,8 +503,8 @@ class TelegramAdapter(BasePlatformAdapter):
     def _persist_dm_topic_thread_id(self, chat_id: int, topic_name: str, thread_id: int) -> None:
         """Save a newly created thread_id back into config.yaml so it persists across restarts."""
         try:
-            from myai_constants import get_hermes_home
-            config_path = get_hermes_home() / "config.yaml"
+            from myai_constants import get_myai_home
+            config_path = get_myai_home() / "config.yaml"
             if not config_path.exists():
                 logger.warning("[%s] Config file not found at %s, cannot persist thread_id", self.name, config_path)
                 return
@@ -1174,7 +1174,7 @@ class TelegramAdapter(BasePlatformAdapter):
             return SendResult(success=False, error="Not connected")
         try:
             default_hint = f" (default: {default})" if default else ""
-            text = f"⚕ *Update needs your input:*\n\n{prompt}{default_hint}"
+            text = f"🤖 *Update needs your input:*\n\n{prompt}{default_hint}"
             keyboard = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton("✓ Yes", callback_data="update_prompt:y"),
@@ -1638,7 +1638,7 @@ class TelegramAdapter(BasePlatformAdapter):
         label = "Yes" if answer == "y" else "No"
         try:
             await query.edit_message_text(
-                text=f"⚕ Update prompt answered: *{label}*",
+                text=f"🤖 Update prompt answered: *{label}*",
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=None,
             )
@@ -1646,8 +1646,8 @@ class TelegramAdapter(BasePlatformAdapter):
             pass  # non-fatal if edit fails
         # Write the response file
         try:
-            from myai_constants import get_hermes_home
-            home = get_hermes_home()
+            from myai_constants import get_myai_home
+            home = get_myai_home()
             response_path = home / ".update_response"
             tmp = response_path.with_suffix(".tmp")
             tmp.write_text(answer)
@@ -2776,8 +2776,8 @@ class TelegramAdapter(BasePlatformAdapter):
         recognized without a gateway restart.
         """
         try:
-            from myai_constants import get_hermes_home
-            config_path = get_hermes_home() / "config.yaml"
+            from myai_constants import get_myai_home
+            config_path = get_myai_home() / "config.yaml"
             if not config_path.exists():
                 return
 

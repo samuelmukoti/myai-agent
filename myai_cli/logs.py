@@ -2,7 +2,7 @@
 
 Supports tailing, following, session filtering, level filtering,
 component filtering, and relative time ranges.  All log files live
-under ``~/.hermes/logs/``.
+under ``~/.myai/logs/``.
 
 Usage examples::
 
@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Sequence
 
-from myai_constants import get_hermes_home, display_hermes_home
+from myai_constants import get_myai_home, display_myai_home
 
 # Known log files (name → filename)
 LOG_FILES = {
@@ -169,7 +169,7 @@ def tail_log(
         print(f"Unknown log: {log_name!r}. Available: {', '.join(sorted(LOG_FILES))}")
         sys.exit(1)
 
-    log_path = get_hermes_home() / "logs" / filename
+    log_path = get_myai_home() / "logs" / filename
     if not log_path.exists():
         print(f"Log file not found: {log_path}")
         print(f"(Logs are created when MyAIOne runs — try 'myai chat' first)")
@@ -228,9 +228,9 @@ def tail_log(
     filter_desc = f" [{', '.join(filter_parts)}]" if filter_parts else ""
 
     if follow:
-        print(f"--- {display_hermes_home()}/logs/{filename}{filter_desc} (Ctrl+C to stop) ---")
+        print(f"--- {display_myai_home()}/logs/{filename}{filter_desc} (Ctrl+C to stop) ---")
     else:
-        print(f"--- {display_hermes_home()}/logs/{filename}{filter_desc} (last {num_lines}) ---")
+        print(f"--- {display_myai_home()}/logs/{filename}{filter_desc} (last {num_lines}) ---")
 
     for line in lines:
         print(line, end="")
@@ -357,12 +357,12 @@ def _follow_log(
 
 def list_logs() -> None:
     """Print available log files with sizes."""
-    log_dir = get_hermes_home() / "logs"
+    log_dir = get_myai_home() / "logs"
     if not log_dir.exists():
-        print(f"No logs directory at {display_hermes_home()}/logs/")
+        print(f"No logs directory at {display_myai_home()}/logs/")
         return
 
-    print(f"Log files in {display_hermes_home()}/logs/:\n")
+    print(f"Log files in {display_myai_home()}/logs/:\n")
     found = False
     for entry in sorted(log_dir.iterdir()):
         if entry.is_file() and entry.suffix == ".log":

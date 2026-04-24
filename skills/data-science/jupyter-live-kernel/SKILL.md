@@ -10,7 +10,7 @@ version: 1.0.0
 author: MyAIOne Agent
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [jupyter, notebook, repl, data-science, exploration, iterative]
     category: data-science
 ---

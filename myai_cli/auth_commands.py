@@ -391,8 +391,8 @@ def auth_remove_command(args) -> None:
                 print(f"Cleared {provider} OAuth tokens from auth store")
 
     elif removed.source == "hermes_pkce" and provider == "anthropic":
-        from myai_constants import get_hermes_home
-        oauth_file = get_hermes_home() / ".anthropic_oauth.json"
+        from myai_constants import get_myai_home
+        oauth_file = get_myai_home() / ".anthropic_oauth.json"
         if oauth_file.exists():
             oauth_file.unlink()
             print("Cleared MyAIOne Anthropic OAuth credentials")

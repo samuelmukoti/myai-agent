@@ -496,8 +496,8 @@ class RetainDBMemoryProvider(MemoryProvider):
         if explicit:
             project = explicit
         else:
-            hermes_home = str(kwargs.get("hermes_home", ""))
-            profile_name = os.path.basename(hermes_home) if hermes_home else ""
+            myai_home = str(kwargs.get("myai_home", ""))
+            profile_name = os.path.basename(myai_home) if myai_home else ""
             project = f"hermes-{profile_name}" if (profile_name and profile_name not in {"", ".hermes"}) else "default"
 
         self._client = _Client(api_key, base_url, project)
@@ -505,8 +505,8 @@ class RetainDBMemoryProvider(MemoryProvider):
         self._user_id = kwargs.get("user_id", "default") or "default"
         self._agent_id = kwargs.get("agent_id", "hermes") or "hermes"
 
-        from myai_constants import get_hermes_home
-        hermes_home_path = get_hermes_home()
+        from myai_constants import get_myai_home
+        hermes_home_path = get_myai_home()
         db_path = hermes_home_path / "retaindb_queue.db"
         self._queue = _WriteQueue(self._client, db_path)
 

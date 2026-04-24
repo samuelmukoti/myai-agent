@@ -1,7 +1,7 @@
 """Tests for Discord thread participation persistence.
 
 Verifies that _threads (ThreadParticipationTracker) survives adapter restarts by
-being persisted to ~/.hermes/discord_threads.json.
+being persisted to ~/.myai/discord_threads.json.
 """
 
 import json
@@ -15,7 +15,7 @@ class TestDiscordThreadPersistence:
     """Thread IDs are saved to disk and reloaded on init."""
 
     def _make_adapter(self, tmp_path):
-        """Build a minimal DiscordAdapter with HERMES_HOME pointed at tmp_path."""
+        """Build a minimal DiscordAdapter with MYAI_HOME pointed at tmp_path."""
         from gateway.config import PlatformConfig
         from gateway.platforms.discord import DiscordAdapter
 

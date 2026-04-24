@@ -72,9 +72,9 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=True)
 
         with (
-            patch("myai_cli.setup.ensure_hermes_home"),
+            patch("myai_cli.setup.ensure_myai_home"),
             patch("myai_cli.setup.load_config", return_value={}),
-            patch("myai_cli.setup.get_hermes_home", return_value="/tmp/.hermes"),
+            patch("myai_cli.setup.get_myai_home", return_value="/tmp/.hermes"),
             patch("myai_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
         ):
@@ -90,9 +90,9 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=False)
 
         with (
-            patch("myai_cli.setup.ensure_hermes_home"),
+            patch("myai_cli.setup.ensure_myai_home"),
             patch("myai_cli.setup.load_config", return_value={}),
-            patch("myai_cli.setup.get_hermes_home", return_value="/tmp/.hermes"),
+            patch("myai_cli.setup.get_myai_home", return_value="/tmp/.hermes"),
             patch("myai_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("sys.stdin") as mock_stdin,
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
@@ -158,9 +158,9 @@ class TestNonInteractiveSetup:
         agent_section = MagicMock()
 
         with (
-            patch.object(setup_mod, "ensure_hermes_home"),
+            patch.object(setup_mod, "ensure_myai_home"),
             patch.object(setup_mod, "load_config", return_value=config),
-            patch.object(setup_mod, "get_hermes_home", return_value=tmp_path),
+            patch.object(setup_mod, "get_myai_home", return_value=tmp_path),
             patch.object(setup_mod, "is_interactive_stdin", return_value=True),
             patch.object(
                 setup_mod,
@@ -202,9 +202,9 @@ class TestNonInteractiveSetup:
             return len(choices) - 1
 
         with (
-            patch.object(setup_mod, "ensure_hermes_home"),
+            patch.object(setup_mod, "ensure_myai_home"),
             patch.object(setup_mod, "load_config", return_value={}),
-            patch.object(setup_mod, "get_hermes_home", return_value=tmp_path),
+            patch.object(setup_mod, "get_myai_home", return_value=tmp_path),
             patch.object(setup_mod, "is_interactive_stdin", return_value=True),
             patch.object(
                 setup_mod,

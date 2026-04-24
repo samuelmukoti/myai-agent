@@ -62,10 +62,10 @@ def _install_modal_test_modules(
     myai_cli = types.ModuleType("myai_cli")
     myai_cli.__path__ = []  # type: ignore[attr-defined]
     sys.modules["myai_cli"] = myai_cli
-    hermes_home = tmp_path / "hermes-home"
-    os.environ["MYAI_HOME"] = str(hermes_home)
+    myai_home = tmp_path / "hermes-home"
+    os.environ["MYAI_HOME"] = str(myai_home)
     sys.modules["myai_cli.config"] = types.SimpleNamespace(
-        get_hermes_home=lambda: hermes_home,
+        get_myai_home=lambda: myai_home,
     )
 
     tools_package = types.ModuleType("tools")
@@ -190,7 +190,7 @@ def _install_modal_test_modules(
     )
 
     return {
-        "snapshot_store": hermes_home / "modal_snapshots.json",
+        "snapshot_store": myai_home / "modal_snapshots.json",
         "create_calls": create_calls,
         "from_id_calls": from_id_calls,
         "registry_calls": registry_calls,

@@ -6,7 +6,7 @@ author: Cocoon AI (hello@cocoon-ai.com), ported by MyAIOne Agent
 license: MIT
 dependencies: []
 metadata:
-  hermes:
+  myai:
     tags: [architecture, diagrams, SVG, HTML, visualization, infrastructure, cloud]
     related_skills: [concept-diagrams, excalidraw]
 ---

@@ -3,7 +3,7 @@ MyAIOne Agent Uninstaller.
 
 Provides options for:
 - Full uninstall: Remove everything including configs and data
-- Keep data: Remove code but keep ~/.hermes/ (configs, sessions, logs)
+- Keep data: Remove code but keep ~/.myai/ (configs, sessions, logs)
 """
 
 import os
@@ -11,7 +11,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 
 from myai_cli.colors import Colors, color
 
@@ -132,7 +132,7 @@ def uninstall_gateway_service():
         from myai_cli.gateway import get_service_name
         svc_name = get_service_name()
     except Exception:
-        svc_name = "hermes-gateway"
+        svc_name = "myai-gateway"
 
     service_file = Path.home() / ".config" / "systemd" / "user" / f"{svc_name}.service"
     
@@ -176,24 +176,24 @@ def run_uninstall(args):
     Run the uninstall process.
     
     Options:
-    - Full uninstall: removes code + ~/.hermes/ (configs, data, logs)
-    - Keep data: removes code but keeps ~/.hermes/ for future reinstall
+    - Full uninstall: removes code + ~/.myai/ (configs, data, logs)
+    - Keep data: removes code but keeps ~/.myai/ for future reinstall
     """
     project_root = get_project_root()
-    hermes_home = get_hermes_home()
+    myai_home = get_myai_home()
     
     print()
     print(color("┌─────────────────────────────────────────────────────────┐", Colors.MAGENTA, Colors.BOLD))
-    print(color("│            ⚕ MyAIOne Agent Uninstaller                  │", Colors.MAGENTA, Colors.BOLD))
+    print(color("│            🤖 MyAIOne Agent Uninstaller                  │", Colors.MAGENTA, Colors.BOLD))
     print(color("└─────────────────────────────────────────────────────────┘", Colors.MAGENTA, Colors.BOLD))
     print()
     
     # Show what will be affected
     print(color("Current Installation:", Colors.CYAN, Colors.BOLD))
     print(f"  Code:    {project_root}")
-    print(f"  Config:  {hermes_home / 'config.yaml'}")
-    print(f"  Secrets: {hermes_home / '.env'}")
-    print(f"  Data:    {hermes_home / 'cron/'}, {hermes_home / 'sessions/'}, {hermes_home / 'logs/'}")
+    print(f"  Config:  {myai_home / 'config.yaml'}")
+    print(f"  Secrets: {myai_home / '.env'}")
+    print(f"  Data:    {myai_home / 'cron/'}, {myai_home / 'sessions/'}, {myai_home / 'logs/'}")
     print()
     
     # Ask for confirmation
@@ -279,8 +279,8 @@ def run_uninstall(args):
     # We need to be careful here
     try:
         if project_root.exists():
-            # If the install is inside ~/.hermes/, just remove the hermes-agent subdir
-            if hermes_home in project_root.parents or project_root.parent == hermes_home:
+            # If the install is inside ~/.myai/, just remove the hermes-agent subdir
+            if myai_home in project_root.parents or project_root.parent == myai_home:
                 shutil.rmtree(project_root)
                 log_success(f"Removed {project_root}")
             else:
@@ -291,18 +291,18 @@ def run_uninstall(args):
         log_warn(f"Could not fully remove {project_root}: {e}")
         log_info("You may need to manually remove it")
     
-    # 5. Optionally remove ~/.hermes/ data directory
+    # 5. Optionally remove ~/.myai/ data directory
     if full_uninstall:
         log_info("Removing configuration and data...")
         try:
-            if hermes_home.exists():
-                shutil.rmtree(hermes_home)
-                log_success(f"Removed {hermes_home}")
+            if myai_home.exists():
+                shutil.rmtree(myai_home)
+                log_success(f"Removed {myai_home}")
         except Exception as e:
-            log_warn(f"Could not fully remove {hermes_home}: {e}")
+            log_warn(f"Could not fully remove {myai_home}: {e}")
             log_info("You may need to manually remove it")
     else:
-        log_info(f"Keeping configuration and data in {hermes_home}")
+        log_info(f"Keeping configuration and data in {myai_home}")
     
     # Done
     print()
@@ -313,7 +313,7 @@ def run_uninstall(args):
     
     if not full_uninstall:
         print(color("Your configuration and data have been preserved:", Colors.CYAN))
-        print(f"  {hermes_home}/")
+        print(f"  {myai_home}/")
         print()
         print("To reinstall later with your existing settings:")
         print(color("  curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash", Colors.DIM))
@@ -322,5 +322,5 @@ def run_uninstall(args):
     print(color("Reload your shell to complete the process:", Colors.YELLOW))
     print("  source ~/.bashrc  # or ~/.zshrc")
     print()
-    print("Thank you for using MyAIOne Agent! ⚕")
+    print("Thank you for using MyAIOne Agent! 🤖")
     print()

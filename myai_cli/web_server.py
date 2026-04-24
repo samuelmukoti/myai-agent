@@ -36,7 +36,7 @@ from myai_cli.config import (
     OPTIONAL_ENV_VARS,
     get_config_path,
     get_env_path,
-    get_hermes_home,
+    get_myai_home,
     load_config,
     load_env,
     save_config,
@@ -234,6 +234,7 @@ _CATEGORY_MERGE: Dict[str, str] = {
     "human_delay": "display",
     "smart_model_routing": "agent",
     "dashboard": "display",
+    "code_execution": "terminal",
 }
 
 # Display order for tabs — unlisted categories sort alphabetically after these.
@@ -460,7 +461,7 @@ async def get_status():
     return {
         "version": __version__,
         "release_date": __release_date__,
-        "hermes_home": str(get_hermes_home()),
+        "myai_home": str(get_myai_home()),
         "config_path": str(get_config_path()),
         "env_path": str(get_env_path()),
         "config_version": current_ver,
@@ -838,7 +839,7 @@ def _anthropic_oauth_status() -> Dict[str, Any]:
     """Combined status across the three Anthropic credential sources we read.
 
     MyAIOne resolves Anthropic creds in this order at runtime:
-    1. ``~/.hermes/.anthropic_oauth.json`` — MyAIOne-managed PKCE flow
+    1. ``~/.myai/.anthropic_oauth.json`` — MyAIOne-managed PKCE flow
     2. ``~/.claude/.credentials.json`` — Claude Code CLI credentials (auto)
     3. ``ANTHROPIC_TOKEN`` / ``ANTHROPIC_API_KEY`` env vars
     The dashboard reports the highest-priority source that's actually present.
@@ -847,12 +848,12 @@ def _anthropic_oauth_status() -> Dict[str, Any]:
         from agent.anthropic_adapter import (
             read_hermes_oauth_credentials,
             read_claude_code_credentials,
-            _HERMES_OAUTH_FILE,
+            _MYAI_OAUTH_FILE,
         )
     except ImportError:
         read_claude_code_credentials = None  # type: ignore
         read_hermes_oauth_credentials = None  # type: ignore
-        _HERMES_OAUTH_FILE = None  # type: ignore
+        _MYAI_OAUTH_FILE = None  # type: ignore
 
     hermes_creds = None
     if read_hermes_oauth_credentials:
@@ -864,7 +865,7 @@ def _anthropic_oauth_status() -> Dict[str, Any]:
         return {
             "logged_in": True,
             "source": "hermes_pkce",
-            "source_label": f"MyAIOne PKCE ({_HERMES_OAUTH_FILE})",
+            "source_label": f"MyAIOne PKCE ({_MYAI_OAUTH_FILE})",
             "token_preview": _truncate_token(hermes_creds.get("accessToken")),
             "expires_at": hermes_creds.get("expiresAt"),
             "has_refresh_token": bool(hermes_creds.get("refreshToken")),
@@ -1070,9 +1071,9 @@ async def disconnect_oauth_provider(provider_id: str, request: Request):
     # want to undo a disconnect.
     if provider_id in ("anthropic", "claude-code"):
         try:
-            from agent.anthropic_adapter import _HERMES_OAUTH_FILE
-            if _HERMES_OAUTH_FILE.exists():
-                _HERMES_OAUTH_FILE.unlink()
+            from agent.anthropic_adapter import _MYAI_OAUTH_FILE
+            if _MYAI_OAUTH_FILE.exists():
+                _MYAI_OAUTH_FILE.unlink()
         except Exception:
             pass
         # Also clear the credential pool entry if present.
@@ -1108,7 +1109,7 @@ async def disconnect_oauth_provider(provider_id: str, request: Request):
 #     2. UI opens auth_url in a new tab. User authorizes, copies code.
 #     3. POST /api/providers/oauth/anthropic/submit { session_id, code }
 #          → server exchanges (code + verifier) → tokens at console.anthropic.com
-#          → persists to ~/.hermes/.anthropic_oauth.json AND credential pool
+#          → persists to ~/.myai/.anthropic_oauth.json AND credential pool
 #          → returns { ok: true, status: "approved" }
 #
 #   Device code (Nous, OpenAI Codex):
@@ -1182,14 +1183,14 @@ def _save_anthropic_oauth_creds(access_token: str, refresh_token: str, expires_a
     Mirrors what auth_commands.add_command does so the dashboard flow leaves
     the system in the same state as ``myai auth add anthropic``.
     """
-    from agent.anthropic_adapter import _HERMES_OAUTH_FILE
+    from agent.anthropic_adapter import _MYAI_OAUTH_FILE
     payload = {
         "accessToken": access_token,
         "refreshToken": refresh_token,
         "expiresAt": expires_at_ms,
     }
-    _HERMES_OAUTH_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _HERMES_OAUTH_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    _MYAI_OAUTH_FILE.parent.mkdir(parents=True, exist_ok=True)
+    _MYAI_OAUTH_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     # Best-effort credential-pool insert. Failure here doesn't invalidate
     # the file write — pool registration only matters for the rotation
     # strategy, not for runtime credential resolution.
@@ -1727,7 +1728,7 @@ async def get_logs(
     log_name = LOG_FILES.get(file)
     if not log_name:
         raise HTTPException(status_code=400, detail=f"Unknown log file: {file}")
-    log_path = get_hermes_home() / "logs" / log_name
+    log_path = get_myai_home() / "logs" / log_name
     if not log_path.exists():
         return {"file": file, "lines": []}
 
@@ -2066,8 +2067,8 @@ _BUILTIN_DASHBOARD_THEMES = [
 
 
 def _discover_user_themes() -> list:
-    """Scan ~/.hermes/dashboard-themes/*.yaml for user-created themes."""
-    themes_dir = get_hermes_home() / "dashboard-themes"
+    """Scan ~/.myai/dashboard-themes/*.yaml for user-created themes."""
+    themes_dir = get_myai_home() / "dashboard-themes"
     if not themes_dir.is_dir():
         return []
     result = []
@@ -2127,7 +2128,7 @@ def _discover_dashboard_plugins() -> list:
     """Scan plugins/*/dashboard/manifest.json for dashboard extensions.
 
     Checks three plugin sources (same as myai_cli.plugins):
-    1. User plugins:    ~/.hermes/plugins/<name>/dashboard/manifest.json
+    1. User plugins:    ~/.myai/plugins/<name>/dashboard/manifest.json
     2. Bundled plugins: <repo>/plugins/<name>/dashboard/manifest.json  (memory/, etc.)
     3. Project plugins: ./.hermes/plugins/  (only if MYAI_ENABLE_PROJECT_PLUGINS)
     """
@@ -2135,7 +2136,7 @@ def _discover_dashboard_plugins() -> list:
     seen_names: set = set()
 
     search_dirs = [
-        (get_hermes_home() / "plugins", "user"),
+        (get_myai_home() / "plugins", "user"),
         (PROJECT_ROOT / "plugins" / "memory", "bundled"),
         (PROJECT_ROOT / "plugins", "bundled"),
     ]

@@ -6,7 +6,7 @@ author: MyAIOne Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  myai:
     tags: [Reminders, tasks, todo, macOS, Apple]
 prerequisites:
   commands: [remindctl]

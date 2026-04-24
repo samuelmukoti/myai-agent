@@ -57,9 +57,9 @@ if _race_path.exists():
 # MyAIOne config paths
 # ═══════════════════════════════════════════════════════════════════
 
-HERMES_HOME = Path(os.getenv("MYAI_HOME", Path.home() / ".myai"))
-CONFIG_PATH = HERMES_HOME / "config.yaml"
-PREFILL_PATH = HERMES_HOME / "prefill.json"
+MYAI_HOME = Path(os.getenv("MYAI_HOME", Path.home() / ".myai"))
+CONFIG_PATH = MYAI_HOME / "config.yaml"
+PREFILL_PATH = MYAI_HOME / "prefill.json"
 
 # ═══════════════════════════════════════════════════════════════════
 # Canary queries — questions that typically trigger safety filters
@@ -407,7 +407,7 @@ def _write_config(system_prompt: str = None, prefill_file: str = None):
 
 
 def _write_prefill(prefill_messages: list):
-    """Write prefill messages to ~/.hermes/prefill.json."""
+    """Write prefill messages to ~/.myai/prefill.json."""
     with open(PREFILL_PATH, "w") as f:
         json.dump(prefill_messages, f, indent=2, ensure_ascii=False)
     return str(PREFILL_PATH)

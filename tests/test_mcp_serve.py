@@ -26,11 +26,11 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _isolate_hermes_home(tmp_path, monkeypatch):
-    """Redirect HERMES_HOME to a temp directory."""
+    """Redirect MYAI_HOME to a temp directory."""
     monkeypatch.setenv("MYAI_HOME", str(tmp_path))
     try:
         import myai_constants
-        monkeypatch.setattr(myai_constants, "get_hermes_home", lambda: tmp_path)
+        monkeypatch.setattr(myai_constants, "get_myai_home", lambda: tmp_path)
     except (ImportError, AttributeError):
         pass
     return tmp_path

@@ -1,4 +1,4 @@
-"""Tests for HermesCLI initialization -- catches configuration bugs
+"""Tests for MyAIOneCLI initialization -- catches configuration bugs
 that only manifest at runtime (not in mocked unit tests)."""
 
 import os
@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
 def _make_cli(env_overrides=None, config_overrides=None, **kwargs):
-    """Create a HermesCLI instance with minimal mocking."""
+    """Create a MyAIOneCLI instance with minimal mocking."""
     import importlib
 
     _clean_config = {
@@ -50,7 +50,7 @@ def _make_cli(env_overrides=None, config_overrides=None, **kwargs):
         _cli_mod = importlib.reload(_cli_mod)
         with patch.object(_cli_mod, "get_tool_definitions", return_value=[]), \
              patch.dict(_cli_mod.__dict__, {"CLI_CONFIG": _clean_config}):
-            return _cli_mod.HermesCLI(**kwargs)
+            return _cli_mod.MyAIOneCLI(**kwargs)
 
 
 class TestMaxTurnsResolution:
@@ -253,11 +253,11 @@ class TestRootLevelProviderOverride:
         """model.provider takes priority — root-level provider is only a fallback."""
         import yaml
 
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = myai_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "provider": "opencode-go",  # stale root-level key
             "model": {
@@ -267,7 +267,7 @@ class TestRootLevelProviderOverride:
         }))
 
         import cli
-        monkeypatch.setattr(cli, "_hermes_home", hermes_home)
+        monkeypatch.setattr(cli, "_myai_home", myai_home)
         cfg = cli.load_cli_config()
 
         assert cfg["model"]["provider"] == "openrouter"
@@ -276,11 +276,11 @@ class TestRootLevelProviderOverride:
         """Even when model.provider is the default 'auto', root-level provider is ignored."""
         import yaml
 
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / ".hermes"
+        myai_home.mkdir()
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = myai_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "provider": "opencode-go",  # stale root key
             "model": {
@@ -290,7 +290,7 @@ class TestRootLevelProviderOverride:
         }))
 
         import cli
-        monkeypatch.setattr(cli, "_hermes_home", hermes_home)
+        monkeypatch.setattr(cli, "_myai_home", myai_home)
         cfg = cli.load_cli_config()
 
         # Root-level "opencode-go" must NOT leak through

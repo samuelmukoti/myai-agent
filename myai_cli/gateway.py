@@ -23,13 +23,13 @@ from gateway.restart import (
 )
 from myai_cli.config import (
     get_env_value,
-    get_hermes_home,
+    get_myai_home,
     is_managed,
     managed_error,
     read_raw_config,
     save_env_value,
 )
-# display_hermes_home is imported lazily at call sites to avoid ImportError
+# display_myai_home is imported lazily at call sites to avoid ImportError
 # when myai_constants is cached from a pre-update version during `myai update`.
 from myai_cli.setup import (
     print_header, print_info, print_success, print_warning, print_error,
@@ -201,7 +201,7 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
         "myai gateway",
         "gateway/run.py",
     ]
-    current_home = str(get_hermes_home().resolve())
+    current_home = str(get_myai_home().resolve())
     current_profile_arg = _profile_arg(current_home)
     current_profile_name = current_profile_arg.split()[-1] if current_profile_arg else ""
 
@@ -438,7 +438,7 @@ def kill_gateway_processes(force: bool = False, exclude_pids: set | None = None,
 
 
 def stop_profile_gateway() -> bool:
-    """Stop only the gateway for the current profile (HERMES_HOME-scoped).
+    """Stop only the gateway for the current profile (MYAI_HOME-scoped).
 
     Uses the PID file written by start_gateway(), so it only kills the
     gateway belonging to this profile — not gateways from other profiles.
@@ -544,17 +544,17 @@ SERVICE_DESCRIPTION = "MyAIOne Agent Gateway - Messaging Platform Integration"
 
 
 def _profile_suffix() -> str:
-    """Derive a service-name suffix from the current HERMES_HOME.
+    """Derive a service-name suffix from the current MYAI_HOME.
 
     Returns ``""`` for the default root, the profile name for
     ``<root>/profiles/<name>``, or a short hash for any other path.
-    Works correctly in Docker (HERMES_HOME=/opt/data) and standard deployments.
+    Works correctly in Docker (MYAI_HOME=/opt/data) and standard deployments.
     """
     import hashlib
     import re
-    from myai_constants import get_default_hermes_root
-    home = get_hermes_home().resolve()
-    default = get_default_hermes_root().resolve()
+    from myai_constants import get_default_myai_root
+    home = get_myai_home().resolve()
+    default = get_default_myai_root().resolve()
     if home == default:
         return ""
     # Detect <root>/profiles/<name> pattern → use the profile name
@@ -566,25 +566,25 @@ def _profile_suffix() -> str:
             return parts[0]
     except ValueError:
         pass
-    # Fallback: short hash for arbitrary HERMES_HOME paths
+    # Fallback: short hash for arbitrary MYAI_HOME paths
     return hashlib.sha256(str(home).encode()).hexdigest()[:8]
 
 
-def _profile_arg(hermes_home: str | None = None) -> str:
-    """Return ``--profile <name>`` only when HERMES_HOME is a named profile.
+def _profile_arg(myai_home: str | None = None) -> str:
+    """Return ``--profile <name>`` only when MYAI_HOME is a named profile.
 
-    For ``~/.hermes/profiles/<name>``, returns ``"--profile <name>"``.
+    For ``~/.myai/profiles/<name>``, returns ``"--profile <name>"``.
     For the default profile or hash-based custom paths, returns the empty string.
 
     Args:
-        hermes_home: Optional explicit HERMES_HOME path. Defaults to the current
-            ``get_hermes_home()`` value. Should be passed when generating a
+        myai_home: Optional explicit MYAI_HOME path. Defaults to the current
+            ``get_myai_home()`` value. Should be passed when generating a
             service definition for a different user (e.g. system service).
     """
     import re
-    from myai_constants import get_default_hermes_root
-    home = Path(hermes_home or str(get_hermes_home())).resolve()
-    default = get_default_hermes_root().resolve()
+    from myai_constants import get_default_myai_root
+    home = Path(myai_home or str(get_myai_home())).resolve()
+    default = get_default_myai_root().resolve()
     if home == default:
         return ""
     profiles_root = (default / "profiles").resolve()
@@ -1159,22 +1159,22 @@ def _remap_path_for_user(path: str, target_home_dir: str) -> str:
 
 
 def _hermes_home_for_target_user(target_home_dir: str) -> str:
-    """Remap the current HERMES_HOME to the equivalent under a target user's home.
+    """Remap the current MYAI_HOME to the equivalent under a target user's home.
 
-    When installing a system service via sudo, get_hermes_home() resolves to
+    When installing a system service via sudo, get_myai_home() resolves to
     root's home.  This translates it to the target user's equivalent path:
       /root/.hermes                    → /home/alice/.hermes
       /root/.hermes/profiles/coder     → /home/alice/.hermes/profiles/coder
       /opt/custom-hermes               → /opt/custom-hermes  (kept as-is)
     """
-    current_hermes = get_hermes_home().resolve()
-    # Accept either the new ~/.myai or the legacy ~/.hermes as "the default"
+    current_hermes = get_myai_home().resolve()
+    # Accept either the new ~/.myai or the legacy ~/.myai as "the default"
     # for this user, so gateway migrations continue to work across the rename.
     home = Path.home()
     default_candidates = [(home / ".myai").resolve(), (home / ".hermes").resolve()]
     target_default = Path(target_home_dir) / ".myai"
 
-    # Default ~/.myai (or legacy ~/.hermes) → remap to target user's default
+    # Default ~/.myai (or legacy ~/.myai) → remap to target user's default
     if current_hermes in default_candidates:
         return str(target_default)
 
@@ -1186,7 +1186,7 @@ def _hermes_home_for_target_user(target_home_dir: str) -> str:
         except ValueError:
             continue
 
-    # Completely custom path (not under ~/.myai or ~/.hermes) — keep as-is
+    # Completely custom path (not under ~/.myai or ~/.myai) — keep as-is
     return str(current_hermes)
 
 
@@ -1210,8 +1210,8 @@ def generate_systemd_unit(system: bool = False, run_as_user: str | None = None) 
 
     if system:
         username, group_name, home_dir = _system_service_identity(run_as_user)
-        hermes_home = _hermes_home_for_target_user(home_dir)
-        profile_arg = _profile_arg(hermes_home)
+        myai_home = _hermes_home_for_target_user(home_dir)
+        profile_arg = _profile_arg(myai_home)
         # Remap all paths that may resolve under the calling user's home
         # (e.g. /root/) to the target user's home so the service can
         # actually access them.
@@ -1242,7 +1242,7 @@ Environment="USER={username}"
 Environment="LOGNAME={username}"
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="MYAI_HOME={hermes_home}"
+Environment="MYAI_HOME={myai_home}"
 Restart=on-failure
 RestartSec=30
 RestartForceExitStatus={GATEWAY_SERVICE_RESTART_EXIT_CODE}
@@ -1257,8 +1257,8 @@ StandardError=journal
 WantedBy=multi-user.target
 """
 
-    hermes_home = str(get_hermes_home().resolve())
-    profile_arg = _profile_arg(hermes_home)
+    myai_home = str(get_myai_home().resolve())
+    profile_arg = _profile_arg(myai_home)
     path_entries.extend(_build_user_local_paths(Path.home(), path_entries))
     path_entries.extend(common_bin_paths)
     sane_path = ":".join(path_entries)
@@ -1274,7 +1274,7 @@ ExecStart={python_path} -m myai_cli.main{f" {profile_arg}" if profile_arg else "
 WorkingDirectory={working_dir}
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="MYAI_HOME={hermes_home}"
+Environment="MYAI_HOME={myai_home}"
 Restart=on-failure
 RestartSec=30
 RestartForceExitStatus={GATEWAY_SERVICE_RESTART_EXIT_CODE}
@@ -1675,11 +1675,11 @@ def _launchd_domain() -> str:
 def generate_launchd_plist() -> str:
     python_path = get_python_path()
     working_dir = str(PROJECT_ROOT)
-    hermes_home = str(get_hermes_home().resolve())
-    log_dir = get_hermes_home() / "logs"
+    myai_home = str(get_myai_home().resolve())
+    log_dir = get_myai_home() / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     label = get_launchd_label()
-    profile_arg = _profile_arg(hermes_home)
+    profile_arg = _profile_arg(myai_home)
     # Build a sane PATH for the launchd plist.  launchd provides only a
     # minimal default (/usr/bin:/bin:/usr/sbin:/sbin) which misses Homebrew,
     # nvm, cargo, etc.  We prepend venv/bin and node_modules/.bin (matching
@@ -1739,7 +1739,7 @@ def generate_launchd_plist() -> str:
         <key>VIRTUAL_ENV</key>
         <string>{venv_dir}</string>
         <key>MYAI_HOME</key>
-        <string>{hermes_home}</string>
+        <string>{myai_home}</string>
     </dict>
     
     <key>RunAtLoad</key>
@@ -1815,7 +1815,7 @@ def launchd_install(force: bool = False):
     print()
     print("Next steps:")
     print("  myai gateway status             # Check status")
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     print(f"  tail -f {_dhh()}/logs/gateway.log  # View logs")
 
 def launchd_uninstall():
@@ -1876,7 +1876,7 @@ def _wait_for_gateway_exit(timeout: float = 10.0, force_after: float | None = 5.
 
     Uses the PID from the gateway.pid file — not launchd labels — so this
     works correctly when multiple gateway instances run under separate
-    HERMES_HOME directories.
+    MYAI_HOME directories.
 
     Args:
         timeout: Total seconds to wait before giving up.
@@ -1977,7 +1977,7 @@ def launchd_status(deep: bool = False):
         print("  Run: myai gateway start")
     
     if deep:
-        log_file = get_hermes_home() / "logs" / "gateway.log"
+        log_file = get_myai_home() / "logs" / "gateway.log"
         if log_file.exists():
             print()
             print("Recent logs:")
@@ -2003,7 +2003,7 @@ def run_gateway(verbose: int = 0, quiet: bool = False, replace: bool = False):
     from gateway.run import start_gateway
     
     print("┌─────────────────────────────────────────────────────────┐")
-    print("│           ⚕ MyAIOne Gateway Starting...                 │")
+    print("│           🤖 MyAIOne Gateway Starting...                 │")
     print("├─────────────────────────────────────────────────────────┤")
     print("│  Messaging platforms + cron scheduler                    │")
     print("│  Press Ctrl+C to stop                                   │")
@@ -2400,7 +2400,7 @@ def _platform_status(platform: dict) -> str:
     val = get_env_value(token_var)
     if token_var == "WHATSAPP_ENABLED":
         if val and val.lower() == "true":
-            session_file = get_hermes_home() / "whatsapp" / "session" / "creds.json"
+            session_file = get_myai_home() / "whatsapp" / "session" / "creds.json"
             if session_file.exists():
                 return "configured + paired"
             return "enabled, not paired"
@@ -2718,7 +2718,7 @@ def _setup_weixin():
     print()
     print_info("  1. MyAIOne will open Tencent iLink QR login in this terminal.")
     print_info("  2. Use WeChat to scan and confirm the QR code.")
-    from myai_constants import display_hermes_home as _dhh
+    from myai_constants import display_myai_home as _dhh
     print_info(f"  3. MyAIOne will store the returned account_id/token in {_dhh()}/.env.")
     print_info("  4. This adapter supports native text, image, video, and document delivery.")
 
@@ -2749,7 +2749,7 @@ def _setup_weixin():
 
     import asyncio
     try:
-        credentials = asyncio.run(qr_login(str(get_hermes_home())))
+        credentials = asyncio.run(qr_login(str(get_myai_home())))
     except KeyboardInterrupt:
         print()
         print_warning("  Weixin setup cancelled.")
@@ -3342,7 +3342,7 @@ def gateway_setup():
 
     print()
     print(color("┌─────────────────────────────────────────────────────────┐", Colors.MAGENTA))
-    print(color("│             ⚕ Gateway Setup                            │", Colors.MAGENTA))
+    print(color("│             🤖 Gateway Setup                            │", Colors.MAGENTA))
     print(color("├─────────────────────────────────────────────────────────┤", Colors.MAGENTA))
     print(color("│  Configure messaging platforms and the gateway service. │", Colors.MAGENTA))
     print(color("│  Press Ctrl+C at any time to exit.                     │", Colors.MAGENTA))
@@ -3482,7 +3482,7 @@ def gateway_setup():
                 print_info("  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'")
             else:
                 if is_termux():
-                    from myai_constants import display_hermes_home as _dhh
+                    from myai_constants import display_myai_home as _dhh
                     print_info("  Termux does not use systemd/launchd services.")
                     print_info("  Run in foreground: myai gateway run")
                     print_info(f"  Or start it manually in the background (best effort): nohup myai gateway run >{_dhh()}/logs/gateway.log 2>&1 &")
@@ -3544,7 +3544,7 @@ def gateway_command(args):
             print()
             print("  myai gateway run                              # direct foreground")
             print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
-            print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  nohup myai gateway run > ~/.myai/logs/gateway.log 2>&1 &  # background")
             sys.exit(1)
         elif is_container():
             print("Service installation is not needed inside a Docker container.")
@@ -3609,7 +3609,7 @@ def gateway_command(args):
             print()
             print("  myai gateway run                              # direct foreground")
             print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
-            print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  nohup myai gateway run > ~/.myai/logs/gateway.log 2>&1 &  # background")
             print()
             print("To enable systemd: add systemd=true to /etc/wsl.conf and run 'wsl --shutdown' from PowerShell.")
             sys.exit(1)
@@ -3811,10 +3811,10 @@ def gateway_command(args):
                 print("To start:")
                 print("  myai gateway run      # Run in foreground")
                 if is_termux():
-                    print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # Best-effort background start")
+                    print("  nohup myai gateway run > ~/.myai/logs/gateway.log 2>&1 &  # Best-effort background start")
                 elif is_wsl():
                     print("  tmux new -s hermes 'myai gateway run'         # persistent via tmux")
-                    print("  nohup myai gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+                    print("  nohup myai gateway run > ~/.myai/logs/gateway.log 2>&1 &  # background")
                 else:
                     print("  myai gateway install  # Install as user service")
                     print("  sudo myai gateway install --system  # Install as boot-time system service")

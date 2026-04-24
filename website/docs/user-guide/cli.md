@@ -32,7 +32,7 @@ hermes chat --provider openrouter  # Force OpenRouter
 hermes chat --toolsets "web,terminal,skills"
 
 # Start with one or more skills preloaded
-hermes -s hermes-agent-dev,github-auth
+myai -s myaione-agent,github-auth
 hermes chat -s github-pr-workflow -q "open a draft PR"
 
 # Resume previous sessions
@@ -150,7 +150,7 @@ Then type `/status` or `/gpu` in any chat. See the [Configuration guide](/docs/u
 If you already know which skills you want active for the session, pass them at launch time:
 
 ```bash
-hermes -s hermes-agent-dev,github-auth
+myai -s myaione-agent,github-auth
 hermes chat -s github-pr-workflow -s github-auth
 ```
 

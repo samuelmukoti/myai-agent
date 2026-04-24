@@ -5,7 +5,7 @@ version: 2.3.0
 author: MyAIOne Agent
 license: MIT
 metadata:
-  hermes:
+  myai:
     tags: [PDF, Documents, Research, Arxiv, Text-Extraction, OCR]
     related_skills: [powerpoint]
 ---

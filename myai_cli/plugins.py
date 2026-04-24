@@ -4,7 +4,7 @@ MyAIOne Plugin System
 
 Discovers, loads, and manages plugins from three sources:
 
-1. **User plugins**   – ``~/.hermes/plugins/<name>/``
+1. **User plugins**   – ``~/.myai/plugins/<name>/``
 2. **Project plugins** – ``./.hermes/plugins/<name>/`` (opt-in via
    ``MYAI_ENABLE_PROJECT_PLUGINS``)
 3. **Pip plugins**     – packages that expose the ``hermes_agent.plugins``
@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from utils import env_var_enabled
 
 try:
@@ -353,7 +353,7 @@ class PluginContext:
 
         The skill becomes resolvable as ``'<plugin_name>:<name>'`` via
         ``skill_view()``.  It does **not** enter the flat
-        ``~/.hermes/skills/`` tree and is **not** listed in the system
+        ``~/.myai/skills/`` tree and is **not** listed in the system
         prompt's ``<available_skills>`` index — plugin skills are
         opt-in explicit loads only.
 
@@ -420,8 +420,8 @@ class PluginManager:
 
         manifests: List[PluginManifest] = []
 
-        # 1. User plugins (~/.hermes/plugins/)
-        user_dir = get_hermes_home() / "plugins"
+        # 1. User plugins (~/.myai/plugins/)
+        user_dir = get_myai_home() / "plugins"
         manifests.extend(self._scan_directory(user_dir, source="user"))
 
         # 2. Project plugins (./.hermes/plugins/)

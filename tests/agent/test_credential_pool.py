@@ -9,9 +9,9 @@ import pytest
 
 
 def _write_auth_store(tmp_path, payload: dict) -> None:
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps(payload, indent=2))
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps(payload, indent=2))
 
 
 def test_fill_first_selection_skips_recently_exhausted_entry(tmp_path, monkeypatch):
@@ -452,7 +452,7 @@ def test_load_pool_migrates_nous_provider_state(tmp_path, monkeypatch):
                 "nous": {
                     "portal_base_url": "https://portal.example.com",
                     "inference_base_url": "https://inference.example.com/v1",
-                    "client_id": "hermes-cli",
+                    "client_id": "myai-cli",
                     "token_type": "Bearer",
                     "scope": "inference:mint_agent_key",
                     "access_token": "access-token",
@@ -532,7 +532,7 @@ def test_load_pool_migrates_nous_provider_state_preserves_tls(tmp_path, monkeypa
                 "nous": {
                     "portal_base_url": "https://portal.example.com",
                     "inference_base_url": "https://inference.example.com/v1",
-                    "client_id": "hermes-cli",
+                    "client_id": "myai-cli",
                     "token_type": "Bearer",
                     "scope": "inference:mint_agent_key",
                     "access_token": "access-token",

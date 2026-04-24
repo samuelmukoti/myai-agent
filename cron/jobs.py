@@ -1,8 +1,8 @@
 """
 Cron job storage and management.
 
-Jobs are stored in ~/.hermes/cron/jobs.json
-Output is saved to ~/.hermes/cron/output/{job_id}/{timestamp}.md
+Jobs are stored in ~/.myai/cron/jobs.json
+Output is saved to ~/.myai/cron/output/{job_id}/{timestamp}.md
 """
 
 import copy
@@ -14,7 +14,7 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from myai_constants import get_hermes_home
+from myai_constants import get_myai_home
 from typing import Optional, Dict, List, Any
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ except ImportError:
 # Configuration
 # =============================================================================
 
-HERMES_DIR = get_hermes_home().resolve()
+HERMES_DIR = get_myai_home().resolve()
 CRON_DIR = HERMES_DIR / "cron"
 JOBS_FILE = CRON_DIR / "jobs.json"
 OUTPUT_DIR = CRON_DIR / "output"

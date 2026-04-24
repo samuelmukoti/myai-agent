@@ -11,11 +11,11 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from myai_constants import get_hermes_home
-from myai_cli.env_loader import load_hermes_dotenv
+from myai_constants import get_myai_home
+from myai_cli.env_loader import load_myai_dotenv
 
-_hermes_home = get_hermes_home()
-load_hermes_dotenv(hermes_home=_hermes_home, project_env=Path(__file__).parent.parent / ".env")
+_myai_home = get_myai_home()
+load_myai_dotenv(myai_home=_myai_home, project_env=Path(__file__).parent.parent / ".env")
 
 try:
     from myai_cli.banner import prefetch_update_check
@@ -44,7 +44,7 @@ sys.stdout = sys.stderr
 
 
 class _SlashWorker:
-    """Persistent HermesCLI subprocess for slash commands."""
+    """Persistent MyAIOneCLI subprocess for slash commands."""
 
     def __init__(self, session_key: str, model: str):
         self._lock = threading.Lock()
@@ -233,7 +233,7 @@ def _load_cfg() -> dict:
     global _cfg_cache, _cfg_mtime
     try:
         import yaml
-        p = _hermes_home / "config.yaml"
+        p = _myai_home / "config.yaml"
         mtime = p.stat().st_mtime if p.exists() else None
         with _cfg_lock:
             if _cfg_cache is not None and _cfg_mtime == mtime:
@@ -255,7 +255,7 @@ def _load_cfg() -> dict:
 def _save_cfg(cfg: dict):
     global _cfg_cache, _cfg_mtime
     import yaml
-    path = _hermes_home / "config.yaml"
+    path = _myai_home / "config.yaml"
     with open(path, "w") as f:
         yaml.safe_dump(cfg, f)
     with _cfg_lock:
@@ -1493,7 +1493,7 @@ def _(rid, params: dict) -> dict:
         return _err(rid, 5027, f"clipboard unavailable: {e}")
 
     session["image_counter"] = session.get("image_counter", 0) + 1
-    img_dir = _hermes_home / "images"
+    img_dir = _myai_home / "images"
     img_dir.mkdir(parents=True, exist_ok=True)
     img_path = img_dir / f"clip_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{session['image_counter']}.png"
 
@@ -1863,8 +1863,8 @@ def _(rid, params: dict) -> dict:
         except Exception as e:
             return _err(rid, 5013, str(e))
     if key == "profile":
-        from myai_constants import display_hermes_home
-        return _ok(rid, {"home": str(_hermes_home), "display": display_hermes_home()})
+        from myai_constants import display_myai_home
+        return _ok(rid, {"home": str(_myai_home), "display": display_myai_home()})
     if key == "full":
         return _ok(rid, {"config": _load_cfg()})
     if key == "prompt":
@@ -1900,7 +1900,7 @@ def _(rid, params: dict) -> dict:
         on = bool(_load_cfg().get("display", {}).get("tui_statusbar", True))
         return _ok(rid, {"value": "on" if on else "off"})
     if key == "mtime":
-        cfg_path = _hermes_home / "config.yaml"
+        cfg_path = _myai_home / "config.yaml"
         try:
             return _ok(rid, {"mtime": cfg_path.stat().st_mtime if cfg_path.exists() else 0})
         except Exception:
@@ -2241,7 +2241,7 @@ def _(rid, params: dict) -> dict:
 
     _paste_counter += 1
     line_count = text.count('\n') + 1
-    paste_dir = _hermes_home / "pastes"
+    paste_dir = _myai_home / "pastes"
     paste_dir.mkdir(parents=True, exist_ok=True)
 
     from datetime import datetime
@@ -2710,7 +2710,7 @@ def _(rid, params: dict) -> dict:
             "title": "Environment",
             "rows": [
                 ["Working Dir", os.getcwd()],
-                ["Config File", str(_hermes_home / "config.yaml")],
+                ["Config File", str(_myai_home / "config.yaml")],
             ]
         }]
         return _ok(rid, {"sections": sections})

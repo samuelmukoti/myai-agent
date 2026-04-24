@@ -86,12 +86,12 @@ class TestResolveVerifyFallback:
 
 
 def _setup_nous_auth(
-    hermes_home: Path,
+    myai_home: Path,
     *,
     access_token: str = "access-old",
     refresh_token: str = "refresh-old",
 ) -> None:
-    hermes_home.mkdir(parents=True, exist_ok=True)
+    myai_home.mkdir(parents=True, exist_ok=True)
     auth_store = {
         "version": 1,
         "active_provider": "nous",
@@ -99,7 +99,7 @@ def _setup_nous_auth(
             "nous": {
                 "portal_base_url": "https://portal.example.com",
                 "inference_base_url": "https://inference.example.com/v1",
-                "client_id": "hermes-cli",
+                "client_id": "myai-cli",
                 "token_type": "Bearer",
                 "scope": "inference:mint_agent_key",
                 "access_token": access_token,
@@ -116,7 +116,7 @@ def _setup_nous_auth(
             }
         },
     }
-    (hermes_home / "auth.json").write_text(json.dumps(auth_store, indent=2))
+    (myai_home / "auth.json").write_text(json.dumps(auth_store, indent=2))
 
 
 def _mint_payload(api_key: str = "agent-key") -> dict:
@@ -137,13 +137,13 @@ def test_get_nous_auth_status_checks_credential_pool(tmp_path, monkeypatch):
     """
     from myai_cli.auth import get_nous_auth_status
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
     # Empty auth store — no Nous provider entry
-    (hermes_home / "auth.json").write_text(json.dumps({
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     # Seed the credential pool with a Nous entry
     from agent.credential_pool import PooledCredential, load_pool
@@ -173,9 +173,9 @@ def test_get_nous_auth_status_auth_store_fallback(tmp_path, monkeypatch):
     """
     from myai_cli.auth import get_nous_auth_status
 
-    hermes_home = tmp_path / "hermes"
-    _setup_nous_auth(hermes_home, access_token="at-123")
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    myai_home = tmp_path / "hermes"
+    _setup_nous_auth(myai_home, access_token="at-123")
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     status = get_nous_auth_status()
     assert status["logged_in"] is True
@@ -188,21 +188,21 @@ def test_get_nous_auth_status_empty_returns_not_logged_in(tmp_path, monkeypatch)
     """
     from myai_cli.auth import get_nous_auth_status
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     status = get_nous_auth_status()
     assert status["logged_in"] is False
 
 
 def test_refresh_token_persisted_when_mint_returns_insufficient_credits(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_nous_auth(hermes_home, refresh_token="refresh-old")
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    myai_home = tmp_path / "hermes"
+    _setup_nous_auth(myai_home, refresh_token="refresh-old")
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     refresh_calls = []
     mint_calls = {"count": 0}
@@ -241,9 +241,9 @@ def test_refresh_token_persisted_when_mint_returns_insufficient_credits(tmp_path
 
 
 def test_refresh_token_persisted_when_mint_times_out(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_nous_auth(hermes_home, refresh_token="refresh-old")
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    myai_home = tmp_path / "hermes"
+    _setup_nous_auth(myai_home, refresh_token="refresh-old")
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     def _fake_refresh_access_token(*, client, portal_base_url, client_id, refresh_token):
         return {
@@ -269,9 +269,9 @@ def test_refresh_token_persisted_when_mint_times_out(tmp_path, monkeypatch):
 
 
 def test_mint_retry_uses_latest_rotated_refresh_token(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_nous_auth(hermes_home, refresh_token="refresh-old")
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    myai_home = tmp_path / "hermes"
+    _setup_nous_auth(myai_home, refresh_token="refresh-old")
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     refresh_calls = []
     mint_calls = {"count": 0}
@@ -317,11 +317,11 @@ class TestLoginNousSkipKeepsCurrent:
 
     def _setup_home_with_openrouter(self, tmp_path, monkeypatch):
         import yaml
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir(parents=True, exist_ok=True)
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = myai_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "model": {
                 "provider": "openrouter",
@@ -329,13 +329,13 @@ class TestLoginNousSkipKeepsCurrent:
             },
         }, sort_keys=False))
 
-        auth_path = hermes_home / "auth.json"
+        auth_path = myai_home / "auth.json"
         auth_path.write_text(json.dumps({
             "version": 1,
             "active_provider": "openrouter",
             "providers": {"openrouter": {"api_key": "sk-or-fake"}},
         }))
-        return hermes_home, config_path, auth_path
+        return myai_home, config_path, auth_path
 
     def _patch_login_internals(self, monkeypatch, *, prompt_returns):
         """Patch OAuth + model-list + prompt so _login_nous doesn't hit network."""
@@ -374,7 +374,7 @@ class TestLoginNousSkipKeepsCurrent:
         import yaml
         from myai_cli.auth import PROVIDER_REGISTRY, _login_nous
 
-        hermes_home, config_path, auth_path = self._setup_home_with_openrouter(
+        myai_home, config_path, auth_path = self._setup_home_with_openrouter(
             tmp_path, monkeypatch,
         )
         self._patch_login_internals(monkeypatch, prompt_returns=None)
@@ -405,7 +405,7 @@ class TestLoginNousSkipKeepsCurrent:
         import yaml
         from myai_cli.auth import PROVIDER_REGISTRY, _login_nous
 
-        hermes_home, config_path, auth_path = self._setup_home_with_openrouter(
+        myai_home, config_path, auth_path = self._setup_home_with_openrouter(
             tmp_path, monkeypatch,
         )
         self._patch_login_internals(
@@ -432,11 +432,11 @@ class TestLoginNousSkipKeepsCurrent:
         import yaml
         from myai_cli.auth import PROVIDER_REGISTRY, _login_nous
 
-        hermes_home = tmp_path / "hermes"
-        hermes_home.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+        myai_home = tmp_path / "hermes"
+        myai_home.mkdir(parents=True, exist_ok=True)
+        monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = myai_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({"model": {}}, sort_keys=False))
 
         # No auth.json yet — simulates first-run before any OAuth
@@ -448,7 +448,7 @@ class TestLoginNousSkipKeepsCurrent:
         )
         _login_nous(args, PROVIDER_REGISTRY["nous"])
 
-        auth_path = hermes_home / "auth.json"
+        auth_path = myai_home / "auth.json"
         auth_after = json.loads(auth_path.read_text())
         # active_provider should NOT be set to "nous" after Skip
         assert auth_after.get("active_provider") in (None, "")
@@ -467,7 +467,7 @@ def _full_state_fixture() -> dict:
     return {
         "portal_base_url": "https://portal.example.com",
         "inference_base_url": "https://inference.example.com/v1",
-        "client_id": "hermes-cli",
+        "client_id": "myai-cli",
         "scope": "inference:mint_agent_key",
         "token_type": "Bearer",
         "access_token": "access-tok",
@@ -497,12 +497,12 @@ def test_persist_nous_credentials_writes_both_pool_and_providers(tmp_path, monke
     """
     from myai_cli.auth import persist_nous_credentials, NOUS_DEVICE_CODE_SOURCE
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     entry = persist_nous_credentials(_full_state_fixture())
 
@@ -510,7 +510,7 @@ def test_persist_nous_credentials_writes_both_pool_and_providers(tmp_path, monke
     assert entry.provider == "nous"
     assert entry.source == NOUS_DEVICE_CODE_SOURCE
 
-    payload = json.loads((hermes_home / "auth.json").read_text())
+    payload = json.loads((myai_home / "auth.json").read_text())
 
     # providers.nous populated with the full state (new behaviour)
     singleton = payload["providers"]["nous"]
@@ -538,12 +538,12 @@ def test_persist_nous_credentials_allows_recovery_from_401(tmp_path, monkeypatch
     """
     from myai_cli.auth import persist_nous_credentials, resolve_nous_runtime_credentials
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     persist_nous_credentials(_full_state_fixture())
 
@@ -580,12 +580,12 @@ def test_persist_nous_credentials_idempotent_no_duplicate_pool_entries(tmp_path,
     """
     from myai_cli.auth import persist_nous_credentials, NOUS_DEVICE_CODE_SOURCE
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     first = _full_state_fixture()
     persist_nous_credentials(first)
@@ -595,7 +595,7 @@ def test_persist_nous_credentials_idempotent_no_duplicate_pool_entries(tmp_path,
     second["agent_key"] = "agent-key-second"
     persist_nous_credentials(second)
 
-    payload = json.loads((hermes_home / "auth.json").read_text())
+    payload = json.loads((myai_home / "auth.json").read_text())
 
     # providers.nous reflects the latest write (singleton semantics)
     assert payload["providers"]["nous"]["access_token"] == "access-second"
@@ -619,12 +619,12 @@ def test_persist_nous_credentials_reloads_pool_after_singleton_write(tmp_path, m
     """
     from myai_cli.auth import persist_nous_credentials, NOUS_DEVICE_CODE_SOURCE
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     entry = persist_nous_credentials(_full_state_fixture())
     assert entry is not None
@@ -645,12 +645,12 @@ def test_persist_nous_credentials_embeds_custom_label(tmp_path, monkeypatch):
     """
     from myai_cli.auth import persist_nous_credentials, NOUS_DEVICE_CODE_SOURCE
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     entry = persist_nous_credentials(_full_state_fixture(), label="my-personal")
     assert entry is not None
@@ -659,7 +659,7 @@ def test_persist_nous_credentials_embeds_custom_label(tmp_path, monkeypatch):
 
     # providers.nous carries the label so re-seeding on the next load_pool
     # doesn't overwrite it with the auto-derived fingerprint.
-    payload = json.loads((hermes_home / "auth.json").read_text())
+    payload = json.loads((myai_home / "auth.json").read_text())
     assert payload["providers"]["nous"]["label"] == "my-personal"
 
 
@@ -670,12 +670,12 @@ def test_persist_nous_credentials_custom_label_survives_reseed(tmp_path, monkeyp
     from myai_cli.auth import persist_nous_credentials
     from agent.credential_pool import load_pool
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     persist_nous_credentials(_full_state_fixture(), label="work-acct")
 
@@ -693,12 +693,12 @@ def test_persist_nous_credentials_no_label_uses_auto_derived(tmp_path, monkeypat
     """
     from myai_cli.auth import persist_nous_credentials
 
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({
+    myai_home = tmp_path / "hermes"
+    myai_home.mkdir(parents=True, exist_ok=True)
+    (myai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
 
     entry = persist_nous_credentials(_full_state_fixture())
     assert entry is not None
@@ -709,5 +709,5 @@ def test_persist_nous_credentials_no_label_uses_auto_derived(tmp_path, monkeypat
     assert entry.label != "my-personal"
 
     # No "label" key embedded in providers.nous when the caller didn't supply one.
-    payload = json.loads((hermes_home / "auth.json").read_text())
+    payload = json.loads((myai_home / "auth.json").read_text())
     assert "label" not in payload["providers"]["nous"]

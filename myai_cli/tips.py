@@ -207,14 +207,14 @@ TIPS = [
     "SSRF protection blocks private networks, loopback, link-local, and cloud metadata addresses.",
     "Tirith pre-exec scanning detects homograph URL spoofing and pipe-to-interpreter patterns.",
     "MCP subprocesses receive a filtered environment — only safe system vars pass through.",
-    "Context files (.hermes.md, AGENTS.md) are security-scanned for prompt injection before loading.",
+    "Context files (.myai.md, AGENTS.md) are security-scanned for prompt injection before loading.",
     "command_allowlist in config.yaml permanently approves specific shell command patterns.",
 
     # --- Context & Compression ---
     "Context auto-compresses when it reaches the threshold — memories are flushed and history summarized.",
     "The status bar turns yellow, then orange, then red as context fills up.",
-    "SOUL.md at ~/.hermes/SOUL.md is the agent's primary identity — customize it to shape behavior.",
-    "MyAIOne loads project context from .hermes.md, AGENTS.md, CLAUDE.md, or .cursorrules (first match).",
+    "SOUL.md at ~/.myai/SOUL.md is the agent's primary identity — customize it to shape behavior.",
+    "MyAIOne loads project context from .myai.md, AGENTS.md, CLAUDE.md, or .cursorrules (first match).",
     "Subdirectory AGENTS.md files are discovered progressively as the agent navigates into folders.",
     "Context files are capped at 20,000 characters with smart head/tail truncation.",
 
@@ -234,7 +234,7 @@ TIPS = [
     "Checkpoints have zero overhead when no files are modified — enabled by default.",
     "A pre-rollback snapshot is saved automatically so you can undo the undo.",
     "/rollback also undoes the conversation turn, so the agent doesn't remember rolled-back changes.",
-    "Checkpoints use shadow repos in ~/.hermes/checkpoints/ — your project's .git is never touched.",
+    "Checkpoints use shadow repos in ~/.myai/checkpoints/ — your project's .git is never touched.",
 
     # --- Batch & Data ---
     "batch_runner.py processes hundreds of prompts in parallel for training data generation.",
@@ -264,12 +264,12 @@ TIPS = [
     "myai status --deep runs deeper diagnostic checks across all components.",
 
     # --- Hidden Gems & Power-User Tricks ---
-    "BOOT.md at ~/.hermes/BOOT.md runs automatically on every gateway start — use it for startup checks.",
+    "BOOT.md at ~/.myai/BOOT.md runs automatically on every gateway start — use it for startup checks.",
     "Cron jobs can attach a Python script (--script) whose stdout is injected into the prompt as context.",
-    "Cron scripts live in ~/.hermes/scripts/ and run before the agent — perfect for data collection pipelines.",
+    "Cron scripts live in ~/.myai/scripts/ and run before the agent — perfect for data collection pipelines.",
     "prefill_messages_file in config.yaml injects few-shot examples into every API call, never saved to history.",
     "SOUL.md completely replaces the agent's default identity — rewrite it to make MyAIOne your own.",
-    "SOUL.md is auto-seeded with a default personality on first run. Edit ~/.hermes/SOUL.md to customize.",
+    "SOUL.md is auto-seeded with a default personality on first run. Edit ~/.myai/SOUL.md to customize.",
     "/compress <focus topic> allocates 60-70% of the summary budget to your topic and aggressively trims the rest.",
     "On second+ compression, the compressor updates the previous summary instead of starting from scratch.",
     "Before a gateway session reset, MyAIOne auto-flushes important facts to memory in the background.",
@@ -291,13 +291,13 @@ TIPS = [
     "agent.restart_drain_timeout (default 60s) lets running agents finish before a gateway restart takes effect.",
     "The gateway caches AIAgent instances per session — destroying this cache breaks Anthropic prompt caching.",
     "Any website can expose skills via /.well-known/skills/index.json — the skills hub discovers them automatically.",
-    "The skills audit log at ~/.hermes/skills/.hub/audit.log tracks every install and removal operation.",
+    "The skills audit log at ~/.myai/skills/.hub/audit.log tracks every install and removal operation.",
     "Stale git worktrees are auto-cleaned: 24-72h old with no unpushed commits get pruned on startup.",
-    "Each profile gets its own subprocess HOME at HERMES_HOME/home/ — isolated git, ssh, npm, gh configs.",
+    "Each profile gets its own subprocess HOME at MYAI_HOME/home/ — isolated git, ssh, npm, gh configs.",
     "MYAI_HOME_MODE env var (octal, e.g. 0701) sets custom directory permissions for web server traversal.",
-    "Container mode: place .container-mode in HERMES_HOME and the host CLI auto-execs into the container.",
+    "Container mode: place .container-mode in MYAI_HOME and the host CLI auto-execs into the container.",
     "Ctrl+C has 5 priority tiers: cancel recording → cancel prompts → cancel picker → interrupt agent → exit.",
-    "Every interrupt during an agent run is logged to ~/.hermes/interrupt_debug.log with timestamps.",
+    "Every interrupt during an agent run is logged to ~/.myai/interrupt_debug.log with timestamps.",
     "BROWSER_CDP_URL connects browser tools to any running Chrome — accepts WebSocket, HTTP, or host:port.",
     "BROWSERBASE_ADVANCED_STEALTH=true enables advanced anti-detection with custom Chromium (Scale Plan).",
     "The CLI auto-switches to compact mode in terminals narrower than 80 columns.",
@@ -330,9 +330,9 @@ TIPS = [
     "In interrupt mode, slash commands typed during agent execution bypass interrupt logic and run immediately.",
     "HERMES_DEV=1 bypasses container mode detection for local development.",
     "Each MCP server gets its own toolset (mcp-servername) that can be toggled independently via myai tools.",
-    "MCP ${ENV_VAR} placeholders in config are resolved at server spawn — including vars from ~/.hermes/.env.",
+    "MCP ${ENV_VAR} placeholders in config are resolved at server spawn — including vars from ~/.myai/.env.",
     "Skills from trusted repos (NousResearch) get a 'trusted' security level; community skills get extra scanning.",
-    "The skills quarantine at ~/.hermes/skills/.hub/quarantine/ holds skills pending security review.",
+    "The skills quarantine at ~/.myai/skills/.hub/quarantine/ holds skills pending security review.",
 ]
 
 

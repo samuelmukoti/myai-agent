@@ -285,9 +285,9 @@ def test_bot_uid_none_processes_channel_message():
 def test_config_bridges_slack_free_response_channels(monkeypatch, tmp_path):
     from gateway.config import load_gateway_config
 
-    hermes_home = tmp_path / ".hermes"
-    hermes_home.mkdir()
-    (hermes_home / "config.yaml").write_text(
+    myai_home = tmp_path / ".hermes"
+    myai_home.mkdir()
+    (myai_home / "config.yaml").write_text(
         "slack:\n"
         "  require_mention: false\n"
         "  free_response_channels:\n"
@@ -296,7 +296,7 @@ def test_config_bridges_slack_free_response_channels(monkeypatch, tmp_path):
         encoding="utf-8",
     )
 
-    monkeypatch.setenv("MYAI_HOME", str(hermes_home))
+    monkeypatch.setenv("MYAI_HOME", str(myai_home))
     monkeypatch.delenv("SLACK_REQUIRE_MENTION", raising=False)
     monkeypatch.delenv("SLACK_FREE_RESPONSE_CHANNELS", raising=False)
 
